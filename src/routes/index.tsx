@@ -47,13 +47,13 @@ function App() {
 							href="https://jomifepe.notion.site/Jos-Pereira-s-Resume-2f44df11cc4f804ca168d44c4b7c9603?source=copy_link"
 							target="_blank"
 							rel="noopener noreferrer"
-							aria-label="See full resume (opens in new tab)"
+							aria-label="see full resume (opens in new tab)"
 						>
 							<span className="group-hover:hidden group-focus:hidden">
-								See full resume
+								see full resume
 							</span>
 							<span className="hidden group-hover:inline group-focus:inline">
-								See full resume 🥱
+								see full resume 🥱
 							</span>
 						</a>
 					</div>
