@@ -25,7 +25,7 @@ function App() {
 					<h2 className="text-white text-sm font-medium mb-8 tracking-wider">
 						work
 					</h2>
-					<div className="flex flex-col gap-6">
+					<div className="flex flex-col items-stretch gap-6">
 						<WorkItem
 							company="Prismic"
 							companyRole="Software Engineer"
@@ -41,6 +41,16 @@ function App() {
 							logo="/logos/xgeeks.svg"
 							url="https://xgeeks.com"
 						/>
+						<a
+							className="text-white/60 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-black rounded group self-start"
+							href="https://jomifepe.notion.site/Jos-Pereira-s-Resume-2f44df11cc4f804ca168d44c4b7c9603?source=copy_link"
+							target="_blank"
+							rel="noopener noreferrer"
+							aria-label="See full resume (opens in new tab)"
+						>
+							<span className="group-hover:hidden group-focus:hidden">See full resume</span>
+							<span className="hidden group-hover:inline group-focus:inline">See full resume 🥱</span>
+						</a>
 					</div>
 				</section>
 				<div className="flex items-center gap-1 mt-8 md:mt-16 flex-wrap">
