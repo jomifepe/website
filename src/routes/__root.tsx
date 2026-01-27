@@ -15,7 +15,7 @@ export const Route = createRootRoute({
 				content: "width=device-width, initial-scale=1",
 			},
 			{
-				title: "José Pereira - Software Engineer",
+				title: "josé pereira",
 			},
 		],
 		links: [
@@ -49,7 +49,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 					}}
 					plugins={[
 						{
-							name: "José Pereira",
+							name: "josé pereira",
 							render: <TanStackRouterDevtoolsPanel />,
 						},
 					]}
