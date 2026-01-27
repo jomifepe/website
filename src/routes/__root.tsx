@@ -15,7 +15,7 @@ export const Route = createRootRoute({
 				content: 'width=device-width, initial-scale=1',
 			},
 			{
-				title: 'TanStack Start Starter',
+				title: 'José Pereira - Software Engineer',
 			},
 		],
 		links: [
@@ -36,6 +36,12 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 				<HeadContent />
 			</head>
 			<body className="bg-black">
+				<a
+					href="#main-content"
+					className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-white focus:text-black focus:rounded focus:font-medium"
+				>
+					Skip to main content
+				</a>
 				{children}
 				<TanStackDevtools
 					config={{

@@ -11,15 +11,17 @@ export const Route = createFileRoute("/")({ component: App });
 
 function App() {
 	return (
-		<div className="min-h-screen bg-black flex items-center justify-center py-20">
-			<div className="flex flex-col max-w-xl gap-4 p-4">
+		<div className="min-h-screen bg-black flex items-center justify-center">
+			{/** biome-ignore lint/correctness/useUniqueElementIds: this is needed */}
+			<main id="main-content" className="flex flex-col max-w-xl gap-4 p-4">
+				<h1 className="sr-only">José Pereira - Software Engineer</h1>
 				<p className="text-white">
 					<strong>josé pereira</strong> is a software engineer.
 				</p>
 				<p className="text-white">
 					he enjoys the craft of building quality software.
 				</p>
-				<section className="mt-16">
+				<section className="mt-8 md:mt-16">
 					<h2 className="text-white text-sm font-medium mb-8 tracking-wider">
 						work
 					</h2>
@@ -41,7 +43,7 @@ function App() {
 						/>
 					</div>
 				</section>
-				<div className="flex items-center gap-1 mt-16 flex-wrap">
+				<div className="flex items-center gap-1 mt-8 md:mt-16 flex-wrap">
 					<SocialLink
 						name="GitHub"
 						url="https://github.com/jomifepe"
@@ -73,7 +75,7 @@ function App() {
 						icon={<IconMail size={20} />}
 					/>
 				</div>
-			</div>
+			</main>
 		</div>
 	);
 }
@@ -84,14 +86,20 @@ type WorkItem = {
 	startDate: string;
 	endDate?: string;
 	logo?: string;
-	url?: string;
+	url: string;
 };
 
 function WorkItem(props: WorkItem) {
 	const { company, companyRole: role, startDate, endDate, logo, url } = props;
 
-	const content = (
-		<>
+	return (
+		<a
+			href={url}
+			target="_blank"
+			rel="noopener noreferrer"
+			aria-label={`${company} - ${role} (opens in new tab)`}
+			className="flex items-start gap-4 p-3 -m-3 rounded-lg transition-colors hover:bg-white/5 focus:bg-white/5 focus:outline-none focus:ring-2 focus:ring-white/50 cursor-pointer"
+		>
 			{logo && (
 				<img
 					src={logo}
@@ -109,23 +117,8 @@ function WorkItem(props: WorkItem) {
 					{startDate} – {endDate || "current"}
 				</div>
 			</div>
-		</>
+		</a>
 	);
-
-	if (url) {
-		return (
-			<a
-				href={url}
-				target="_blank"
-				rel="noopener noreferrer"
-				className="flex items-start gap-4 p-3 -m-3 rounded-lg transition-colors hover:bg-white/5 cursor-pointer"
-			>
-				{content}
-			</a>
-		);
-	}
-
-	return <div className="flex items-start gap-4">{content}</div>;
 }
 
 type SocialLinkProps = {
@@ -151,13 +144,14 @@ function RaycastIcon() {
 }
 
 function SocialLink({ name, url, icon }: SocialLinkProps) {
+	const isExternal = !url.startsWith("mailto:");
 	return (
 		<a
 			href={url}
-			target={url.startsWith("mailto:") ? undefined : "_blank"}
-			rel={url.startsWith("mailto:") ? undefined : "noopener noreferrer"}
-			className="flex items-center justify-center w-10 h-10 rounded-lg text-white/60 hover:bg-white/10 hover:text-white transition-colors"
-			aria-label={name}
+			target={isExternal ? "_blank" : undefined}
+			rel={isExternal ? "noopener noreferrer" : undefined}
+			aria-label={`${name}${isExternal ? " (opens in new tab)" : ""}`}
+			className="flex items-center justify-center w-10 h-10 rounded-lg text-white/60 hover:bg-white/10 hover:text-white focus:bg-white/10 focus:text-white focus:outline-none focus:ring-2 focus:ring-white/50 transition-colors"
 		>
 			{icon}
 		</a>
