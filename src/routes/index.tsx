@@ -1,6 +1,7 @@
 import {
 	IconBrandGithub,
 	IconBrandLinkedin,
+	IconBrandMedium,
 	IconBrandStrava,
 	IconBrandX,
 	IconMail,
@@ -48,8 +49,12 @@ function App() {
 							rel="noopener noreferrer"
 							aria-label="See full resume (opens in new tab)"
 						>
-							<span className="group-hover:hidden group-focus:hidden">See full resume</span>
-							<span className="hidden group-hover:inline group-focus:inline">See full resume 🥱</span>
+							<span className="group-hover:hidden group-focus:hidden">
+								See full resume
+							</span>
+							<span className="hidden group-hover:inline group-focus:inline">
+								See full resume 🥱
+							</span>
 						</a>
 					</div>
 				</section>
@@ -58,31 +63,43 @@ function App() {
 						name="GitHub"
 						url="https://github.com/jomifepe"
 						icon={<IconBrandGithub size={20} />}
+						title="GitHub"
 					/>
 					<SocialLink
 						name="Twitter"
 						url="https://twitter.com/jomifepe"
 						icon={<IconBrandX size={20} />}
+						title="Twitter"
 					/>
 					<SocialLink
 						name="LinkedIn"
 						url="https://www.linkedin.com/in/jomifepe/"
 						icon={<IconBrandLinkedin size={20} />}
+						title="LinkedIn"
+					/>
+					<SocialLink
+						name="Medium"
+						url="https://medium.com/@jomifepe"
+						icon={<IconBrandMedium size={20} />}
+						title="Medium"
 					/>
 					<SocialLink
 						name="Raycast"
 						url="https://www.raycast.com/jomifepe"
 						icon={<RaycastIcon />}
+						title="Raycast"
 					/>
 					<SocialLink
 						name="Strava"
 						url="https://www.strava.com/athletes/jomifepe"
 						icon={<IconBrandStrava size={20} />}
+						title="Strava"
 					/>
 					<SocialLink
 						name="Email"
 						url="mailto:contact@jomifepe.dev"
 						icon={<IconMail size={20} />}
+						title="Email"
 					/>
 				</div>
 			</main>
@@ -135,6 +152,7 @@ type SocialLinkProps = {
 	name: string;
 	url: string;
 	icon: React.ReactNode;
+	title: string;
 };
 
 function RaycastIcon() {
@@ -153,15 +171,16 @@ function RaycastIcon() {
 	);
 }
 
-function SocialLink({ name, url, icon }: SocialLinkProps) {
+function SocialLink({ name, url, icon, title }: SocialLinkProps) {
 	const isExternal = !url.startsWith("mailto:");
 	return (
 		<a
+			className="flex items-center justify-center w-10 h-10 rounded-lg text-white/60 hover:bg-white/10 hover:text-white focus:bg-white/10 focus:text-white focus:outline-none focus:ring-2 focus:ring-white/50 transition-colors"
 			href={url}
+			title={title}
 			target={isExternal ? "_blank" : undefined}
 			rel={isExternal ? "noopener noreferrer" : undefined}
 			aria-label={`${name}${isExternal ? " (opens in new tab)" : ""}`}
-			className="flex items-center justify-center w-10 h-10 rounded-lg text-white/60 hover:bg-white/10 hover:text-white focus:bg-white/10 focus:text-white focus:outline-none focus:ring-2 focus:ring-white/50 transition-colors"
 		>
 			{icon}
 		</a>
