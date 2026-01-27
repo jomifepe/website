@@ -14,8 +14,8 @@ function App() {
 	return (
 		<div className="min-h-screen bg-black flex items-center justify-center">
 			{/** biome-ignore lint/correctness/useUniqueElementIds: this is needed */}
-			<main id="main-content" className="flex flex-col max-w-xl gap-4 p-4">
-				<h1 className="sr-only">José Pereira - Software Engineer</h1>
+			<main id="main-content" className="flex flex-col max-w-3xl gap-4 p-4">
+				<h1 className="sr-only">josé pereira - software engineer</h1>
 				<p className="text-white">
 					<strong>josé pereira</strong> is a software engineer.
 				</p>
