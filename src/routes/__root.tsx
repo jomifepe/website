@@ -43,17 +43,19 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 					Skip to main content
 				</a>
 				{children}
-				<TanStackDevtools
-					config={{
-						position: "bottom-right",
-					}}
-					plugins={[
-						{
-							name: "josé pereira",
-							render: <TanStackRouterDevtoolsPanel />,
-						},
-					]}
-				/>
+				{process.env.NODE_ENV !== "production" && (
+					<TanStackDevtools
+						config={{
+							position: "bottom-right",
+						}}
+						plugins={[
+							{
+								name: "josé pereira",
+								render: <TanStackRouterDevtoolsPanel />,
+							},
+						]}
+					/>
+				)}
 				<Scripts />
 			</body>
 		</html>

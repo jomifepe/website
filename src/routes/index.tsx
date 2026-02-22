@@ -6,104 +6,142 @@ import {
 	IconBrandX,
 	IconMail,
 } from "@tabler/icons-react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useLoaderData } from "@tanstack/react-router";
+import { PageLayout } from "../components/PageLayout";
+import { WorkoutCard } from "../components/WorkoutCard";
+import { getActivities } from "../lib/server-activities";
 
-export const Route = createFileRoute("/")({ component: App });
+export const Route = createFileRoute("/")({
+	loader: async () => {
+		// Fetch just 1 activity from page 1
+		const activities = await getActivities({ data: { page: 1, perPage: 1 } });
+		return { recentWorkout: activities[0] || null };
+	},
+	component: App,
+});
 
 function App() {
+	const { recentWorkout } = useLoaderData({ from: "/" });
+
 	return (
-		<div className="min-h-screen bg-black flex items-center justify-center">
-			{/** biome-ignore lint/correctness/useUniqueElementIds: this is needed */}
-			<main id="main-content" className="flex flex-col max-w-3xl gap-4 p-4">
-				<h1 className="sr-only">josé pereira - software engineer</h1>
-				<p className="text-white">
-					<strong>josé pereira</strong> is a software engineer.
+		<PageLayout>
+			<h1 className="sr-only">josé pereira - software engineer</h1>
+			<p className="text-white">
+				<strong>josé pereira</strong> is a software engineer
+			</p>
+			<div className="flex flex-col gap-2">
+				<p className="text-white text-sm">
+					<span className="text-white/30">$&gt;</span> he builds things on his
+					computer
 				</p>
-				<p className="text-white">
-					he enjoys the craft of building quality software.
+				<p className="text-white text-sm">
+					<span className="text-white/30">$&gt;</span> he lifts heavy objects
+					and runs
 				</p>
-				<section className="mt-8 md:mt-16">
-					<h2 className="text-white text-sm font-medium mb-8 tracking-wider">
-						work
-					</h2>
-					<div className="flex flex-col items-stretch gap-6">
+			</div>
+			<section className="flex flex-col mt-8 md:mt-16 self-start gap-5">
+				<h2 className="text-white text-sm font-medium tracking-wider">work</h2>
+				<div className="flex flex-col gap-4">
+					<div className="flex flex-col items-stretch gap-1">
 						<WorkItem
-							company="Prismic"
-							companyRole="Software Engineer"
+							company="prismic"
+							companyRole="software engineer"
 							startDate="2024"
 							logo="/logos/prismic.svg"
 							url="https://prismic.io"
 						/>
 						<WorkItem
 							company="xgeeks"
-							companyRole="Senior Software Engineer"
+							companyRole="senior software engineer"
 							startDate="2021"
 							endDate="2024"
 							logo="/logos/xgeeks.svg"
 							url="https://xgeeks.com"
 						/>
+					</div>
+					<a
+						className="text-white/60 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-black rounded group self-start"
+						href="https://jomifepe.notion.site/Jos-Pereira-s-Resume-2f44df11cc4f804ca168d44c4b7c9603?source=copy_link"
+						target="_blank"
+						rel="noopener noreferrer"
+						aria-label="see full resume (opens in new tab)"
+					>
+						<span className="group-hover:hidden group-focus:hidden">
+							view full resume
+						</span>
+						<span className="hidden group-hover:inline group-focus:inline">
+							view full resume 🥱
+						</span>
+					</a>
+				</div>
+			</section>
+			{recentWorkout && (
+				<section className="flex flex-col mt-8 md:mt-16 gap-5">
+					<h2 className="text-white text-sm font-medium tracking-wider">
+						workout
+					</h2>
+					<div className="flex flex-col items-stretch gap-4">
+						<WorkoutCard activity={recentWorkout} />
 						<a
 							className="text-white/60 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-black rounded group self-start"
-							href="https://jomifepe.notion.site/Jos-Pereira-s-Resume-2f44df11cc4f804ca168d44c4b7c9603?source=copy_link"
-							target="_blank"
-							rel="noopener noreferrer"
-							aria-label="see full resume (opens in new tab)"
+							href="/workout"
+							aria-label="view all workouts"
 						>
 							<span className="group-hover:hidden group-focus:hidden">
-								see full resume
+								view more workouts
 							</span>
 							<span className="hidden group-hover:inline group-focus:inline">
-								see full resume 🥱
+								view more workouts 💪
 							</span>
 						</a>
 					</div>
 				</section>
-				<div className="flex items-center gap-1 mt-8 md:mt-16 flex-wrap">
-					<SocialLink
-						name="GitHub"
-						url="https://github.com/jomifepe"
-						icon={<IconBrandGithub size={20} />}
-						title="GitHub"
-					/>
-					<SocialLink
-						name="Twitter"
-						url="https://twitter.com/jomifepe"
-						icon={<IconBrandX size={20} />}
-						title="Twitter"
-					/>
-					<SocialLink
-						name="LinkedIn"
-						url="https://www.linkedin.com/in/jomifepe/"
-						icon={<IconBrandLinkedin size={20} />}
-						title="LinkedIn"
-					/>
-					<SocialLink
-						name="Medium"
-						url="https://medium.com/@jomifepe"
-						icon={<IconBrandMedium size={20} />}
-						title="Medium"
-					/>
-					<SocialLink
-						name="Raycast"
-						url="https://www.raycast.com/jomifepe"
-						icon={<RaycastIcon />}
-						title="Raycast"
-					/>
-					<SocialLink
-						name="Strava"
-						url="https://www.strava.com/athletes/jomifepe"
-						icon={<IconBrandStrava size={20} />}
-						title="Strava"
-					/>
-					<SocialLink
-						name="Email"
-						url="mailto:contact@jomifepe.dev"
-						icon={<IconMail size={20} />}
-						title="Email"
-					/>
-				</div>
-			</main>
-		</div>
+			)}
+			<div className="flex items-center gap-1 mt-8 md:mt-16 flex-wrap">
+				<SocialLink
+					name="github"
+					url="https://github.com/jomifepe"
+					icon={<IconBrandGithub size={20} />}
+					title="github"
+				/>
+				<SocialLink
+					name="x"
+					url="https://twitter.com/jomifepe"
+					icon={<IconBrandX size={20} />}
+					title="x"
+				/>
+				<SocialLink
+					name="linkedin"
+					url="https://www.linkedin.com/in/jomifepe/"
+					icon={<IconBrandLinkedin size={20} />}
+					title="linkedin"
+				/>
+				<SocialLink
+					name="medium"
+					url="https://medium.com/@jomifepe"
+					icon={<IconBrandMedium size={20} />}
+					title="medium"
+				/>
+				<SocialLink
+					name="raycast"
+					url="https://www.raycast.com/jomifepe"
+					icon={<RaycastIcon />}
+					title="raycast"
+				/>
+				<SocialLink
+					name="strava"
+					url="https://www.strava.com/athletes/jomifepe"
+					icon={<IconBrandStrava size={20} />}
+					title="strava"
+				/>
+				<SocialLink
+					name="email"
+					url="mailto:contact@jomifepe.dev"
+					icon={<IconMail size={20} />}
+					title="email"
+				/>
+			</div>
+		</PageLayout>
 	);
 }
 
@@ -125,7 +163,7 @@ function WorkItem(props: WorkItem) {
 			target="_blank"
 			rel="noopener noreferrer"
 			aria-label={`${company} - ${role} (opens in new tab)`}
-			className="flex items-start gap-4 p-3 -m-3 rounded-lg transition-colors hover:bg-white/5 focus:bg-white/5 focus:outline-none focus:ring-2 focus:ring-white/50 cursor-pointer"
+			className="flex items-start gap-4 p-3 -mx-3 rounded-lg transition-colors hover:bg-white/5 focus:bg-white/5 focus:outline-none focus:ring-2 focus:ring-white/50 cursor-pointer"
 		>
 			{logo && (
 				<img

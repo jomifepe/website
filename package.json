@@ -9,18 +9,19 @@
     "test": "vitest run",
     "format": "biome format",
     "lint": "biome lint",
-    "check": "biome check"
+    "check": "biome check",
+    "tsc": "tsc --noEmit"
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.2.8",
     "@tabler/icons-react": "^3.36.1",
     "@tailwindcss/vite": "^4.0.6",
     "@tanstack/react-devtools": "^0.7.0",
-    "@tanstack/react-router": "^1.132.0",
-    "@tanstack/react-router-devtools": "^1.132.0",
+    "@tanstack/react-router": "^1.162.0",
+    "@tanstack/react-router-devtools": "^1.162.0",
     "@tanstack/react-router-ssr-query": "^1.131.7",
-    "@tanstack/react-start": "^1.132.0",
-    "@tanstack/router-plugin": "^1.132.0",
+    "@tanstack/react-start": "^1.162.0",
+    "@tanstack/router-plugin": "^1.162.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.561.0",
@@ -30,7 +31,8 @@
     "tailwind-merge": "^3.0.2",
     "tailwindcss": "^4.0.6",
     "tw-animate-css": "^1.3.6",
-    "vite-tsconfig-paths": "^6.0.2"
+    "vite-tsconfig-paths": "^6.0.2",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@biomejs/biome": "2.2.4",
