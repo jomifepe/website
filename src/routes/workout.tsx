@@ -26,11 +26,12 @@ export const Route = createFileRoute("/workout")({
 function WorkoutPage() {
 	const activities = useLoaderData({ from: "/workout" });
 	const navigate = useNavigate();
+
 	const { current, last } = groupByCalendarWeek(activities);
 	const weeks = [
 		{ label: "current week", activities: current },
 		{ label: "last week", activities: last },
-	];
+	] as const;
 
 	return (
 		<PageLayout>
@@ -51,7 +52,10 @@ function WorkoutPage() {
 				</h1>
 				<div className="flex flex-col items-stretch gap-8">
 					{weeks.map(({ label, activities: weekActivities }) => {
-						const category = categorizeWeek(weekActivities.length);
+						const category =
+							label === "current week"
+								? categorizeCurrentWeek(weekActivities.length)
+								: categorizeWeek(weekActivities.length);
 						return (
 							<div key={label}>
 								<div className="flex items-center gap-3 mb-4">
@@ -115,19 +119,23 @@ function groupByCalendarWeek(activities: StravaActivity[]): {
 
 type WeekCategory = {
 	label: string;
-	color: "gold" | "purple" | "green" | "red";
-	bgColor: string;
-	textColor: string;
+	color: "gold" | "purple" | "green" | "red" | "secondary";
 	description: string;
 };
+
+function categorizeCurrentWeek(activityCount: number): WeekCategory {
+	return {
+		label: "in progress",
+		color: "secondary",
+		description: `trained ${activityCount} day${activityCount === 1 ? "" : "s"} so far`,
+	};
+}
 
 function categorizeWeek(activityCount: number): WeekCategory {
 	if (activityCount >= 6) {
 		return {
 			label: "outstanding 🥇",
 			color: "gold",
-			bgColor: "bg-amber-500/20",
-			textColor: "text-amber-400",
 			description: `trained 6 or more days`,
 		};
 	}
@@ -135,8 +143,6 @@ function categorizeWeek(activityCount: number): WeekCategory {
 		return {
 			label: "strong",
 			color: "purple",
-			bgColor: "bg-purple-500/20",
-			textColor: "text-purple-400",
 			description: "trained 5 days",
 		};
 	}
@@ -144,8 +150,6 @@ function categorizeWeek(activityCount: number): WeekCategory {
 		return {
 			label: "good",
 			color: "green",
-			bgColor: "bg-green-500/20",
-			textColor: "text-green-400",
 			description: `trained ${activityCount} days`,
 		};
 	}
@@ -153,16 +157,12 @@ function categorizeWeek(activityCount: number): WeekCategory {
 		return {
 			label: "okay",
 			color: "green",
-			bgColor: "bg-green-500/20",
-			textColor: "text-green-400",
 			description: "trained 2 days",
 		};
 	}
 	return {
 		label: "slacking 😴",
 		color: "red",
-		bgColor: "bg-red-500/20",
-		textColor: "text-red-400",
 		description: `trained ${activityCount} day${activityCount === 1 ? "" : "s"}`,
 	};
 }
