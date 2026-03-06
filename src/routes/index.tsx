@@ -6,7 +6,7 @@ import {
 	IconBrandX,
 	IconMail,
 } from "@tabler/icons-react";
-import { createFileRoute, useLoaderData } from "@tanstack/react-router";
+import { createFileRoute, Link, useLoaderData } from "@tanstack/react-router";
 import { PageLayout } from "../components/PageLayout";
 import { WorkoutCard } from "../components/WorkoutCard";
 import { getActivities } from "../lib/server-activities";
@@ -34,12 +34,14 @@ function App() {
 			</p>
 			<div className="flex flex-col gap-2">
 				<p className="text-white text-sm">
-					<span className="text-white/30">$&gt;</span> he builds things on his
-					computer
+					<span className="text-white/30">$&gt;</span> he{" "}
+					<TextLink to="https://github.com/jomifepe">builds things</TextLink> on
+					his computer
 				</p>
 				<p className="text-white text-sm">
-					<span className="text-white/30">$&gt;</span> he lifts heavy objects
-					and runs
+					<span className="text-white/30">$&gt;</span> he{" "}
+					<TextLink to="/workout">lifts heavy objects</TextLink> and{" "}
+					<TextLink to="/workout">runs</TextLink>
 				</p>
 			</div>
 			<section className="flex flex-col mt-8 md:mt-16 self-start gap-5">
@@ -145,6 +147,37 @@ function App() {
 				/>
 			</div>
 		</PageLayout>
+	);
+}
+
+type TextLinkProps = {
+	children: React.ReactNode;
+	to: string;
+};
+
+function TextLink(props: TextLinkProps) {
+	const { children, to } = props;
+
+	const className =
+		"text-white/50 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-black rounded group self-start";
+
+	if (to.startsWith("http")) {
+		return (
+			<a
+				className={className}
+				href={to}
+				target="_blank"
+				rel="noopener noreferrer"
+			>
+				{children}
+			</a>
+		);
+	}
+
+	return (
+		<Link className={className} to={to}>
+			{children}
+		</Link>
 	);
 }
 
