@@ -24,11 +24,13 @@ export function WorkoutCard({ activity }: { activity: StravaActivity }) {
 
 	const title = `${timeOfDay} ${getSportTypeLabel(activity.sport_type)}`;
 
-	const dateStr = date.toLocaleDateString("en-US", {
-		month: "short",
-		day: "numeric",
-		year: "numeric",
-	});
+	const dateStr = date
+		.toLocaleDateString("en-US", {
+			month: "short",
+			day: "numeric",
+			year: "numeric",
+		})
+		.toLowerCase();
 
 	const distanceKm = activity.distance / 1000;
 	const showDistance = shouldShowDistance(activity.sport_type);
