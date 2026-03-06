@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import {
 	IconBrandGithub,
 	IconBrandLinkedin,
@@ -151,7 +152,7 @@ function App() {
 }
 
 type TextLinkProps = {
-	children: React.ReactNode;
+	children: ReactNode;
 	to: string;
 };
 
@@ -222,13 +223,6 @@ function WorkItem(props: WorkItem) {
 	);
 }
 
-type SocialLinkProps = {
-	name: string;
-	url: string;
-	icon: React.ReactNode;
-	title: string;
-};
-
 function RaycastIcon() {
 	return (
 		<svg
@@ -245,7 +239,15 @@ function RaycastIcon() {
 	);
 }
 
-function SocialLink({ name, url, icon, title }: SocialLinkProps) {
+type SocialLinkProps = {
+	name: string;
+	url: string;
+	icon: ReactNode;
+	title: string;
+};
+
+function SocialLink(props: SocialLinkProps) {
+	const { name, url, icon, title } = props;
 	const isExternal = !url.startsWith("mailto:");
 	return (
 		<a

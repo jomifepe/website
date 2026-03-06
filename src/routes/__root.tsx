@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { TanStackDevtools } from "@tanstack/react-devtools";
 import { createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
@@ -29,7 +30,12 @@ export const Route = createRootRoute({
 	shellComponent: RootDocument,
 });
 
-function RootDocument({ children }: { children: React.ReactNode }) {
+type RootDocumentProps = {
+	children: ReactNode;
+};
+
+function RootDocument(props: RootDocumentProps) {
+	const { children } = props;
 	return (
 		<html lang="en">
 			<head>

@@ -1,15 +1,16 @@
-import type React from "react";
+import type { ReactNode } from "react";
 import { cn } from "~/lib/cn";
 
-interface TooltipProps {
+type TooltipProps = {
 	className?: string;
 	content: string;
-	children: React.ReactNode;
+	children: ReactNode;
 	side?: "top" | "bottom" | "left" | "right";
-}
+};
 
 export function Tooltip(props: TooltipProps) {
 	const { content, children, side = "top", className } = props;
+
 	const sideClasses = {
 		top: "bottom-full mb-2",
 		bottom: "top-full mt-2",

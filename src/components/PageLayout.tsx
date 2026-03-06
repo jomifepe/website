@@ -1,6 +1,11 @@
-import type React from "react";
+import type { ReactNode } from "react";
 
-export function PageLayout({ children }: { children: React.ReactNode }) {
+type PageLayoutProps = {
+	children: ReactNode;
+};
+
+export function PageLayout(props: PageLayoutProps) {
+	const { children } = props;
 	return (
 		<div className="min-h-screen bg-black flex items-center justify-center">
 			{/** biome-ignore lint/correctness/useUniqueElementIds: this is needed */}

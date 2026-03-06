@@ -9,7 +9,12 @@ import {
 } from "@tabler/icons-react";
 import type { SportType, StravaActivity } from "../lib/strava";
 
-export function WorkoutCard({ activity }: { activity: StravaActivity }) {
+type WorkoutCardProps = {
+	activity: StravaActivity;
+};
+
+export function WorkoutCard(props: WorkoutCardProps) {
+	const { activity } = props;
 	const date = new Date(activity.start_date_local);
 	const hour = date.getHours();
 
@@ -85,7 +90,12 @@ function getSportTypeLabel(sportType: SportType) {
 		.toLowerCase();
 }
 
-function RoutePreview({ encoded }: { encoded: string }) {
+type RoutePreviewProps = {
+	encoded: string;
+};
+
+function RoutePreview(props: RoutePreviewProps) {
+	const { encoded } = props;
 	if (!encoded) return null;
 
 	const coords = decodePolyline(encoded);
