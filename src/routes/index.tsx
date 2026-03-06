@@ -17,6 +17,9 @@ export const Route = createFileRoute("/")({
 		const activities = await getActivities({ data: { page: 1, perPage: 1 } });
 		return { recentWorkout: activities[0] || null };
 	},
+	headers: () => ({
+		"Cache-Control": "public, s-maxage=900, stale-while-revalidate=86400",
+	}),
 	component: App,
 });
 

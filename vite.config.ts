@@ -18,10 +18,6 @@ const config = defineConfig({
 		devtools(),
 		nitro({
 			preset: "vercel",
-			routeRules: {
-				"/": { isr: 900 },
-				"/workout": { isr: 900 },
-			},
 		}),
 		// this is the plugin that enables path aliases
 		viteTsConfigPaths({

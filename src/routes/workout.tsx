@@ -15,6 +15,9 @@ export const Route = createFileRoute("/workout")({
 		// Fetch ~2 weeks of activities
 		return getActivities({ data: { page: 1, perPage: 28 } });
 	},
+	headers: () => ({
+		"Cache-Control": "public, s-maxage=900, stale-while-revalidate=86400",
+	}),
 	// Cache the loader data for 1 hour (3,600,000 ms)
 	staleTime: 60 * 60 * 1000,
 	component: WorkoutPage,
