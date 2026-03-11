@@ -59,7 +59,7 @@ export function WorkoutCard(props: WorkoutCardProps) {
 	return (
 		<div
 			className={cn(
-				"flex items-start gap-4 p-3 -mx-3 rounded-lg relative",
+				"flex items-start gap-4 p-3 -mx-3 rounded-lg relative group",
 				activity.map?.summary_polyline && isLastItemInList && "mb-10",
 			)}
 		>
@@ -124,7 +124,7 @@ function RoutePreview(props: RoutePreviewProps) {
 					strokeWidth="1.5"
 					fill="none"
 					vectorEffect="non-scaling-stroke"
-					className="text-orange-500/30"
+					className="text-orange-500/20 group-hover:text-orange-500/70 transition-colors"
 				/>
 				<title>route preview</title>
 			</svg>
