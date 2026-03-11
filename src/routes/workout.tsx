@@ -69,14 +69,20 @@ function WorkoutPage() {
 									</Tooltip>
 								</div>
 								{weekActivities.length === 0 ? (
-								<p className="text-white/40 text-sm italic">no activities yet</p>
-							) : (
-								<div className="flex flex-col items-stretch gap-2">
-									{weekActivities.map((activity) => (
-										<WorkoutCard key={activity.id} activity={activity} />
-									))}
-								</div>
-							)}
+									<p className="text-white/40 text-sm italic">
+										no activities yet
+									</p>
+								) : (
+									<div className="flex flex-col items-stretch gap-2">
+										{weekActivities.map((activity, index) => (
+											<WorkoutCard
+												key={activity.id}
+												activity={activity}
+												isLastItemInList={index === weekActivities.length - 1}
+											/>
+										))}
+									</div>
+								)}
 							</div>
 						);
 					})}

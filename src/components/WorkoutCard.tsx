@@ -8,13 +8,16 @@ import {
 	IconWalk,
 } from "@tabler/icons-react";
 import type { SportType, StravaActivity } from "../lib/strava";
+import { cn } from "~/lib/cn";
 
 type WorkoutCardProps = {
 	activity: StravaActivity;
+	isLastItemInList?: boolean;
 };
 
 export function WorkoutCard(props: WorkoutCardProps) {
-	const { activity } = props;
+	const { activity, isLastItemInList = false } = props;
+
 	const date = new Date(activity.start_date_local);
 	const hour = date.getHours();
 
@@ -54,7 +57,12 @@ export function WorkoutCard(props: WorkoutCardProps) {
 	}
 
 	return (
-		<div className="flex items-start gap-4 p-3 -mx-3 rounded-lg relative">
+		<div
+			className={cn(
+				"flex items-start gap-4 p-3 -mx-3 rounded-lg relative",
+				activity.map?.summary_polyline && isLastItemInList && "mb-10",
+			)}
+		>
 			<div className="text-white/60 mt-0.5">
 				{getWorkoutIcon(activity.sport_type)}
 			</div>
