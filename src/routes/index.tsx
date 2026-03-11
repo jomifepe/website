@@ -34,15 +34,15 @@ function App() {
 				<strong>josé pereira</strong> is a software engineer
 			</p>
 			<div className="flex flex-col gap-2">
-				<p className="text-white text-sm">
-					<span className="text-white/30">$&gt;</span> he{" "}
+				<p className="text-white/50 text-sm">
+					<span className="text-green-500">$&gt;</span> he{" "}
 					<TextLink to="https://github.com/jomifepe">builds things</TextLink> on
 					his computer
 				</p>
-				<p className="text-white text-sm">
-					<span className="text-white/30">$&gt;</span> he{" "}
-					<TextLink to="/workout">lifts heavy objects</TextLink> and{" "}
-					<TextLink to="/workout">runs</TextLink>
+				<p className="text-white/50 text-sm">
+					<span className="text-green-500">$&gt;</span> he enjoys{" "}
+					<TextLink to="/workout">lifting heavy objects</TextLink> and{" "}
+					<TextLink to="/workout">running</TextLink>
 				</p>
 			</div>
 			<section className="flex flex-col mt-8 md:mt-16 self-start gap-5">
@@ -160,7 +160,7 @@ function TextLink(props: TextLinkProps) {
 	const { children, to } = props;
 
 	const className =
-		"text-white/50 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-black rounded group self-start";
+		"text-white hover:text-white/80 transition-colors focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-black rounded group self-start";
 
 	if (to.startsWith("http")) {
 		return (
