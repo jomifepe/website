@@ -68,11 +68,15 @@ function WorkoutPage() {
 										</Badge>
 									</Tooltip>
 								</div>
+								{weekActivities.length === 0 ? (
+								<p className="text-white/40 text-sm italic">no activities yet</p>
+							) : (
 								<div className="flex flex-col items-stretch gap-2">
 									{weekActivities.map((activity) => (
 										<WorkoutCard key={activity.id} activity={activity} />
 									))}
 								</div>
+							)}
 							</div>
 						);
 					})}
