@@ -6,6 +6,12 @@ import {
 import { Badge } from "../components/Badge";
 import { PageLayout } from "../components/PageLayout";
 import { Tooltip } from "../components/Tooltip";
+import {
+	Card,
+	CardContent,
+	CardHeader,
+	CardTitle,
+} from "../components/ui/card";
 import { WorkoutCard } from "../components/WorkoutCard";
 import { getActivities } from "../lib/server-activities";
 import type { StravaActivity } from "../lib/strava";
@@ -57,33 +63,40 @@ function WorkoutPage() {
 								? categorizeCurrentWeek(weekActivities.length)
 								: categorizeWeek(weekActivities.length);
 						return (
-							<div key={label}>
-								<div className="flex items-center gap-3 mb-4">
-									<h2 className="text-white/80 text-sm font-medium tracking-wide">
-										{label}
-									</h2>
-									<Tooltip content={category.description}>
-										<Badge className="cursor-help" variant={category.color}>
-											{category.label}
-										</Badge>
-									</Tooltip>
-								</div>
-								{weekActivities.length === 0 ? (
-									<p className="text-white/40 text-sm italic">
-										no activities yet
-									</p>
-								) : (
-									<div className="flex flex-col items-stretch gap-2">
-										{weekActivities.map((activity, index) => (
-											<WorkoutCard
-												key={activity.id}
-												activity={activity}
-												isLastItemInList={index === weekActivities.length - 1}
-											/>
-										))}
+							<Card
+								key={label}
+								className="flex h-full flex-col gap-4 border-white/10 bg-white/3 p-6 text-white shadow-none"
+							>
+								<CardHeader className="p-0">
+									<div className="flex flex-row flex-wrap items-center gap-3">
+										<CardTitle className="font-medium tracking-wider text-sm text-white">
+											{label}
+										</CardTitle>
+										<Tooltip content={category.description}>
+											<Badge className="cursor-help" variant={category.color}>
+												{category.label}
+											</Badge>
+										</Tooltip>
 									</div>
-								)}
-							</div>
+								</CardHeader>
+								<CardContent className="flex min-h-0 flex-1 flex-col gap-2 p-0">
+									{weekActivities.length === 0 ? (
+										<p className="italic text-white/40 text-sm">
+											no activities yet
+										</p>
+									) : (
+										<div className="flex flex-col items-stretch gap-2">
+											{weekActivities.map((activity, index) => (
+												<WorkoutCard
+													key={activity.id}
+													activity={activity}
+													isLastItemInList={index === weekActivities.length - 1}
+												/>
+											))}
+										</div>
+									)}
+								</CardContent>
+							</Card>
 						);
 					})}
 				</div>

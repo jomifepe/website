@@ -7,16 +7,21 @@ import {
 	IconSwimming,
 	IconWalk,
 } from "@tabler/icons-react";
-import type { SportType, StravaActivity } from "../lib/strava";
 import { cn } from "~/lib/cn";
+import type { SportType, StravaActivity } from "../lib/strava";
+
+type WorkoutCardVariant = "default" | "small";
 
 type WorkoutCardProps = {
 	activity: StravaActivity;
 	isLastItemInList?: boolean;
+	/** Compact route preview and spacing (e.g. home card grid). */
+	variant?: WorkoutCardVariant;
 };
 
 export function WorkoutCard(props: WorkoutCardProps) {
-	const { activity, isLastItemInList = false } = props;
+	const { activity, isLastItemInList = false, variant = "default" } = props;
+	const isSmall = variant === "small";
 
 	const date = new Date(activity.start_date_local);
 	const hour = date.getHours();
@@ -59,8 +64,11 @@ export function WorkoutCard(props: WorkoutCardProps) {
 	return (
 		<div
 			className={cn(
-				"flex items-start gap-4 p-3 -mx-3 rounded-lg relative group",
-				activity.map?.summary_polyline && isLastItemInList && "mb-10",
+				"flex items-start gap-4 rounded-lg relative group",
+				isSmall ? "py-2" : "p-3 -mx-3",
+				activity.map?.summary_polyline &&
+					isLastItemInList &&
+					(isSmall ? "mb-6" : "mb-10"),
 			)}
 		>
 			<div className="text-white/60 mt-0.5">
@@ -85,7 +93,10 @@ export function WorkoutCard(props: WorkoutCardProps) {
 				</div>
 			</div>
 			{activity.map?.summary_polyline && (
-				<RoutePreview encoded={activity.map.summary_polyline} />
+				<RoutePreview
+					encoded={activity.map.summary_polyline}
+					size={isSmall ? "small" : "default"}
+				/>
 			)}
 		</div>
 	);
@@ -100,28 +111,35 @@ function getSportTypeLabel(sportType: SportType) {
 
 type RoutePreviewProps = {
 	encoded: string;
+	size?: "default" | "small";
 };
 
 function RoutePreview(props: RoutePreviewProps) {
-	const { encoded } = props;
+	const { encoded, size = "default" } = props;
 	if (!encoded) return null;
 
 	const coords = decodePolyline(encoded);
 	if (coords.length === 0) return null;
 
 	const pathD = polylineToSvgPath(coords, 100, 100, 5);
+	const isSmall = size === "small";
 
 	return (
-		<div className="absolute top-1/2 -translate-y-1/2 right-3">
+		<div
+			className={cn(
+				"absolute top-1/2 -translate-y-1/2 pointer-events-none",
+				isSmall ? "right-2" : "right-4",
+			)}
+		>
 			<svg
 				viewBox="0 0 100 100"
-				className="w-32 h-32"
+				className={isSmall ? "h-12 w-12" : "h-32 w-32"}
 				xmlns="http://www.w3.org/2000/svg"
 			>
 				<path
 					d={pathD}
 					stroke="currentColor"
-					strokeWidth="1.5"
+					strokeWidth={isSmall ? 2 : 1.5}
 					fill="none"
 					vectorEffect="non-scaling-stroke"
 					className="text-orange-500/20 group-hover:text-orange-500/70 transition-colors"

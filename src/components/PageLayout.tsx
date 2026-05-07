@@ -11,7 +11,7 @@ export function PageLayout(props: PageLayoutProps) {
 			{/** biome-ignore lint/correctness/useUniqueElementIds: this is needed */}
 			<main
 				id="main-content"
-				className="flex flex-col max-w-[512px] w-full gap-4 py-5 max-sm:px-5"
+				className="flex flex-col max-w-3xl w-full gap-4 py-12 max-md:px-5"
 			>
 				{children}
 			</main>
