@@ -181,7 +181,7 @@ function App() {
 			</div>
 			<div
 				className={cn(
-					"grid w-full gap-6 mt-8 md:mt-16 self-stretch",
+					"grid w-full gap-4 mt-8 md:mt-16 self-stretch",
 					recentWorkouts.length > 0 && "md:grid-cols-2",
 				)}
 			>
