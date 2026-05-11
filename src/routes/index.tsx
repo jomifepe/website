@@ -60,7 +60,7 @@ const weightLiftingPhrases = [
 	"lugging heftiness",
 	"pressing burdens",
 	"hoisting gravitas",
-	"deadlifting enormity",
+	"hoicking cumbrous weight",
 	"hefting mass",
 	"straining neath heft",
 	"shouldering preponderance",
@@ -75,7 +75,7 @@ const weightLiftingPhrases = [
 ] as const;
 
 const runningPhrases = [
-	"fleetfooted sprinting",
+	"nimble-limbed bolting",
 	"swift perambulating",
 	"hasted ambulating",
 	"rapid locomoting",
@@ -94,7 +94,7 @@ const runningPhrases = [
 	"breakneck hurtling",
 	"precipitous dashing",
 	"headlong careering",
-	"breakneck sprinting",
+	"frenetic bolting",
 ] as const;
 
 const musicPhrases = [
