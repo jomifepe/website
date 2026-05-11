@@ -251,9 +251,9 @@ function App() {
 									/>
 								))}
 							</div>
-							<a
+							<Link
 								className="text-white/60 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-black rounded group self-start shrink-0"
-								href="/workout"
+								to="/workout"
 								aria-label="view all workouts"
 							>
 								<span className="group-hover:hidden group-focus:hidden">
@@ -262,7 +262,7 @@ function App() {
 								<span className="hidden group-hover:inline group-focus:inline">
 									view more workouts 💪
 								</span>
-							</a>
+							</Link>
 						</CardContent>
 					</Card>
 				)}

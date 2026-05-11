@@ -1,9 +1,5 @@
 import { IconBrandStrava } from "@tabler/icons-react";
-import {
-	createFileRoute,
-	useLoaderData,
-	useNavigate,
-} from "@tanstack/react-router";
+import { createFileRoute, Link, useLoaderData } from "@tanstack/react-router";
 import { SocialLink } from "~/components/SocialLink";
 import { Badge } from "../components/Badge";
 import { PageLayout } from "../components/PageLayout";
@@ -34,7 +30,6 @@ export const Route = createFileRoute("/workout")({
 });
 
 function WorkoutPage() {
-	const navigate = useNavigate();
 	const activities = useLoaderData({ from: "/workout" });
 
 	const weeks = [
@@ -45,14 +40,13 @@ function WorkoutPage() {
 	return (
 		<PageLayout>
 			<div className="flex shrink-0 items-center justify-between gap-3 mb-4">
-				<button
-					type="button"
-					onClick={() => navigate({ to: "/" })}
+				<Link
+					to="/"
 					className="text-white/60 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-black rounded px-2 py-1 cursor-pointer"
 					aria-label="back to home"
 				>
 					← back
-				</button>
+				</Link>
 				<SocialLink
 					name="strava"
 					url="https://www.strava.com/athletes/jomifepe"
