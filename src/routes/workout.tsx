@@ -16,7 +16,11 @@ import type { StravaActivity } from "../lib/strava";
 
 export const Route = createFileRoute("/workout")({
 	// Fetch ~2 weeks of activities
-	loader: async () => getActivities({ data: { page: 1, perPage: 28 } }),
+	loader: async () => {
+		const activities = await getActivities();
+		const { current, last } = groupByCalendarWeek(activities);
+		return { current, last };
+	},
 	headers: () => ({
 		"Cache-Control": "public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400",
 	}),
