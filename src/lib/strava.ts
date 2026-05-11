@@ -1,3 +1,4 @@
+import { defineCachedFunction } from "nitro/cache";
 import { z } from "zod";
 
 /** https://developers.strava.com/docs/reference/#api-models-SportType */
@@ -147,7 +148,7 @@ async function refreshAccessToken(): Promise<StravaTokenResponse> {
 	return tokenData;
 }
 
-export async function fetchActivities(
+async function fetchActivitiesRaw(
 	page: number,
 	perPage: number = 10,
 ): Promise<StravaActivity[]> {
@@ -184,3 +185,9 @@ export async function fetchActivities(
 
 	return activities;
 }
+
+export const fetchActivities = defineCachedFunction(fetchActivitiesRaw, {
+	name: "strava-activities",
+	maxAge: 60 * 60, // 1 hour
+	getKey: (page: number, perPage: number = 10) => `p${page}-pp${perPage}`,
+});

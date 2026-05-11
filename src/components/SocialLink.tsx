@@ -35,7 +35,8 @@ export type SocialLinkProps = {
 	className?: string;
 };
 
-export const SocialLink = forwardRef<HTMLAnchorElement, SocialLinkProps>((props, ref) => {
+export const SocialLink = forwardRef<HTMLAnchorElement, SocialLinkProps>(
+	(props, ref) => {
 		const {
 			name,
 			url,
@@ -61,7 +62,7 @@ export const SocialLink = forwardRef<HTMLAnchorElement, SocialLinkProps>((props,
 			onFocusProp?.(event);
 			slideHighlight?.onInteract(event);
 		};
-		
+
 		const handleMouseEnter = (event: MouseEvent<HTMLAnchorElement>) => {
 			onMouseEnterProp?.(event);
 			slideHighlight?.onInteract(event);

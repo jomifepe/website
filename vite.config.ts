@@ -16,15 +16,14 @@ const config = defineConfig({
 	},
 	plugins: [
 		devtools(),
-		nitro({
-			preset: "vercel",
-		}),
+		nitro({ preset: "vercel" }),
 		// this is the plugin that enables path aliases
-		viteTsConfigPaths({
-			projects: ["./tsconfig.json"],
-		}),
+		viteTsConfigPaths({ projects: ["./tsconfig.json"] }),
 		tailwindcss(),
-		tanstackStart(),
+		tanstackStart({
+			prerender: { enabled: true },
+			pages: [{ path: "/" }, { path: "/workout" }],
+		}),
 		viteReact(),
 	],
 });

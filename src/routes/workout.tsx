@@ -1,9 +1,5 @@
 import { IconBrandStrava } from "@tabler/icons-react";
-import {
-	createFileRoute,
-	useLoaderData,
-	useNavigate,
-} from "@tanstack/react-router";
+import { createFileRoute, Link, useLoaderData } from "@tanstack/react-router";
 import { SocialLink } from "~/components/SocialLink";
 import { Badge } from "../components/Badge";
 import { PageLayout } from "../components/PageLayout";
@@ -20,7 +16,11 @@ import type { StravaActivity } from "../lib/strava";
 
 export const Route = createFileRoute("/workout")({
 	// Fetch ~2 weeks of activities
-	loader: async () => getActivities({ data: { page: 1, perPage: 28 } }),
+	loader: async () => {
+		const activities = await getActivities();
+		const { current, last } = groupByCalendarWeek(activities);
+		return { current, last };
+	},
 	headers: () => ({
 		"Cache-Control": "public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400",
 	}),
@@ -30,25 +30,22 @@ export const Route = createFileRoute("/workout")({
 
 function WorkoutPage() {
 	const activities = useLoaderData({ from: "/workout" });
-	const navigate = useNavigate();
 
-	const { current, last } = groupByCalendarWeek(activities);
 	const weeks = [
-		{ label: "current week", activities: current },
-		{ label: "last week", activities: last },
+		{ label: "current week", activities: activities.current },
+		{ label: "last week", activities: activities.last },
 	];
 
 	return (
 		<PageLayout>
 			<div className="flex shrink-0 items-center justify-between gap-3 mb-4">
-				<button
-					type="button"
-					onClick={() => navigate({ to: "/" })}
-					className="text-white/60 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-black rounded px-2 py-1 cursor-pointer"
+				<Link
+					to="/"
+					className="relative z-10 flex shrink-0 items-center justify-center rounded-lg -mx-2 -my-1 px-2 py-1 text-white/60 hover:text-white focus:text-white hover:bg-white/10 focus:bg-white/10 transition-colors motion-reduce:transition-none focus:outline-none focus:ring-2 focus:ring-white/50 h-10"
 					aria-label="back to home"
 				>
-					← back
-				</button>
+					<span className="mr-2">←</span>back
+				</Link>
 				<SocialLink
 					name="strava"
 					url="https://www.strava.com/athletes/jomifepe"
@@ -89,7 +86,7 @@ function WorkoutPage() {
 								<CardContent className="flex min-h-0 flex-1 flex-col gap-2 p-0">
 									{weekActivities.length === 0 ? (
 										<p className="italic text-white/40 text-sm">
-											no activities yet
+											no activities yet, get moving
 										</p>
 									) : (
 										<div className="flex flex-col items-stretch gap-2">
@@ -127,13 +124,15 @@ function getWeekBounds(): { currentMonday: Date; lastMonday: Date } {
 	return { currentMonday, lastMonday };
 }
 
-function groupByCalendarWeek(activities: StravaActivity[]): {
-	current: StravaActivity[];
-	last: StravaActivity[];
+function groupByCalendarWeek<T extends StravaActivity>(
+	activities: T[],
+): {
+	current: T[];
+	last: T[];
 } {
 	const { currentMonday, lastMonday } = getWeekBounds();
-	const current: StravaActivity[] = [];
-	const last: StravaActivity[] = [];
+	const current: T[] = [];
+	const last: T[] = [];
 
 	for (const activity of activities) {
 		const date = new Date(activity.start_date_local);
