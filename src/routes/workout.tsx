@@ -25,7 +25,8 @@ export const Route = createFileRoute("/workout")({
 		return { current, last };
 	},
 	headers: () => ({
-		"Cache-Control": "public, s-maxage=900, stale-while-revalidate=86400",
+		"Cache-Control":
+			"public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400",
 	}),
 	// Cache the loader data for 1 hour (3,600,000 ms)
 	staleTime: 60 * 60 * 1000,

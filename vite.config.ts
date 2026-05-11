@@ -24,7 +24,13 @@ const config = defineConfig({
 			projects: ["./tsconfig.json"],
 		}),
 		tailwindcss(),
-		tanstackStart(),
+		tanstackStart({
+			// https://tanstack.com/start/latest/docs/framework/react/guide/static-prerendering
+			prerender: {
+				enabled: true,
+				crawlLinks: true,
+			},
+		}),
 		viteReact(),
 	],
 });
