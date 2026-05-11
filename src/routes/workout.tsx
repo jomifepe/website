@@ -16,7 +16,7 @@ import type { StravaActivity } from "../lib/strava";
 
 export const Route = createFileRoute("/workout")({
 	loader: async () => {
-		const activities = await getActivities({ data: { page: 1, perPage: 28 } });
+		const activities = await getActivities();
 		const { current, last } = groupByCalendarWeek(activities);
 		return { current, last };
 	},

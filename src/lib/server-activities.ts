@@ -2,9 +2,11 @@ import { createServerFn } from "@tanstack/react-start";
 import { fetchActivities, type SportType, type StravaActivity } from "./strava";
 
 export const getActivities = createServerFn({ method: "GET" })
-	.inputValidator((data: { page: number; perPage?: number }) => ({
-		page: data.page,
-		perPage: data.perPage ?? 10,
+	.inputValidator((data?: { page?: number; perPage?: number }) => ({
+		page: data?.page ?? 1,
+		// 28 covers the worst realistic case for /workout's "current + last week"
+		// grouping: 14 days × up to 2 activities/day.
+		perPage: data?.perPage ?? 28,
 	}))
 	.handler(async ({ data }) => {
 		const activities = await fetchActivities(data.page, data.perPage);

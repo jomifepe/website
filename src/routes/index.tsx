@@ -127,15 +127,18 @@ function rnd(array: readonly string[]) {
 }
 
 export const Route = createFileRoute("/")({
-	loader: async () => ({
-		recentWorkouts: await getActivities({ data: { page: 1, perPage: 2 } }),
-		sentences: {
-			codingSentence: rnd(codingPhrases),
-			weightLiftingSentence: rnd(weightLiftingPhrases),
-			runningSentence: rnd(runningPhrases),
-			musicSentence: rnd(musicPhrases),
-		},
-	}),
+	loader: async () => {
+		const activities = await getActivities();
+		return {
+			recentWorkouts: activities.slice(0, 2),
+			sentences: {
+				codingSentence: rnd(codingPhrases),
+				weightLiftingSentence: rnd(weightLiftingPhrases),
+				runningSentence: rnd(runningPhrases),
+				musicSentence: rnd(musicPhrases),
+			},
+		};
+	},
 	headers: () => ({
 		"Cache-Control":
 			"public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400",
