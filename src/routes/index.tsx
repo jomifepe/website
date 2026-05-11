@@ -141,6 +141,7 @@ export const Route = createFileRoute("/")({
 			"public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400",
 	}),
 	component: App,
+	staleTime: 60 * 60 * 1000,
 });
 
 function App() {
