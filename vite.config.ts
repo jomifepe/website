@@ -16,24 +16,13 @@ const config = defineConfig({
 	},
 	plugins: [
 		devtools(),
-		nitro({
-			preset: "vercel",
-			// One render per hour per edge, then served instantly from the edge cache.
-			// https://v3.nitro.build/deploy/providers/vercel#on-demand-incremental-static-regeneration-isr
-			routeRules: {
-				"/": { isr: 3600 },
-				"/workout": { isr: 3600 },
-			},
-		}),
+		nitro({ preset: "vercel" }),
 		// this is the plugin that enables path aliases
-		viteTsConfigPaths({
-			projects: ["./tsconfig.json"],
-		}),
+		viteTsConfigPaths({ projects: ["./tsconfig.json"] }),
 		tailwindcss(),
 		tanstackStart({
-			// ISR (see nitro routeRules above) handles freshness for / and /workout,
-			// so we intentionally skip build-time prerender for them.
-			prerender: { enabled: false },
+			prerender: { enabled: true },
+			pages: [{ path: "/" }, { path: "/workout" }],
 		}),
 		viteReact(),
 	],
