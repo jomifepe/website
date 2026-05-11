@@ -19,14 +19,11 @@ import { getActivities } from "../lib/server-activities";
 import type { StravaActivity } from "../lib/strava";
 
 export const Route = createFileRoute("/workout")({
-	loader: async () => {
-		// Fetch ~2 weeks of activities
-		return getActivities({ data: { page: 1, perPage: 28 } });
-	},
+	// Fetch ~2 weeks of activities
+	loader: async () => getActivities({ data: { page: 1, perPage: 28 } }),
 	headers: () => ({
-		"Cache-Control": "public, s-maxage=900, stale-while-revalidate=86400",
+		"Cache-Control": "public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400",
 	}),
-	// Cache the loader data for 1 hour (3,600,000 ms)
 	staleTime: 60 * 60 * 1000,
 	component: WorkoutPage,
 });
@@ -39,7 +36,7 @@ function WorkoutPage() {
 	const weeks = [
 		{ label: "current week", activities: current },
 		{ label: "last week", activities: last },
-	] as const;
+	];
 
 	return (
 		<PageLayout>
