@@ -27,6 +27,7 @@ import { WorkoutCard } from "../components/WorkoutCard";
 import { getActivities } from "../lib/server-activities";
 
 const codingPhrases = [
+	"builds things",
 	"fabricates contraptions",
 	"engineers automata",
 	"forges apparatus",
@@ -50,6 +51,7 @@ const codingPhrases = [
 ] as const;
 
 const weightLiftingPhrases = [
+	"lifting weights",
 	"heaving steel",
 	"hoisting iron",
 	"shouldering ballast",
@@ -73,6 +75,7 @@ const weightLiftingPhrases = [
 ] as const;
 
 const runningPhrases = [
+	"running",
 	"nimble-limbed bolting",
 	"swift perambulating",
 	"hasted ambulating",
@@ -96,6 +99,7 @@ const runningPhrases = [
 ] as const;
 
 const musicPhrases = [
+	"listening to heavy sounds",
 	"reveling in cacophony",
 	"indulging thunderous din",
 	"luxuriating in clamor",
