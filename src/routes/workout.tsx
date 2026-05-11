@@ -1,8 +1,10 @@
+import { IconBrandStrava } from "@tabler/icons-react";
 import {
 	createFileRoute,
 	useLoaderData,
 	useNavigate,
 } from "@tanstack/react-router";
+import { SocialLink } from "~/components/SocialLink";
 import { Badge } from "../components/Badge";
 import { PageLayout } from "../components/PageLayout";
 import { Tooltip } from "../components/Tooltip";
@@ -41,7 +43,7 @@ function WorkoutPage() {
 
 	return (
 		<PageLayout>
-			<div className="flex items-center gap-2 mb-4">
+			<div className="flex shrink-0 items-center justify-between gap-3 mb-4">
 				<button
 					type="button"
 					onClick={() => navigate({ to: "/" })}
@@ -50,6 +52,14 @@ function WorkoutPage() {
 				>
 					← back
 				</button>
+				<SocialLink
+					name="strava"
+					url="https://www.strava.com/athletes/jomifepe"
+					title="strava"
+					hoverColor="orange"
+					useSlideHighlight={false}
+					icon={<IconBrandStrava size={20} className="shrink-0" aria-hidden />}
+				/>
 			</div>
 
 			<section>
