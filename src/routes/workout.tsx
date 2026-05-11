@@ -20,8 +20,9 @@ import type { StravaActivity } from "../lib/strava";
 
 export const Route = createFileRoute("/workout")({
 	loader: async () => {
-		// Fetch ~2 weeks of activities
-		return getActivities({ data: { page: 1, perPage: 28 } });
+		const activities = await getActivities({ data: { page: 1, perPage: 28 } });
+		const { current, last } = groupByCalendarWeek(activities);
+		return { current, last };
 	},
 	headers: () => ({
 		"Cache-Control": "public, s-maxage=900, stale-while-revalidate=86400",
@@ -32,13 +33,12 @@ export const Route = createFileRoute("/workout")({
 });
 
 function WorkoutPage() {
-	const activities = useLoaderData({ from: "/workout" });
 	const navigate = useNavigate();
+	const activities = useLoaderData({ from: "/workout" });
 
-	const { current, last } = groupByCalendarWeek(activities);
 	const weeks = [
-		{ label: "current week", activities: current },
-		{ label: "last week", activities: last },
+		{ label: "current week", activities: activities.current },
+		{ label: "last week", activities: activities.last },
 	] as const;
 
 	return (
@@ -130,13 +130,15 @@ function getWeekBounds(): { currentMonday: Date; lastMonday: Date } {
 	return { currentMonday, lastMonday };
 }
 
-function groupByCalendarWeek(activities: StravaActivity[]): {
-	current: StravaActivity[];
-	last: StravaActivity[];
+function groupByCalendarWeek<T extends StravaActivity>(
+	activities: T[],
+): {
+	current: T[];
+	last: T[];
 } {
 	const { currentMonday, lastMonday } = getWeekBounds();
-	const current: StravaActivity[] = [];
-	const last: StravaActivity[] = [];
+	const current: T[] = [];
+	const last: T[] = [];
 
 	for (const activity of activities) {
 		const date = new Date(activity.start_date_local);

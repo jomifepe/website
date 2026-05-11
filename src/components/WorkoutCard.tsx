@@ -8,12 +8,13 @@ import {
 	IconWalk,
 } from "@tabler/icons-react";
 import { cn } from "~/lib/cn";
-import type { SportType, StravaActivity } from "../lib/strava";
+import type { WorkoutCardActivity } from "~/lib/server-activities";
+import type { SportType } from "../lib/strava";
 
 type WorkoutCardVariant = "default" | "small";
 
 type WorkoutCardProps = {
-	activity: StravaActivity;
+	activity: WorkoutCardActivity;
 	isLastItemInList?: boolean;
 	/** Compact route preview and spacing (e.g. home card grid). */
 	variant?: WorkoutCardVariant;
@@ -23,27 +24,7 @@ export function WorkoutCard(props: WorkoutCardProps) {
 	const { activity, isLastItemInList = false, variant = "default" } = props;
 	const isSmall = variant === "small";
 
-	const date = new Date(activity.start_date_local);
-	const hour = date.getHours();
-
-	let timeOfDay: string;
-	if (hour < 12) {
-		timeOfDay = "morning";
-	} else if (hour < 17) {
-		timeOfDay = "afternoon";
-	} else {
-		timeOfDay = "evening";
-	}
-
-	const title = `${timeOfDay} ${getSportTypeLabel(activity.sport_type)}`;
-
-	const dateStr = date
-		.toLocaleDateString("en-US", {
-			month: "short",
-			day: "numeric",
-			year: "numeric",
-		})
-		.toLowerCase();
+	const { displayTitle: title, displayDateStr: dateStr } = activity;
 
 	const distanceKm = activity.distance / 1000;
 	const showDistance = shouldShowDistance(activity.sport_type);
@@ -100,13 +81,6 @@ export function WorkoutCard(props: WorkoutCardProps) {
 			)}
 		</div>
 	);
-}
-
-function getSportTypeLabel(sportType: SportType) {
-	return sportType
-		.replace(/([A-Z])/g, " $1")
-		.trim()
-		.toLowerCase();
 }
 
 type RoutePreviewProps = {
