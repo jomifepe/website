@@ -219,20 +219,12 @@ function App() {
 								url="https://xgeeks.com"
 							/>
 						</SlideHighlightRegion>
-						<a
-							className="text-white/60 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-black rounded group self-start shrink-0"
-							href="https://jomifepe.notion.site/Jos-Pereira-s-Resume-2f44df11cc4f804ca168d44c4b7c9603?source=copy_link"
-							target="_blank"
-							rel="noopener noreferrer"
-							aria-label="see full resume (opens in new tab)"
-						>
-							<span className="group-hover:hidden group-focus:hidden">
-								view full resume
-							</span>
-							<span className="hidden group-hover:inline group-focus:inline">
-								view full resume 🥱
-							</span>
-						</a>
+						<CardViewMoreLink
+							to="https://jomifepe.notion.site/Jos-Pereira-s-Resume-2f44df11cc4f804ca168d44c4b7c9603?source=copy_link"
+							ariaLabel="see full resume (opens in new tab)"
+							label="view full resume"
+							hoverLabel="🥱"
+						/>
 					</CardContent>
 				</Card>
 				{recentWorkouts.length > 0 && (
@@ -253,24 +245,65 @@ function App() {
 									/>
 								))}
 							</div>
-							<Link
-								className="text-white/60 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-black rounded group self-start shrink-0"
+							<CardViewMoreLink
 								to="/workout"
-								aria-label="view all workouts"
-							>
-								<span className="group-hover:hidden group-focus:hidden">
-									view more workouts
-								</span>
-								<span className="hidden group-hover:inline group-focus:inline">
-									view more workouts 💪
-								</span>
-							</Link>
+								ariaLabel="view all workouts"
+								label="view more workouts"
+								hoverLabel="💪"
+							/>
 						</CardContent>
 					</Card>
 				)}
 			</div>
 			<SocialLinksGroup />
 		</PageLayout>
+	);
+}
+
+type CardViewMoreLinkProps = {
+	to: string;
+	ariaLabel: string;
+	label: string;
+	hoverLabel: string;
+};
+
+function CardViewMoreLink(props: CardViewMoreLinkProps) {
+	const { to, ariaLabel, label, hoverLabel } = props;
+
+	const className = "group relative z-10 inline-flex shrink-0 cursor-pointer items-center self-start rounded-lg px-2 py-1 text-white/60 hover:text-white/80 focus:text-white/80 hover:bg-white/10 focus:bg-white/10 transition-colors motion-reduce:transition-none focus:outline-none focus:ring-2 focus:ring-white/50 -mx-2 -my-1"
+
+	const inner = (
+		<span className="inline-flex items-center">
+			{label}
+			<span
+				className="ml-0 inline-block max-w-0 overflow-hidden transition-[max-width,margin] duration-200 ease-out group-hover:ml-1.5 group-hover:max-w-8 motion-reduce:transition-none group-focus-within:ml-1.5 group-focus-within:max-w-8"
+				aria-hidden
+			>
+				<span className="inline-block origin-center text-base leading-none transition-transform duration-200 ease-out scale-50 group-hover:scale-110 motion-reduce:scale-100 motion-reduce:transition-none group-focus-within:scale-110">
+					{hoverLabel}
+				</span>
+			</span>
+		</span>
+	);
+
+	if (to.startsWith("http")) {
+		return (
+			<a
+				className={className}
+				href={to}
+				target="_blank"
+				rel="noopener noreferrer"
+				aria-label={ariaLabel}
+			>
+				{inner}
+			</a>
+		);
+	}
+
+	return (
+		<Link className={className} to={to} aria-label={ariaLabel}>
+			{inner}
+		</Link>
 	);
 }
 
