@@ -1,7 +1,7 @@
-import type { ReactNode } from "react";
 import { TanStackDevtools } from "@tanstack/react-devtools";
 import { createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
+import type { ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 
@@ -34,6 +34,20 @@ type RootDocumentProps = {
 	children: ReactNode;
 };
 
+function CloudflareWebAnalyticsBeacon() {
+	const token = import.meta.env.VITE_CLOUDFLARE_WEB_ANALYTICS_TOKEN;
+	if (!token) {
+		return null;
+	}
+	return (
+		<script
+			defer
+			src="https://static.cloudflareinsights.com/beacon.min.js"
+			data-cf-beacon={JSON.stringify({ token })}
+		/>
+	);
+}
+
 function RootDocument(props: RootDocumentProps) {
 	const { children } = props;
 	return (
@@ -62,6 +76,7 @@ function RootDocument(props: RootDocumentProps) {
 						]}
 					/>
 				)}
+				<CloudflareWebAnalyticsBeacon />
 				<Scripts />
 			</body>
 		</html>
