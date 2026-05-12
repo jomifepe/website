@@ -140,7 +140,8 @@ export const Route = createFileRoute("/")({
 		};
 	},
 	headers: () => ({
-		"Cache-Control": "public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400",
+		"Cache-Control":
+			"public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400",
 	}),
 	staleTime: 60 * 60 * 1000,
 	component: App,
@@ -270,7 +271,8 @@ type CardViewMoreLinkProps = {
 function CardViewMoreLink(props: CardViewMoreLinkProps) {
 	const { to, ariaLabel, label, hoverLabel } = props;
 
-	const className = "group relative z-10 inline-flex shrink-0 cursor-pointer items-center self-start rounded-lg px-2 py-1 text-white/60 hover:text-white/80 focus:text-white/80 hover:bg-white/10 focus:bg-white/10 transition-colors motion-reduce:transition-none focus:outline-none focus:ring-2 focus:ring-white/50 -mx-2 -my-1"
+	const className =
+		"group relative z-10 inline-flex shrink-0 cursor-pointer items-center self-start rounded-lg px-2 py-1 text-white/60 hover:text-white/80 focus:text-white/80 hover:bg-white/10 focus:bg-white/10 transition-colors motion-reduce:transition-none focus:outline-none focus:ring-2 focus:ring-white/50 -mx-2 -my-1";
 
 	const inner = (
 		<span className="inline-flex items-center">

@@ -22,7 +22,8 @@ export const Route = createFileRoute("/workout")({
 		return { current, last };
 	},
 	headers: () => ({
-		"Cache-Control": "public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400",
+		"Cache-Control":
+			"public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400",
 	}),
 	staleTime: 60 * 60 * 1000,
 	component: WorkoutPage,

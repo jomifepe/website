@@ -13,7 +13,6 @@ export const getActivities = createServerFn({ method: "GET" })
 		return activities.map(attachWorkoutCardDisplay);
 	});
 
-	
 export type WorkoutCardActivity = StravaActivity & {
 	displayTitle: string;
 	displayDateStr: string;
@@ -50,8 +49,6 @@ function attachWorkoutCardDisplay(
 		displayDateStr,
 	};
 }
-
-
 
 /** Converts `TrailRun` → `trail run` etc. */
 function sportTypeLabel(sportType: SportType): string {
