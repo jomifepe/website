@@ -61,16 +61,16 @@ const ICONS: Record<Theme, (props: IconProps) => ReactNode> = {
 };
 
 const NAMES: Record<Theme, string> = {
-  dark: "Dark",
-  light: "Light",
-  system: "System",
+  dark: "dark",
+  light: "light",
+  system: "system",
 };
 
 function getNextLabel(theme: Theme): string {
   const systemIsDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-  if (theme === "system") return systemIsDark ? "Switch to light mode" : "Switch to dark mode";
-  if (theme === "dark") return systemIsDark ? "Switch to automatic mode" : "Switch to light mode";
-  return systemIsDark ? "Switch to dark mode" : "Switch to automatic mode";
+  if (theme === "system") return systemIsDark ? "switch to light mode" : "switch to dark mode";
+  if (theme === "dark") return systemIsDark ? "switch to automatic mode" : "switch to light mode";
+  return systemIsDark ? "switch to dark mode" : "switch to automatic mode";
 }
 
 type GetThemeValuesArgs = {
