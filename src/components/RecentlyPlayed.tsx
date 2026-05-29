@@ -1,32 +1,13 @@
-import { useEffect, useRef, useState } from "react";
-import { getRecentlyPlayed } from "~/lib/server-statsfm";
 import type { RecentTrack } from "~/lib/statsfm";
 import { cn } from "~/lib/cn";
 import { IconDiscFilled } from "@tabler/icons-react";
 
-const POLL_INTERVAL_MS = 60_000;
-
-type NowPlayingProps = {
+type RecentlyPlayedProps = {
+  track: RecentTrack | null;
   className?: string;
 };
 
-export function RecentlyPlayed({ className }: NowPlayingProps) {
-  const [track, setTrack] = useState<RecentTrack | null>(null);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  const fetchTrack = async () => {
-    const result = await getRecentlyPlayed();
-    setTrack(result);
-  };
-
-  useEffect(() => {
-    fetchTrack();
-    intervalRef.current = setInterval(fetchTrack, POLL_INTERVAL_MS);
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
-  }, []);
-
+export function RecentlyPlayed({ track, className }: RecentlyPlayedProps) {
   if (!track) return null;
 
   return (
@@ -51,7 +32,7 @@ export function RecentlyPlayed({ className }: NowPlayingProps) {
           <span className="text-xs font-medium text-foreground/80 truncate leading-tight">{track.trackName}</span>
           <span className="text-xs text-foreground/50 truncate leading-tight">{track.artistName}</span>
         </div>
-        <IconDiscFilled className="ml-1 text-green-500 size-5" />
+        <IconDiscFilled className="ml-1 text-green-500 size-5 animate-disc-spin" />
       </a>
     </div>
   );

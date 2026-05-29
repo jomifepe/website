@@ -129,6 +129,29 @@ code {
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
+@keyframes disc-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@layer utilities {
+  .animate-disc-spin {
+    animation: disc-spin 4s linear infinite;
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-disc-spin {
+      animation: none;
+    }
+  }
+}
+
 @keyframes terminal-cursor-blink {
   0%,
   49% {

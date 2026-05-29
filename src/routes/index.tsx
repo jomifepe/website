@@ -26,6 +26,7 @@ import { cn } from "~/lib/cn";
 import { PageLayout } from "../components/PageLayout";
 import { WorkoutCard } from "../components/WorkoutCard";
 import { getActivities } from "../lib/server-activities";
+import { getRecentlyPlayed } from "~/lib/server-statsfm";
 
 const codingPhrases = [
   "builds things",
@@ -129,9 +130,10 @@ function rnd(array: readonly string[]) {
 
 export const Route = createFileRoute("/")({
   loader: async () => {
-    const activities = await getActivities();
+    const [activities, recentTrack] = await Promise.all([getActivities(), getRecentlyPlayed()]);
     return {
       recentWorkouts: activities.slice(0, 2),
+      recentTrack,
       sentences: {
         codingSentence: rnd(codingPhrases),
         weightLiftingSentence: rnd(weightLiftingPhrases),
@@ -148,7 +150,7 @@ export const Route = createFileRoute("/")({
 });
 
 function App() {
-  const { recentWorkouts, sentences } = useLoaderData({ from: "/" });
+  const { recentWorkouts, recentTrack, sentences } = useLoaderData({ from: "/" });
 
   return (
     <PageLayout>
@@ -247,7 +249,7 @@ function App() {
           </Card>
         )}
       </div>
-      <SocialLinksGroup />
+      <SocialLinksGroup recentTrack={recentTrack} />
     </PageLayout>
   );
 }
@@ -637,10 +639,10 @@ function SlideHighlightRegion(props: SlideHighlightRegionProps) {
   );
 }
 
-function SocialLinksGroup() {
+function SocialLinksGroup({ recentTrack }: { recentTrack: Parameters<typeof RecentlyPlayed>[0]["track"] }) {
   return (
     <div className="flex flex-col gap-4 sm:flex-row items-end sm:gap-4 mt-6 sm:mt-12">
-      <RecentlyPlayed />
+      <RecentlyPlayed track={recentTrack} />
       <SlideHighlightRegion
         variant="navigation"
         aria-label="social links"
