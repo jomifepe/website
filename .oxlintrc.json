@@ -1,21 +1,21 @@
 {
-	"$schema": "./node_modules/oxlint/configuration_schema.json",
-	"plugins": ["react", "typescript", "unicorn", "oxc", "import"],
-	"categories": {
-		"correctness": "error",
-		"suspicious": "warn"
-	},
-	"env": {
-		"browser": true,
-		"es2022": true
-	},
-	"settings": {
-		"react": {
-			"version": "19"
-		}
-	},
-	"ignorePatterns": ["src/routeTree.gen.ts", "dist/**"],
-	"rules": {
-		"react/react-in-jsx-scope": "off"
-	}
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["react", "typescript", "unicorn", "oxc", "import"],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "warn"
+  },
+  "env": {
+    "browser": true,
+    "es2022": true
+  },
+  "settings": {
+    "react": {
+      "version": "19"
+    }
+  },
+  "ignorePatterns": ["src/routeTree.gen.ts", "dist/**"],
+  "rules": {
+    "react/react-in-jsx-scope": "off"
+  }
 }
