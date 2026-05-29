@@ -7,7 +7,9 @@ type RecentlyPlayedProps = {
   className?: string;
 };
 
-export function RecentlyPlayed({ track, className }: RecentlyPlayedProps) {
+export function RecentlyPlayed(props: RecentlyPlayedProps) {
+  const { track, className } = props;
+
   if (!track) return null;
 
   return (

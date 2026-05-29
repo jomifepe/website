@@ -1,4 +1,5 @@
 import { RecentlyPlayed } from "~/components/RecentlyPlayed";
+import type { RecentTrack } from "~/lib/statsfm";
 import {
   IconBrandGithub,
   IconBrandLinkedin,
@@ -640,10 +641,11 @@ function SlideHighlightRegion(props: SlideHighlightRegionProps) {
 }
 
 type SocialLinksGroupProps = {
-  recentTrack: Parameters<typeof RecentlyPlayed>[0]["track"];
+  recentTrack: RecentTrack | null;
 };
 
-function SocialLinksGroup({ recentTrack }: SocialLinksGroupProps) {
+function SocialLinksGroup(props: SocialLinksGroupProps) {
+  const { recentTrack } = props;
   return (
     <div className="flex flex-col gap-4 sm:flex-row items-end sm:gap-4 mt-6 sm:mt-12">
       <RecentlyPlayed track={recentTrack} />
