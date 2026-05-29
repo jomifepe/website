@@ -1,6 +1,6 @@
 import { type IconProps, IconMoon, IconSun, IconSunMoon } from "@tabler/icons-react";
 import { motion } from "motion/react";
-import { type ReactNode, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { type ReactNode, useEffect, useLayoutEffect, useState } from "react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "~/components/ui/tooltip";
 import type { Theme } from "~/hooks/useTheme";
 import { useTheme } from "~/hooks/useTheme";
@@ -30,18 +30,15 @@ const hidden = { scale: 0, opacity: 0, rotate: 90 };
 export function ThemeToggle() {
   const { theme: currentTheme, toggle: toggleTheme } = useTheme();
   const mounted = useIsMounted();
-  const tooltip = usePersistentTooltipHover();
 
   const nextLabel = mounted ? getNextLabel(currentTheme) : "Toggle theme";
 
   return (
-    <Tooltip open={mounted && tooltip.open}>
+    <Tooltip delayDuration={500}>
       <TooltipTrigger asChild>
         <motion.button
           className="relative flex h-9 w-9 items-center justify-center rounded-lg text-foreground/50 hover:text-foreground hover:bg-foreground/10 focus:bg-foreground/10 transition-[background-color] focus:outline-none overflow-hidden cursor-pointer"
           onClick={toggleTheme}
-          onMouseEnter={tooltip.handleMouseEnter}
-          onMouseLeave={tooltip.handleMouseLeave}
           aria-label={nextLabel}
           whileTap={{ scale: 0.88 }}
         >
@@ -88,20 +85,4 @@ function useIsMounted() {
   }, []);
 
   return mounted;
-}
-
-function usePersistentTooltipHover() {
-  const [open, setTooltipOpen] = useState(false);
-  const hoverTimer = useRef<ReturnType<typeof setTimeout>>(null);
-
-  const handleMouseEnter = () => {
-    hoverTimer.current = setTimeout(() => setTooltipOpen(true), 500);
-  };
-
-  const handleMouseLeave = () => {
-    if (hoverTimer.current) clearTimeout(hoverTimer.current);
-    setTooltipOpen(false);
-  };
-
-  return { open, handleMouseEnter, handleMouseLeave };
 }
