@@ -52,16 +52,16 @@ export function WorkoutCard(props: WorkoutCardProps) {
 					(isSmall ? "mb-6" : "mb-10"),
 			)}
 		>
-			<div className="text-white/60 mt-0.5">
+			<div className="text-foreground/60 mt-0.5">
 				{getWorkoutIcon(activity.sport_type)}
 			</div>
 			<div className="flex-1">
 				<div className="flex flex-row items-baseline gap-2 mb-1 flex-wrap">
-					<span className="text-white font-medium">{title}</span>
-					<span className="text-white/60">·</span>
-					<span className="text-white/80 text-sm">{dateStr}</span>
+					<span className="text-foreground font-medium">{title}</span>
+					<span className="text-foreground/60">·</span>
+					<span className="text-foreground/80 text-sm">{dateStr}</span>
 				</div>
-				<div className="flex items-center gap-3 text-white/60 text-sm flex-wrap">
+				<div className="flex items-center gap-3 text-foreground/60 text-sm flex-wrap">
 					<span>{timeStr}</span>
 					{showDistance && <span>·</span>}
 					{showDistance && <span>{distanceKm.toFixed(1)} km</span>}
@@ -125,7 +125,7 @@ function RoutePreview(props: RoutePreviewProps) {
 }
 
 export function getWorkoutIcon(sportType: SportType) {
-	const commonProps = { size: 24, className: "shrink-0", color: "white" };
+	const commonProps = { size: 24, className: "shrink-0" };
 
 	switch (sportType) {
 		case "Run":

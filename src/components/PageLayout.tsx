@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { ThemeToggle } from "./ThemeToggle";
 
 type PageLayoutProps = {
 	children: ReactNode;
@@ -7,7 +8,10 @@ type PageLayoutProps = {
 export function PageLayout(props: PageLayoutProps) {
 	const { children } = props;
 	return (
-		<div className="min-h-screen bg-black flex items-center justify-center">
+		<div className="min-h-screen bg-background flex items-center justify-center">
+			<div className="fixed top-4 right-4 z-50">
+				<ThemeToggle />
+			</div>
 			{/** biome-ignore lint/correctness/useUniqueElementIds: this is needed */}
 			<main
 				id="main-content"

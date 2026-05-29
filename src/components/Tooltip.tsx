@@ -24,7 +24,7 @@ export function Tooltip(props: TooltipProps) {
 			<div
 				className={`absolute ${sideClasses[side]} left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10`}
 			>
-				<div className="bg-white text-black text-xs font-medium px-2 py-1 rounded whitespace-nowrap">
+				<div className="bg-foreground text-background text-xs font-medium px-2 py-1 rounded whitespace-nowrap">
 					{content}
 				</div>
 			</div>

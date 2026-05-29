@@ -153,14 +153,14 @@ function App() {
 	return (
 		<PageLayout>
 			<h1 className="sr-only">josé pereira - software engineer</h1>
-			<p className="text-white">
+			<p className="text-foreground">
 				<strong>josé pereira</strong> is a{" "}
 				<span className="underline underline-offset-4 decoration-dotted">
 					software engineer
 				</span>
 			</p>
 			<div className="flex flex-col gap-1 mt-3">
-				<p className="relative text-white/50 text-sm">
+				<p className="relative text-foreground/50 text-sm">
 					<span
 						className="absolute -left-4 top-0 font-bold flex justify-center font-mono text-green-500 tabular-nums animate-terminal-cursor motion-reduce:animate-none motion-reduce:opacity-100 select-none"
 						aria-hidden="true"
@@ -192,9 +192,9 @@ function App() {
 					recentWorkouts.length > 0 && "md:grid-cols-2",
 				)}
 			>
-				<Card className="border-white/10 bg-white/3 text-white shadow-none h-full flex flex-col gap-4 p-6">
+				<Card className="border-border bg-foreground/[0.04] text-foreground shadow-none h-full flex flex-col gap-4 p-6">
 					<CardHeader className="p-0">
-						<CardTitle className="text-white text-sm font-medium tracking-wider">
+						<CardTitle className="text-foreground text-sm font-medium tracking-wider">
 							work
 						</CardTitle>
 					</CardHeader>
@@ -229,9 +229,9 @@ function App() {
 					</CardContent>
 				</Card>
 				{recentWorkouts.length > 0 && (
-					<Card className="border-white/10 bg-white/3 text-white shadow-none h-full flex flex-col gap-4 p-6">
+					<Card className="border-border bg-foreground/[0.04] text-foreground shadow-none h-full flex flex-col gap-4 p-6">
 						<CardHeader className="p-0">
-							<CardTitle className="text-white text-sm font-medium tracking-wider">
+							<CardTitle className="text-foreground text-sm font-medium tracking-wider">
 								workout
 							</CardTitle>
 						</CardHeader>
@@ -272,7 +272,7 @@ function CardViewMoreLink(props: CardViewMoreLinkProps) {
 	const { to, ariaLabel, label, hoverLabel } = props;
 
 	const className =
-		"group relative z-10 inline-flex shrink-0 cursor-pointer items-center self-start rounded-lg px-2 py-1 text-white/60 hover:text-white/80 focus:text-white/80 hover:bg-white/10 focus:bg-white/10 transition-colors motion-reduce:transition-none focus:outline-none focus:ring-2 focus:ring-white/50 -mx-2 -my-1";
+		"group relative z-10 inline-flex shrink-0 cursor-pointer items-center self-start rounded-lg px-2 py-1 text-foreground/60 hover:text-foreground/80 focus:text-foreground/80 hover:bg-foreground/10 focus:bg-foreground/10 transition-colors motion-reduce:transition-none focus:outline-none focus:ring-2 focus:ring-ring -mx-2 -my-1";
 
 	const inner = (
 		<span className="inline-flex items-center">
@@ -332,7 +332,7 @@ function TextLink(props: TextLinkProps) {
 	}
 
 	const className = cn(
-		"text-white hover:text-white/80 transition-colors focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-black rounded group self-start",
+		"text-foreground hover:text-foreground/80 transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background rounded group self-start",
 		hoverColorClass,
 	);
 
@@ -376,8 +376,10 @@ function WorkItem(props: WorkExperienceProps) {
 			rel="noopener noreferrer"
 			aria-label={`${company} - ${role} (opens in new tab)`}
 			className={cn(
-				"relative flex cursor-pointer items-start gap-4 rounded-lg -mx-3 px-3 py-3 transition-colors focus:outline-none focus:ring-2 focus:ring-white/50",
-				slideHighlight != null ? "z-10" : "hover:bg-white/5 focus:bg-white/5",
+				"relative flex cursor-pointer items-start gap-4 rounded-lg -mx-3 px-3 py-3 transition-colors focus:outline-none focus:ring-2 focus:ring-ring",
+				slideHighlight != null
+					? "z-10"
+					: "hover:bg-foreground/5 focus:bg-foreground/5",
 			)}
 			onFocus={slideHighlight != null ? slideHighlight.onInteract : undefined}
 			onMouseEnter={
@@ -393,11 +395,11 @@ function WorkItem(props: WorkExperienceProps) {
 			)}
 			<div className="flex-1">
 				<div className="flex flex-row items-baseline gap-2 mb-1 flex-wrap">
-					<span className="text-white font-medium">{company}</span>
-					<span className="text-white/60">·</span>
-					<span className="text-white/80">{role}</span>
+					<span className="text-foreground font-medium">{company}</span>
+					<span className="text-foreground/60">·</span>
+					<span className="text-foreground/80">{role}</span>
 				</div>
-				<div className="text-white/60 text-sm">
+				<div className="text-foreground/60 text-sm">
 					{startDate} – {endDate || "current"}
 				</div>
 			</div>
@@ -612,7 +614,7 @@ function SlideHighlightRegion(props: SlideHighlightRegionProps) {
 		<span
 			aria-hidden
 			className={cn(
-				"pointer-events-none absolute z-0 rounded-lg bg-white/10 shadow-none",
+				"pointer-events-none absolute z-0 rounded-lg bg-foreground/10 shadow-none",
 				"transition-[left,top,width,height,opacity] duration-300 ease-out",
 				"motion-reduce:transition-none motion-reduce:duration-150",
 				backdropClassName,

@@ -42,7 +42,7 @@ function WorkoutPage() {
 			<div className="flex shrink-0 items-center justify-between gap-3 mb-4">
 				<Link
 					to="/"
-					className="relative z-10 flex shrink-0 items-center justify-center rounded-lg -mx-2 -my-1 px-2 py-1 text-white/60 hover:text-white focus:text-white hover:bg-white/10 focus:bg-white/10 transition-colors motion-reduce:transition-none focus:outline-none focus:ring-2 focus:ring-white/50 h-10"
+					className="relative z-10 flex shrink-0 items-center justify-center rounded-lg -mx-2 -my-1 px-2 py-1 text-foreground/60 hover:text-foreground focus:text-foreground hover:bg-foreground/10 focus:bg-foreground/10 transition-colors motion-reduce:transition-none focus:outline-none focus:ring-2 focus:ring-ring h-10"
 					aria-label="back to home"
 				>
 					<span className="mr-2">←</span>back
@@ -58,7 +58,7 @@ function WorkoutPage() {
 			</div>
 
 			<section>
-				<h1 className="text-white text-sm font-medium mb-8 tracking-wider">
+				<h1 className="text-foreground text-sm font-medium mb-8 tracking-wider">
 					workouts
 				</h1>
 				<div className="flex flex-col items-stretch gap-8">
@@ -70,11 +70,11 @@ function WorkoutPage() {
 						return (
 							<Card
 								key={label}
-								className="flex h-full flex-col gap-4 border-white/10 bg-white/3 p-6 text-white shadow-none"
+								className="flex h-full flex-col gap-4 border-border bg-foreground/[0.04] p-6 text-foreground shadow-none"
 							>
 								<CardHeader className="p-0">
 									<div className="flex flex-row flex-wrap items-center gap-3">
-										<CardTitle className="font-medium tracking-wider text-sm text-white">
+										<CardTitle className="font-medium tracking-wider text-sm text-foreground">
 											{label}
 										</CardTitle>
 										<Tooltip content={category.description}>
@@ -86,7 +86,7 @@ function WorkoutPage() {
 								</CardHeader>
 								<CardContent className="flex min-h-0 flex-1 flex-col gap-2 p-0">
 									{weekActivities.length === 0 ? (
-										<p className="italic text-white/40 text-sm">
+										<p className="italic text-foreground/40 text-sm">
 											no activities yet, get moving
 										</p>
 									) : (
