@@ -12,7 +12,6 @@ export function PageLayout(props: PageLayoutProps) {
       <div className="fixed top-4 right-4 z-50">
         <ThemeToggle />
       </div>
-      {/** biome-ignore lint/correctness/useUniqueElementIds: this is needed */}
       <main id="main-content" className="flex flex-col max-w-5xl w-full gap-4 py-12 px-5">
         {children}
       </main>
