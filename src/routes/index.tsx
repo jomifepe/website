@@ -639,7 +639,11 @@ function SlideHighlightRegion(props: SlideHighlightRegionProps) {
   );
 }
 
-function SocialLinksGroup({ recentTrack }: { recentTrack: Parameters<typeof RecentlyPlayed>[0]["track"] }) {
+type SocialLinksGroupProps = {
+  recentTrack: Parameters<typeof RecentlyPlayed>[0]["track"];
+};
+
+function SocialLinksGroup({ recentTrack }: SocialLinksGroupProps) {
   return (
     <div className="flex flex-col gap-4 sm:flex-row items-end sm:gap-4 mt-6 sm:mt-12">
       <RecentlyPlayed track={recentTrack} />

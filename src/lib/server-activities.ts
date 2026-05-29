@@ -1,8 +1,13 @@
 import { createServerFn } from "@tanstack/react-start";
 import { fetchActivities, type SportType, type StravaActivity } from "./strava";
 
+type InputData = {
+  page?: number;
+  perPage?: number;
+};
+
 export const getActivities = createServerFn({ method: "GET" })
-  .inputValidator((data?: { page?: number; perPage?: number }) => ({
+  .inputValidator((data?: InputData) => ({
     page: data?.page ?? 1,
     // 28 covers the worst realistic case for /workout's "current + last week"
     // grouping: 14 days × up to 2 activities/day.

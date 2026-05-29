@@ -12,7 +12,12 @@ const springTransition = {
   opacity: { duration: 0.1, ease: "easeOut" },
 } as const;
 
-const themeOptions: { theme: Theme; Icon: (props: IconProps) => ReactNode }[] = [
+type ThemeOption = {
+  theme: Theme;
+  Icon: (props: IconProps) => ReactNode;
+};
+
+const themeOptions: ThemeOption[] = [
   { theme: "dark", Icon: IconMoon },
   { theme: "light", Icon: IconSun },
   { theme: "system", Icon: IconSunMoon },

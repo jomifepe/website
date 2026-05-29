@@ -101,7 +101,7 @@ function WorkoutPage() {
   );
 }
 
-function getWeekBounds(): { currentMonday: Date; lastMonday: Date } {
+function getWeekBounds() {
   const today = new Date();
   const dayOfWeek = today.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
   const offsetFromMonday = (dayOfWeek - 1 + 7) % 7;
@@ -116,12 +116,7 @@ function getWeekBounds(): { currentMonday: Date; lastMonday: Date } {
   return { currentMonday, lastMonday };
 }
 
-function groupByCalendarWeek<T extends StravaActivity>(
-  activities: T[],
-): {
-  current: T[];
-  last: T[];
-} {
+function groupByCalendarWeek<T extends StravaActivity>(activities: T[]) {
   const { currentMonday, lastMonday } = getWeekBounds();
   const current: T[] = [];
   const last: T[] = [];
