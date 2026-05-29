@@ -37,7 +37,7 @@ export function ThemeToggle() {
     <Tooltip delayDuration={500}>
       <TooltipTrigger asChild>
         <motion.button
-          className="relative flex h-9 w-9 items-center justify-center rounded-lg text-foreground/50 hover:text-foreground hover:bg-foreground/10 focus:bg-foreground/10 transition-[background-color] focus:outline-none overflow-hidden cursor-pointer"
+          className="relative flex h-9 w-9 items-center justify-center rounded-lg text-foreground/50 hover:text-foreground hover:bg-foreground/10 focus-visible:bg-foreground/10 transition-[background-color] focus-visible:outline-none overflow-hidden cursor-pointer"
           onClick={toggleTheme}
           aria-label={nextLabel}
           whileTap={{ scale: 0.88 }}

@@ -11,12 +11,12 @@ import { SlideHighlightContext } from "~/contexts/SlideHighlightContext";
 import { cn } from "~/lib/cn";
 
 const hoverColorClass = {
-  green: "hover:text-green-400 focus:text-green-400",
-  orange: "hover:text-orange-400 focus:text-orange-400",
-  purple: "hover:text-purple-400 focus:text-purple-400",
-  red: "hover:text-red-400 focus:text-red-400",
-  blue: "hover:text-blue-400 focus:text-blue-400",
-  white: "hover:text-foreground/80 focus:text-foreground/80",
+  green: "hover:text-green-400 focus-visible:text-green-400",
+  orange: "hover:text-orange-400 focus-visible:text-orange-400",
+  purple: "hover:text-purple-400 focus-visible:text-purple-400",
+  red: "hover:text-red-400 focus-visible:text-red-400",
+  blue: "hover:text-blue-400 focus-visible:text-blue-400",
+  white: "hover:text-foreground/80 focus-visible:text-foreground/80",
 } as const;
 
 export type SocialLinkHoverColor = keyof typeof hoverColorClass;
@@ -68,10 +68,10 @@ export const SocialLink = forwardRef<HTMLAnchorElement, SocialLinkProps>((props,
     <a
       ref={ref}
       className={cn(
-        "relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-foreground/60 hover:text-foreground focus:text-foreground",
-        "transition-colors motion-reduce:transition-none focus:outline-none",
+        "relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-foreground/60 hover:text-foreground focus-visible:text-foreground",
+        "transition-colors motion-reduce:transition-none focus-visible:outline-none",
         hoverColorClass[hoverColor],
-        !suppressBackdropFill && "focus:bg-foreground/10 hover:bg-foreground/10",
+        !suppressBackdropFill && "focus-visible:bg-foreground/10 hover:bg-foreground/10",
         classNameProp,
       )}
       href={url}

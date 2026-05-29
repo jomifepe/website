@@ -262,7 +262,7 @@ function CardViewMoreLink(props: CardViewMoreLinkProps) {
   const { to, ariaLabel, label, hoverLabel } = props;
 
   const className =
-    "group relative z-10 inline-flex shrink-0 cursor-pointer items-center self-start rounded-lg px-2 py-1 text-foreground/60 hover:text-foreground/80 focus:text-foreground/80 hover:bg-foreground/10 focus:bg-foreground/10 transition-colors motion-reduce:transition-none focus:outline-none -mx-2 -my-1";
+    "group relative z-10 inline-flex shrink-0 cursor-pointer items-center self-start rounded-lg px-2 py-1 text-foreground/60 hover:text-foreground/80 focus-visible:text-foreground/80 hover:bg-foreground/10 focus-visible:bg-foreground/10 transition-colors motion-reduce:transition-none focus-visible:outline-none -mx-2 -my-1";
 
   const inner = (
     <span className="inline-flex items-center">
@@ -305,18 +305,18 @@ function TextLink(props: TextLinkProps) {
   let hoverColorClass = "";
   switch (hoverColor) {
     case "green":
-      hoverColorClass = "hover:text-green-400 focus:text-green-400";
+      hoverColorClass = "hover:text-green-400 focus-visible:text-green-400";
       break;
     case "orange":
-      hoverColorClass = "hover:text-orange-400 focus:text-orange-400";
+      hoverColorClass = "hover:text-orange-400 focus-visible:text-orange-400";
       break;
     case "purple":
-      hoverColorClass = "hover:text-purple-400 focus:text-purple-400";
+      hoverColorClass = "hover:text-purple-400 focus-visible:text-purple-400";
       break;
   }
 
   const className = cn(
-    "text-foreground hover:text-foreground/80 transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background rounded group self-start",
+    "text-foreground hover:text-foreground/80 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded group self-start",
     hoverColorClass,
   );
 
@@ -355,8 +355,8 @@ function WorkItem(props: WorkExperienceProps) {
       rel="noopener noreferrer"
       aria-label={`${company} - ${role} (opens in new tab)`}
       className={cn(
-        "relative flex cursor-pointer items-start gap-4 rounded-lg -mx-3 px-3 py-3 transition-colors focus:outline-none",
-        slideHighlight != null ? "z-10" : "hover:bg-foreground/5 focus:bg-foreground/5",
+        "relative flex cursor-pointer items-start gap-4 rounded-lg -mx-3 px-3 py-3 transition-colors focus-visible:outline-none",
+        slideHighlight != null ? "z-10" : "hover:bg-foreground/5 focus-visible:bg-foreground/5",
       )}
       onFocus={slideHighlight != null ? slideHighlight.onInteract : undefined}
       onMouseEnter={slideHighlight != null ? slideHighlight.onInteract : undefined}
