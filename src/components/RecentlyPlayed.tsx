@@ -1,0 +1,58 @@
+import { useEffect, useRef, useState } from "react";
+import { getRecentlyPlayed } from "~/lib/server-statsfm";
+import type { RecentTrack } from "~/lib/statsfm";
+import { cn } from "~/lib/cn";
+import { IconDiscFilled } from "@tabler/icons-react";
+
+const POLL_INTERVAL_MS = 60_000;
+
+type NowPlayingProps = {
+  className?: string;
+};
+
+export function RecentlyPlayed({ className }: NowPlayingProps) {
+  const [track, setTrack] = useState<RecentTrack | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const fetchTrack = async () => {
+    const result = await getRecentlyPlayed();
+    setTrack(result);
+  };
+
+  useEffect(() => {
+    fetchTrack();
+    intervalRef.current = setInterval(fetchTrack, POLL_INTERVAL_MS);
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, []);
+
+  if (!track) return null;
+
+  return (
+    <div className={cn("flex flex-col items-end sm:items-start gap-1", className)}>
+      <span className="text-[10px] text-foreground/40">recently played</span>
+      <a
+        href={track.trackUrl ?? undefined}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={`Recently played: ${track.trackName} by ${track.artistName} on Spotify (opens in new tab)`}
+        className={cn(
+          "group flex items-center gap-2 max-w-[220px] rounded-lg px-2 py-1.5 -mx-2",
+          "text-foreground/60 hover:text-foreground focus-visible:text-foreground",
+          "hover:bg-foreground/10 focus-visible:bg-foreground/10",
+          "transition-colors motion-reduce:transition-none focus-visible:outline-none",
+        )}
+      >
+        {track.albumImageUrl && (
+          <img src={track.albumImageUrl} alt={track.albumName} className="w-8 h-8 rounded shrink-0 object-cover" />
+        )}
+        <div className="flex flex-col min-w-0 flex-1">
+          <span className="text-xs font-medium text-foreground/80 truncate leading-tight">{track.trackName}</span>
+          <span className="text-xs text-foreground/50 truncate leading-tight">{track.artistName}</span>
+        </div>
+        <IconDiscFilled className="ml-1 text-green-500 size-5" />
+      </a>
+    </div>
+  );
+}

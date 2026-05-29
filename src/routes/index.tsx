@@ -1,3 +1,4 @@
+import { RecentlyPlayed } from "~/components/RecentlyPlayed";
 import {
   IconBrandGithub,
   IconBrandLinkedin,
@@ -221,7 +222,7 @@ function App() {
           </CardContent>
         </Card>
         {recentWorkouts.length > 0 && (
-          <Card className="border-border bg-foreground/[0.04] text-foreground shadow-none h-full flex flex-col gap-4 p-6">
+          <Card className="border-border bg-foreground/4 text-foreground shadow-none h-full flex flex-col gap-4 p-6">
             <CardHeader className="p-0">
               <CardTitle className="text-foreground text-sm font-medium tracking-wider">workout</CardTitle>
             </CardHeader>
@@ -638,21 +639,24 @@ function SlideHighlightRegion(props: SlideHighlightRegionProps) {
 
 function SocialLinksGroup() {
   return (
-    <SlideHighlightRegion
-      variant="navigation"
-      aria-label="social links"
-      className={cn("relative flex flex-wrap items-center justify-end gap-1", "mt-8 md:mt-16")}
-    >
-      {SOCIAL_NAV_ITEMS.map((item) => (
-        <SocialLink
-          key={item.name}
-          icon={item.icon}
-          title={item.title}
-          hoverColor={item.hoverColor}
-          name={item.name}
-          url={item.url}
-        />
-      ))}
-    </SlideHighlightRegion>
+    <div className="flex flex-col gap-4 sm:flex-row items-end sm:gap-4 mt-6 sm:mt-12">
+      <RecentlyPlayed />
+      <SlideHighlightRegion
+        variant="navigation"
+        aria-label="social links"
+        className="relative flex flex-wrap items-center justify-end gap-1 sm:ml-auto"
+      >
+        {SOCIAL_NAV_ITEMS.map((item) => (
+          <SocialLink
+            key={item.name}
+            icon={item.icon}
+            title={item.title}
+            hoverColor={item.hoverColor}
+            name={item.name}
+            url={item.url}
+          />
+        ))}
+      </SlideHighlightRegion>
+    </div>
   );
 }
