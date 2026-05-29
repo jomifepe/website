@@ -262,7 +262,7 @@ function CardViewMoreLink(props: CardViewMoreLinkProps) {
   const { to, ariaLabel, label, hoverLabel } = props;
 
   const className =
-    "group relative z-10 inline-flex shrink-0 cursor-pointer items-center self-start rounded-lg px-2 py-1 text-foreground/60 hover:text-foreground/80 focus:text-foreground/80 hover:bg-foreground/10 focus:bg-foreground/10 transition-colors motion-reduce:transition-none focus:outline-none focus:ring-2 focus:ring-ring -mx-2 -my-1";
+    "group relative z-10 inline-flex shrink-0 cursor-pointer items-center self-start rounded-lg px-2 py-1 text-foreground/60 hover:text-foreground/80 focus:text-foreground/80 hover:bg-foreground/10 focus:bg-foreground/10 transition-colors motion-reduce:transition-none focus:outline-none -mx-2 -my-1";
 
   const inner = (
     <span className="inline-flex items-center">
@@ -355,13 +355,13 @@ function WorkItem(props: WorkExperienceProps) {
       rel="noopener noreferrer"
       aria-label={`${company} - ${role} (opens in new tab)`}
       className={cn(
-        "relative flex cursor-pointer items-start gap-4 rounded-lg -mx-3 px-3 py-3 transition-colors focus:outline-none focus:ring-2 focus:ring-ring",
+        "relative flex cursor-pointer items-start gap-4 rounded-lg -mx-3 px-3 py-3 transition-colors focus:outline-none",
         slideHighlight != null ? "z-10" : "hover:bg-foreground/5 focus:bg-foreground/5",
       )}
       onFocus={slideHighlight != null ? slideHighlight.onInteract : undefined}
       onMouseEnter={slideHighlight != null ? slideHighlight.onInteract : undefined}
     >
-      {logo && <img src={logo} alt={`${company} logo`} className="w-12 h-12 rounded object-contain shrink-0" />}
+      {logo && <img src={logo} alt={`${company} logo`} className="w-12 h-12 rounded-md object-contain shrink-0" />}
       <div className="flex-1">
         <div className="flex flex-row items-baseline gap-2 mb-1 flex-wrap">
           <span className="text-foreground font-medium">{company}</span>

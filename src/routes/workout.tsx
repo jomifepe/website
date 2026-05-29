@@ -36,7 +36,7 @@ function WorkoutPage() {
       <div className="flex shrink-0 items-center justify-between gap-3 mb-4">
         <Link
           to="/"
-          className="relative z-10 flex shrink-0 items-center justify-center rounded-lg -mx-2 -my-1 px-2 py-1 text-foreground/60 hover:text-foreground focus:text-foreground hover:bg-foreground/10 focus:bg-foreground/10 transition-colors motion-reduce:transition-none focus:outline-none focus:ring-2 focus:ring-ring h-10"
+          className="relative z-10 flex shrink-0 items-center justify-center rounded-lg -mx-2 -my-1 px-2 py-1 text-foreground/60 hover:text-foreground focus:text-foreground hover:bg-foreground/10 focus:bg-foreground/10 transition-colors motion-reduce:transition-none focus:outline-none h-10"
           aria-label="back to home"
         >
           <span className="mr-2">←</span>back

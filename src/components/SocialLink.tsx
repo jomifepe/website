@@ -69,7 +69,7 @@ export const SocialLink = forwardRef<HTMLAnchorElement, SocialLinkProps>((props,
       ref={ref}
       className={cn(
         "relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-foreground/60 hover:text-foreground focus:text-foreground",
-        "transition-colors motion-reduce:transition-none focus:outline-none focus:ring-2 focus:ring-ring",
+        "transition-colors motion-reduce:transition-none focus:outline-none",
         hoverColorClass[hoverColor],
         !suppressBackdropFill && "focus:bg-foreground/10 hover:bg-foreground/10",
         classNameProp,

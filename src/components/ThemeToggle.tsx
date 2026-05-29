@@ -23,7 +23,7 @@ export function ThemeToggle() {
     <Tooltip open={mounted && tooltip.open}>
       <TooltipTrigger asChild>
         <motion.button
-          className="relative flex h-9 w-9 items-center justify-center rounded-lg text-foreground/50 hover:text-foreground hover:bg-foreground/10 transition-colors focus:outline-none focus:ring-2 focus:ring-ring overflow-hidden cursor-pointer"
+          className="relative flex h-9 w-9 items-center justify-center rounded-lg text-foreground/50 hover:text-foreground hover:bg-foreground/10 focus:bg-foreground/10 transition-colors focus:outline-none overflow-hidden cursor-pointer"
           onClick={appTheme.toggle}
           onMouseEnter={tooltip.handleMouseEnter}
           onMouseLeave={tooltip.handleMouseLeave}
