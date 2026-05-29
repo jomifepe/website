@@ -1,0 +1,77 @@
+---
+description: Coding standards and code quality guidelines
+alwaysApply: true
+---
+
+# Coding Standards
+
+- Readability over cleverness. No surprises file-to-file.
+- Consistent style. American spelling.
+- Self-documenting names. Small focused functions. Follow project structure.
+- Comments explain WHY, constraints, trade-offs — not WHAT.
+- Required comments: non-obvious business rules, workarounds, perf/concurrency limits, intentional limits.
+- If removing comment no hurt understanding, skip it.
+- ALWAYS research about APIs, SDKs, or any packages before using them, use context7 if you have access to it. NEVER assume anything external to the project.
+
+## TypeScript & React
+
+- Zod for all data validation (API in/out, internal transforms).
+- TS strict mode. Fix all type errors.
+- Types over interfaces.
+- No nested ternaries.
+- Early returns over nested conditionals. Extract a small function if cleaner.
+- Import from React instead of using the global React object (e.g, `React.FC`).
+- Function definitions over arrow for root level functions.
+- Arrow functions inside of components.
+- Let TypeScript infer when possible, avoid unnecessary type annotations.
+- Sensible shorthands (e.g., `array.every(Boolean)` instead of `array.every((item) => Boolean(item))`).
+- No non-null assertions (`!`) unless absolutely necessary, narrow or validate the value and return or throw an error instead.
+- For arguments and props, prefer:
+  ```
+  type ArgsType = { 
+    arg1: string; 
+    arg2: number;
+  };
+
+  function myFunction(args: ArgsType) {
+    const { arg1, arg2 } = args;
+
+    // ...
+  }
+
+  type PropsType = { 
+    prop1: string; 
+    prop2: number;
+  };
+
+  function MyComponent(props: PropsType) {
+    const { prop1, prop2 } = props;
+
+    // ...
+  }
+  ```
+  over:
+  ```
+  function myFunction({ arg1, arg2 }: { arg1: string; arg2: number }) {
+    // ...
+  }
+  function MyComponent({ prop1, prop2 }: { prop1: string; prop2: number }) {
+    // ...
+  }
+  ```
+- Conditional rendering with syntax, prefer:
+  ```
+  return <div>{condition && <div>True</div>}</div>;
+  ```
+  over:
+  ```
+  return <div>{condition ? <div>True</div> : null}</div>;
+  ```
+- Prefer defaults over explicit types, for example:
+  ```
+  const [value, setValue] = useState<string>();
+  ```
+  over:
+  ```
+  const [value, setValue] = useState<string | undefined>(undefined);
+  ```
