@@ -1,5 +1,5 @@
-import { IconMoon, IconProps, IconSun, IconSunMoon } from "@tabler/icons-react";
-import { AnimatePresence, motion } from "motion/react";
+import { type IconProps, IconMoon, IconSun, IconSunMoon } from "@tabler/icons-react";
+import { motion } from "motion/react";
 import { type ReactNode, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "~/components/ui/tooltip";
 import type { Theme } from "~/hooks/useTheme";
@@ -12,79 +12,67 @@ const springTransition = {
   opacity: { duration: 0.1, ease: "easeOut" },
 } as const;
 
+const themeOptions: { theme: Theme; Icon: (props: IconProps) => ReactNode }[] = [
+  { theme: "dark", Icon: IconMoon },
+  { theme: "light", Icon: IconSun },
+  { theme: "system", Icon: IconSunMoon },
+];
+
+const themeNameMap: Record<Theme, string> = {
+  dark: "dark",
+  light: "light",
+  system: "system",
+};
+
+const visible = { scale: 1, opacity: 1, rotate: 0 };
+const hidden = { scale: 0, opacity: 0, rotate: 90 };
+
 export function ThemeToggle() {
-  const appTheme = useTheme();
+  const { theme: currentTheme, toggle: toggleTheme } = useTheme();
   const mounted = useIsMounted();
   const tooltip = usePersistentTooltipHover();
 
-  const themeValues = getThemeValues({ theme: appTheme.theme, mounted });
+  const nextLabel = mounted ? getNextLabel(currentTheme) : "Toggle theme";
 
   return (
     <Tooltip open={mounted && tooltip.open}>
       <TooltipTrigger asChild>
         <motion.button
-          className="relative flex h-9 w-9 items-center justify-center rounded-lg text-foreground/50 hover:text-foreground hover:bg-foreground/10 focus:bg-foreground/10 transition-colors focus:outline-none overflow-hidden cursor-pointer"
-          onClick={appTheme.toggle}
+          className="relative flex h-9 w-9 items-center justify-center rounded-lg text-foreground/50 hover:text-foreground hover:bg-foreground/10 focus:bg-foreground/10 transition-[background-color] focus:outline-none overflow-hidden cursor-pointer"
+          onClick={toggleTheme}
           onMouseEnter={tooltip.handleMouseEnter}
           onMouseLeave={tooltip.handleMouseLeave}
-          aria-label={themeValues.nextLabel}
+          aria-label={nextLabel}
           whileTap={{ scale: 0.88 }}
         >
           {mounted && (
-            <AnimatePresence mode="sync" initial={false} custom={themeValues.step}>
-              <motion.span
-                key={appTheme.theme}
-                className="absolute inset-0 flex items-center justify-center"
-                custom={themeValues.step}
-                initial={{ scale: 0, rotate: 90, opacity: 0 }}
-                animate={{ scale: 1, rotate: 0, opacity: 1 }}
-                exit={{ scale: 0, rotate: -90, opacity: 0 }}
-                transition={springTransition}
-              >
-                <themeValues.IconComponent className="text-foreground" size={17} strokeWidth={1.75} />
-              </motion.span>
-            </AnimatePresence>
+            <>
+              {themeOptions.map(({ theme, Icon }) => (
+                <motion.span
+                  key={theme}
+                  className="absolute inset-0 flex items-center justify-center"
+                  initial={false}
+                  transition={springTransition}
+                  // keep all the options mounted to avoid color transition bugs
+                  animate={theme === currentTheme ? visible : hidden}
+                >
+                  <Icon className="text-foreground/60" size={17} strokeWidth={1.75} />
+                </motion.span>
+              ))}
+            </>
           )}
         </motion.button>
       </TooltipTrigger>
-      {mounted && <TooltipContent side="bottom">{themeValues.name}</TooltipContent>}
+      {mounted && <TooltipContent side="bottom">{themeNameMap[currentTheme]}</TooltipContent>}
     </Tooltip>
   );
 }
-
-const CYCLE: Theme[] = ["dark", "light", "system"];
-
-const ICONS: Record<Theme, (props: IconProps) => ReactNode> = {
-  dark: IconMoon,
-  light: IconSun,
-  system: IconSunMoon,
-};
-
-const NAMES: Record<Theme, string> = {
-  dark: "dark",
-  light: "light",
-  system: "system",
-};
 
 function getNextLabel(theme: Theme): string {
   const systemIsDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
   if (theme === "system") return systemIsDark ? "switch to light mode" : "switch to dark mode";
   if (theme === "dark") return systemIsDark ? "switch to automatic mode" : "switch to light mode";
   return systemIsDark ? "switch to dark mode" : "switch to automatic mode";
-}
-
-type GetThemeValuesArgs = {
-  theme: Theme;
-  mounted: boolean;
-};
-
-function getThemeValues({ theme, mounted }: GetThemeValuesArgs) {
-  const nextLabel = mounted ? getNextLabel(theme) : "Toggle theme";
-  const step = mounted ? CYCLE.indexOf(theme) : 0;
-  const IconComponent = ICONS[theme];
-  const name = NAMES[theme];
-
-  return { IconComponent, name, nextLabel, step };
 }
 
 // useLayoutEffect on the client (runs synchronously before paint, so the browser
