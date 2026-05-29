@@ -186,7 +186,7 @@ function App() {
       <div
         className={cn("grid w-full gap-4 mt-8 md:mt-16 self-stretch", recentWorkouts.length > 0 && "md:grid-cols-2")}
       >
-        <Card className="border-border bg-foreground/[0.04] text-foreground shadow-none h-full flex flex-col gap-4 p-6">
+        <Card className="border-border bg-foreground/4 text-foreground shadow-none h-full flex flex-col gap-4 p-6">
           <CardHeader className="p-0">
             <CardTitle className="text-foreground text-sm font-medium tracking-wider">work</CardTitle>
           </CardHeader>

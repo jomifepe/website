@@ -154,3 +154,14 @@ code {
     @apply bg-background text-foreground;
   }
 }
+
+/* Progressive enhancement: squircle corners on browsers that support corner-shape. */
+@supports (corner-shape: superellipse(2)) {
+  :root {
+    --radius: 2rem; /* 36px, up from 0.625rem/10px — gives rounded-xl = 40px */
+  }
+
+  * {
+    corner-shape: superellipse(2);
+  }
+}

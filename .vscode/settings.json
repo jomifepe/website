@@ -34,6 +34,7 @@
   "[css]": {
     "editor.defaultFormatter": "vscode.css-language-features"
   },
+  "css.lint.unknownProperties": "ignore",
   "editor.codeActionsOnSave": {
     "source.fixAll.oxc": "explicit"
   },
