@@ -31,7 +31,7 @@ function attachWorkoutCardDisplay(activity: StravaActivity): WorkoutCardActivity
     timeOfDay = "evening";
   }
 
-  const displayTitle = `${timeOfDay} ${sportTypeLabel(activity.sport_type)}`;
+  const displayTitle = `${timeOfDay} ${runLabel(activity.sport_type, activity.distance) ?? sportTypeLabel(activity.sport_type)}`;
 
   const displayDateStr = date
     .toLocaleDateString("en-US", {
@@ -46,6 +46,32 @@ function attachWorkoutCardDisplay(activity: StravaActivity): WorkoutCardActivity
     displayTitle,
     displayDateStr,
   };
+}
+
+const RUN_SPORT_TYPES = new Set<SportType>(["Run", "TrailRun", "VirtualRun"]);
+
+const RUN_PREFIXES: Partial<Record<SportType, string>> = {
+  TrailRun: "trail",
+  VirtualRun: "virtual",
+};
+
+/**
+ * Returns a distance-aware label for run sport types, or `null` for non-runs.
+ * Distance thresholds (distance is in metres):
+ *   ≥ 42 195 m → marathon
+ *   ≥ 21 097.5 m → half marathon
+ *   > 10 000 m → long run
+ *   otherwise → run
+ */
+function runLabel(sportType: SportType, distanceMetres: number): string | null {
+  if (!RUN_SPORT_TYPES.has(sportType)) return null;
+
+  const prefix = RUN_PREFIXES[sportType] ? `${RUN_PREFIXES[sportType]} ` : "";
+
+  if (distanceMetres >= 42_195) return `${prefix}marathon`;
+  if (distanceMetres >= 21_097.5) return `${prefix}half marathon`;
+  if (distanceMetres > 10_000) return `${prefix}long run`;
+  return `${prefix}run`;
 }
 
 /** Converts `TrailRun` → `trail run` etc. */

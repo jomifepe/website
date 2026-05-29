@@ -62,7 +62,7 @@ function WorkoutPage() {
             return (
               <Card
                 key={label}
-                className="flex h-full flex-col gap-4 border-border bg-foreground/[0.04] p-6 text-foreground shadow-none"
+                className="flex h-full flex-col gap-4 border-border bg-foreground/4 p-6 text-foreground shadow-none"
               >
                 <CardHeader className="p-0">
                   <div className="flex flex-row flex-wrap items-center gap-3">

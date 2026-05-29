@@ -50,7 +50,7 @@ export function WorkoutCard(props: WorkoutCardProps) {
         activity.map?.summary_polyline && isLastItemInList && (isSmall ? "mb-6" : "mb-10"),
       )}
     >
-      <div className="text-foreground/60 mt-0.5">{getWorkoutIcon(activity.sport_type)}</div>
+      <div className="text-muted-foreground mt-0.5">{getWorkoutIcon(activity.sport_type)}</div>
       <div className="flex-1">
         <div className="flex flex-row items-baseline gap-2 mb-1 flex-wrap">
           <span className="text-foreground font-medium">{title}</span>
