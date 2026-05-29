@@ -1,9 +1,14 @@
 import { IconMoon, IconSun, IconSunMoon } from "@tabler/icons-react";
 import { AnimatePresence, motion } from "motion/react";
-import { type ReactNode, useEffect, useRef, useState } from "react";
+import { type ReactNode, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "~/components/ui/tooltip";
 import type { Theme } from "~/hooks/useTheme";
 import { useTheme } from "~/hooks/useTheme";
+
+// useLayoutEffect on the client (runs synchronously before paint, so the browser
+// never renders the wrong icon). Falls back to useEffect on the server to avoid
+// the SSR "useLayoutEffect does nothing" warning.
+const useIsomorphicLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
 const CYCLE: Theme[] = ["dark", "light", "system"];
 
@@ -39,7 +44,9 @@ export function ThemeToggle() {
   const [tooltipOpen, setTooltipOpen] = useState(false);
   const hoverTimer = useRef<ReturnType<typeof setTimeout>>(null);
 
-  useEffect(() => {
+  // Runs synchronously before the browser paints — the correct icon is
+  // shown on the very first visible frame with no spring animation.
+  useIsomorphicLayoutEffect(() => {
     setMounted(true);
   }, []);
 
