@@ -1,9 +1,9 @@
 import { IconBrandStrava } from "@tabler/icons-react";
 import { createFileRoute, Link, useLoaderData } from "@tanstack/react-router";
 import { SocialLink } from "~/components/SocialLink";
-import { Badge } from "../components/Badge";
+import { Badge } from "../components/ui/badge";
 import { PageLayout } from "../components/PageLayout";
-import { Tooltip } from "../components/Tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../components/ui/tooltip";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { WorkoutCard } from "../components/WorkoutCard";
 import { getActivities } from "../lib/server-activities";
@@ -67,10 +67,13 @@ function WorkoutPage() {
                 <CardHeader className="p-0">
                   <div className="flex flex-row flex-wrap items-center gap-3">
                     <CardTitle className="font-medium tracking-wider text-sm text-foreground">{label}</CardTitle>
-                    <Tooltip content={category.description}>
-                      <Badge className="cursor-help" variant={category.color}>
-                        {category.label}
-                      </Badge>
+                    <Tooltip delayDuration={0}>
+                      <TooltipTrigger asChild>
+                        <Badge className="cursor-help" variant={category.color}>
+                          {category.label}
+                        </Badge>
+                      </TooltipTrigger>
+                      <TooltipContent>{category.description}</TooltipContent>
                     </Tooltip>
                   </div>
                 </CardHeader>
