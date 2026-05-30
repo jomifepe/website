@@ -136,7 +136,6 @@ async function refreshAccessToken(): Promise<StravaTokenResponse> {
     athlete: tokenData.athlete?.firstname,
   });
 
-  // TODO: If refresh_token changed, update .env or store in database
   if (tokenData.refresh_token !== process.env.STRAVA_REFRESH_TOKEN) {
     console.warn("⚠️  Strava refresh token has changed. Update STRAVA_REFRESH_TOKEN in your environment.");
   }

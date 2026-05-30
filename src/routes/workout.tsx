@@ -7,7 +7,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "../components/ui/toolti
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { WorkoutCard } from "../components/WorkoutCard";
 import { getActivities } from "../lib/server-activities";
-import type { StravaActivity } from "../lib/strava";
+import type { StravaActivity } from "~/lib/strava";
 
 export const Route = createFileRoute("/workout")({
   // Fetch ~2 weeks of activities

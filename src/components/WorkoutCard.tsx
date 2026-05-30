@@ -8,13 +8,13 @@ import {
   IconWalk,
 } from "@tabler/icons-react";
 import { cn } from "~/lib/cn";
-import type { WorkoutCardActivity } from "~/lib/server-activities";
-import type { SportType } from "../lib/strava";
+import { decodePolyline, polylineToSvgPath } from "~/lib/polyline";
+import type { SportType, StravaActivity } from "../lib/strava";
 
 type WorkoutCardVariant = "default" | "small";
 
 type WorkoutCardProps = {
-  activity: WorkoutCardActivity;
+  activity: StravaActivity;
   isLastItemInList?: boolean;
   /** Compact route preview and spacing (e.g. home card grid). */
   variant?: WorkoutCardVariant;
@@ -24,23 +24,11 @@ export function WorkoutCard(props: WorkoutCardProps) {
   const { activity, isLastItemInList = false, variant = "default" } = props;
   const isSmall = variant === "small";
 
-  const { displayTitle: title, displayDateStr: dateStr } = activity;
-
+  const title = formatActivityTitle(activity);
+  const dateStr = formatActivityDate(activity.start_date_local);
+  const timeStr = formatMovingTime(activity.moving_time);
   const distanceKm = activity.distance / 1000;
   const showDistance = shouldShowDistance(activity.sport_type);
-
-  const hours = Math.floor(activity.moving_time / 3600);
-  const minutes = Math.floor((activity.moving_time % 3600) / 60);
-  const seconds = activity.moving_time % 60;
-
-  let timeStr: string;
-  if (hours > 0) {
-    timeStr = `${hours}h ${minutes}m`;
-  } else if (minutes > 0) {
-    timeStr = `${minutes}m ${seconds}s`;
-  } else {
-    timeStr = `${seconds}s`;
-  }
 
   return (
     <div
@@ -88,7 +76,7 @@ function RoutePreview(props: RoutePreviewProps) {
   const coords = decodePolyline(encoded);
   if (coords.length === 0) return null;
 
-  const pathD = polylineToSvgPath(coords, 100, 100, 5);
+  const pathD = polylineToSvgPath({ coords, w: 100, h: 100, padding: 5 });
   const isSmall = size === "small";
 
   return (
@@ -186,69 +174,72 @@ function shouldShowDistance(sportType: SportType) {
   }
 }
 
-// Decode Google Encoded Polyline Algorithm
-function decodePolyline(encoded: string): [number, number][] {
-  const coords: [number, number][] = [];
-  let lat = 0,
-    lng = 0;
-  let i = 0;
+const RUN_SPORT_TYPES = new Set<SportType>(["Run", "TrailRun", "VirtualRun"]);
 
-  while (i < encoded.length) {
-    let dlat = 0,
-      shift = 0,
-      result = 0;
+const RUN_PREFIXES: Partial<Record<SportType, string>> = {
+  TrailRun: "trail",
+  VirtualRun: "virtual",
+};
 
-    do {
-      const byte = encoded.charCodeAt(i++) - 63;
-      result |= (byte & 0x1f) << shift;
-      shift += 5;
-    } while (encoded.charCodeAt(i - 1) - 63 >= 0x20);
+/**
+ * Returns a distance-aware label for run sport types, or `null` for non-runs.
+ * Distance thresholds (distance is in metres):
+ *   ≥ 42 195 m → marathon
+ *   ≥ 21 097.5 m → half marathon
+ *   > 10 000 m → long run
+ *   otherwise → run
+ */
+function runLabel(sportType: SportType, distanceMetres: number): string | null {
+  if (!RUN_SPORT_TYPES.has(sportType)) return null;
 
-    dlat = result & 1 ? ~(result >> 1) : result >> 1;
-    lat += dlat;
+  const prefix = RUN_PREFIXES[sportType] ? `${RUN_PREFIXES[sportType]} ` : "";
 
-    let dlng = 0;
-    shift = 0;
-    result = 0;
-
-    do {
-      const byte = encoded.charCodeAt(i++) - 63;
-      result |= (byte & 0x1f) << shift;
-      shift += 5;
-    } while (encoded.charCodeAt(i - 1) - 63 >= 0x20);
-
-    dlng = result & 1 ? ~(result >> 1) : result >> 1;
-    lng += dlng;
-
-    coords.push([lat / 1e5, lng / 1e5]);
-  }
-
-  return coords;
+  if (distanceMetres >= 42_195) return `${prefix}marathon`;
+  if (distanceMetres >= 21_097.5) return `${prefix}half marathon`;
+  if (distanceMetres > 10_000) return `${prefix}long run`;
+  return `${prefix}run`;
 }
 
-// Project coordinates to SVG path string
-function polylineToSvgPath(coords: [number, number][], w: number, h: number, padding: number): string {
-  if (coords.length === 0) return "";
+/** Converts `TrailRun` → `trail run` etc. */
+function sportTypeLabel(sportType: SportType): string {
+  return sportType
+    .replace(/([A-Z])/g, " $1")
+    .trim()
+    .toLowerCase();
+}
 
-  const lats = coords.map((c) => c[0]);
-  const lngs = coords.map((c) => c[1]);
+function formatActivityTitle(activity: StravaActivity): string {
+  const date = new Date(activity.start_date_local);
+  const hour = date.getHours();
 
-  const minLat = Math.min(...lats);
-  const maxLat = Math.max(...lats);
-  const minLng = Math.min(...lngs);
-  const maxLng = Math.max(...lngs);
+  let timeOfDay: string;
+  if (hour < 12) {
+    timeOfDay = "morning";
+  } else if (hour < 17) {
+    timeOfDay = "afternoon";
+  } else {
+    timeOfDay = "evening";
+  }
 
-  const latRange = maxLat - minLat || 1;
-  const lngRange = maxLng - minLng || 1;
+  return `${timeOfDay} ${runLabel(activity.sport_type, activity.distance) ?? sportTypeLabel(activity.sport_type)}`;
+}
 
-  const innerW = w - 2 * padding;
-  const innerH = h - 2 * padding;
+function formatActivityDate(startDateLocal: string): string {
+  return new Date(startDateLocal)
+    .toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    })
+    .toLowerCase();
+}
 
-  const points = coords.map((c) => {
-    const x = padding + ((c[1] - minLng) / lngRange) * innerW;
-    const y = padding + ((maxLat - c[0]) / latRange) * innerH;
-    return `${x},${y}`;
-  });
+function formatMovingTime(movingTime: number): string {
+  const hours = Math.floor(movingTime / 3600);
+  const minutes = Math.floor((movingTime % 3600) / 60);
+  const seconds = movingTime % 60;
 
-  return `M${points.join(" L")}`;
+  if (hours > 0) return `${hours}h ${minutes}m`;
+  if (minutes > 0) return `${minutes}m ${seconds}s`;
+  return `${seconds}s`;
 }
