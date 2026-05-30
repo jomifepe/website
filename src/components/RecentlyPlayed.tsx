@@ -13,7 +13,7 @@ export function RecentlyPlayed(props: RecentlyPlayedProps) {
   if (!track) return null;
 
   return (
-    <div className={cn("flex flex-col items-end sm:items-start gap-1", className)}>
+    <div className={cn("flex flex-col items-center sm:items-start gap-1", className)}>
       <span className="text-[10px] text-foreground/40">recently played</span>
       <a
         href={track.trackUrl ?? undefined}
@@ -21,9 +21,9 @@ export function RecentlyPlayed(props: RecentlyPlayedProps) {
         rel="noopener noreferrer"
         aria-label={`Recently played: ${track.trackName} by ${track.artistName} on Spotify (opens in new tab)`}
         className={cn(
-          "group flex items-center gap-2 max-w-[220px] rounded-lg px-2 py-1.5 -mx-2",
+          "group flex items-center gap-2 rounded-lg px-2 py-1.5 -mx-2",
           "text-foreground/60 hover:text-foreground focus-visible:text-foreground",
-          "hover:bg-foreground/10 focus-visible:bg-foreground/10",
+          "hover:bg-foreground/10 focus-visible:bg-foreground/10 bg-foreground/5",
           "transition-colors motion-reduce:transition-none focus-visible:outline-none",
         )}
       >

@@ -468,12 +468,12 @@ type SocialLinksGroupProps = {
 function SocialLinksGroup(props: SocialLinksGroupProps) {
   const { recentTrack } = props;
   return (
-    <div className="flex flex-col gap-4 sm:flex-row items-end sm:gap-4 mt-6 sm:mt-12">
+    <div className="flex flex-col gap-4 sm:flex-row items-center sm:items-end mt-6 sm:mt-12">
       <RecentlyPlayed track={recentTrack} />
       <SlideHighlightRegion
         variant="navigation"
         aria-label="social links"
-        className="relative flex flex-wrap items-center justify-end gap-1 sm:ml-auto"
+        className="relative flex flex-wrap items-center justify-center sm:justify-end gap-1 sm:ml-auto"
       >
         {SOCIAL_NAV_ITEMS.map((item) => (
           <SocialLink
