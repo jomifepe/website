@@ -5,9 +5,8 @@ import {
   type MouseEvent,
   type MouseEventHandler,
   type ReactNode,
-  useContext,
 } from "react";
-import { SlideHighlightContext } from "~/contexts/SlideHighlightContext";
+import { useSlideHighlightRegion } from "~/components/SlideHighlightRegion";
 import { cn } from "~/lib/cn";
 
 const hoverColorClass = {
@@ -49,7 +48,8 @@ export const SocialLink = forwardRef<HTMLAnchorElement, SocialLinkProps>((props,
     className: classNameProp,
   } = props;
 
-  const slideHighlightCtx = useContext(SlideHighlightContext);
+  const slideHighlightCtx = useSlideHighlightRegion();
+
   const slideHighlight = useSlideHighlight && slideHighlightCtx !== null ? slideHighlightCtx : null;
   const suppressBackdropFill = omitHoverBackdrop || slideHighlight !== null;
   const isExternal = !url.startsWith("mailto:");

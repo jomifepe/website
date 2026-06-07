@@ -1,14 +1,15 @@
 import {
+  createContext,
   type FocusEvent,
   type MouseEvent,
   type ReactNode,
   useCallback,
+  useContext,
   useEffect,
   useMemo,
   useRef,
   useState,
 } from "react";
-import { SlideHighlightContext } from "~/contexts/SlideHighlightContext";
 import { cn } from "~/lib/cn";
 
 type SlideBackdropRect = {
@@ -24,6 +25,12 @@ type SlideHighlightRegionProps = {
   groupAriaLabel?: string;
   children: ReactNode;
 } & ({ variant: "navigation"; "aria-label": string } | { variant?: "panel" });
+
+type SlideHighlightContextValue = {
+  onInteract: (e: MouseEvent<Element> | FocusEvent<Element>) => void;
+};
+
+const SlideHighlightContext = createContext<SlideHighlightContextValue | null>(null);
 
 export function SlideHighlightRegion(props: SlideHighlightRegionProps) {
   const { className, backdropClassName, children, groupAriaLabel } = props;
@@ -164,4 +171,8 @@ export function SlideHighlightRegion(props: SlideHighlightRegionProps) {
       )}
     </SlideHighlightContext.Provider>
   );
+}
+
+export function useSlideHighlightRegion() {
+  return useContext(SlideHighlightContext);
 }

@@ -59,6 +59,7 @@ function WorkoutPage() {
               label === "current week"
                 ? categorizeCurrentWeek(weekActivities.length)
                 : categorizeWeek(weekActivities.length);
+
             return (
               <Card
                 key={label}
