@@ -91,6 +91,7 @@ export const StravaActivitySchema = z.object({
     })
     .optional()
     .nullable(),
+  private: z.boolean(),
 });
 
 export type StravaActivity = z.infer<typeof StravaActivitySchema>;
@@ -167,7 +168,10 @@ async function fetchActivitiesRaw(page: number, perPage: number = 10): Promise<S
   }
 
   const data = await response.json();
-  const activities = z.array(StravaActivitySchema).parse(data);
+  const activities = z
+    .array(StravaActivitySchema)
+    .parse(data)
+    .filter((activity) => !activity.private);
 
   console.log(`Fetched ${activities.length} activities from Strava (page ${page})`);
 
