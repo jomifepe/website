@@ -6,6 +6,8 @@ import {
   IconRun,
   IconSwimming,
   IconWalk,
+  IconHeart,
+  IconArrowUp,
 } from "@tabler/icons-react";
 import { cn } from "~/lib/cn";
 import { decodePolyline, polylineToSvgPath } from "~/lib/polyline";
@@ -45,14 +47,24 @@ export function WorkoutCard(props: WorkoutCardProps) {
           <span className="text-foreground/60">·</span>
           <span className="text-foreground/80 text-sm">{dateStr}</span>
         </div>
-        <div className="flex items-center gap-3 text-foreground/60 text-sm flex-wrap">
+        <div className="flex items-center gap-2 text-foreground/60 text-sm flex-wrap">
           <span>{timeStr}</span>
           {showDistance && <span>·</span>}
           {showDistance && <span>{distanceKm.toFixed(1)} km</span>}
           {activity.total_elevation_gain > 0 && (
             <>
               <span>·</span>
-              <span>↑ {Math.round(activity.total_elevation_gain)}m</span>
+              <span className="flex items-center gap-1">
+                <IconArrowUp size={12} /> {Math.round(activity.total_elevation_gain)}m
+              </span>
+            </>
+          )}
+          {activity.has_heartrate && activity.average_heartrate && (
+            <>
+              <span>·</span>
+              <span className="flex items-center gap-1">
+                <IconHeart size={12} /> {Math.round(activity.average_heartrate)} bpm
+              </span>
             </>
           )}
         </div>

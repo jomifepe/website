@@ -92,6 +92,8 @@ export const StravaActivitySchema = z.object({
     .optional()
     .nullable(),
   private: z.boolean(),
+  has_heartrate: z.boolean().optional(),
+  average_heartrate: z.number().optional(),
 });
 
 export type StravaActivity = z.infer<typeof StravaActivitySchema>;
