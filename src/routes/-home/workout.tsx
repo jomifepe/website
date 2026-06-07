@@ -11,7 +11,7 @@ export function RecentWorkoutCard(props: RecentWorkoutCardProps) {
   const { activities } = props;
 
   return (
-    <Card className="border-border bg-foreground/4 text-foreground shadow-none h-full flex flex-col gap-4 p-6">
+    <Card style={{ viewTransitionName: "workout-card" }} className="border-border bg-foreground/4 text-foreground shadow-none h-full flex flex-col gap-4 p-6">
       <CardHeader className="p-0">
         <CardTitle className="text-foreground text-sm font-medium tracking-wider">workout</CardTitle>
       </CardHeader>

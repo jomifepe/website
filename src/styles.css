@@ -178,6 +178,22 @@ code {
   }
 }
 
+/* View transition: workout card expanding into the full workout page */
+@supports (view-transition-name: none) {
+  ::view-transition-old(workout-card),
+  ::view-transition-new(workout-card) {
+    animation-duration: 380ms;
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    ::view-transition-old(workout-card),
+    ::view-transition-new(workout-card) {
+      animation-duration: 0.01ms;
+    }
+  }
+}
+
 /* Progressive enhancement: squircle corners on browsers that support corner-shape. */
 @supports (corner-shape: superellipse(2)) {
   :root {

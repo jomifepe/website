@@ -39,7 +39,7 @@ export function CardViewMoreLink(props: CardViewMoreLinkProps) {
   }
 
   return (
-    <Link className={className} to={to} aria-label={ariaLabel}>
+    <Link className={className} to={to} aria-label={ariaLabel} viewTransition>
       {inner}
     </Link>
   );

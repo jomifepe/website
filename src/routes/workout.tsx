@@ -36,6 +36,7 @@ function WorkoutPage() {
       <div className="flex shrink-0 items-center justify-between gap-3 mb-4">
         <Link
           to="/"
+          viewTransition
           className="relative z-10 flex shrink-0 items-center justify-center rounded-lg -mx-2 -my-1 px-2 py-1 text-foreground/60 hover:text-foreground focus-visible:text-foreground hover:bg-foreground/10 focus-visible:bg-foreground/10 transition-colors motion-reduce:transition-none focus-visible:outline-none h-10"
           aria-label="back to home"
         >
@@ -51,7 +52,7 @@ function WorkoutPage() {
         />
       </div>
 
-      <section>
+      <section style={{ viewTransitionName: "workout-card" }}>
         <h1 className="text-foreground text-sm font-medium mb-8 tracking-wider">workouts</h1>
         <div className="flex flex-col items-stretch gap-8">
           {weeks.map(({ label, activities: weekActivities }) => {
