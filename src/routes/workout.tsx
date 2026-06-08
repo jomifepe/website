@@ -20,6 +20,7 @@ export const Route = createFileRoute("/workout")({
     "Cache-Control": "public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400",
   }),
   staleTime: 60 * 60 * 1000,
+  gcTime: 60 * 60 * 1000,
   component: WorkoutPage,
 });
 
@@ -37,6 +38,7 @@ function WorkoutPage() {
         <Link
           to="/"
           viewTransition
+          preload="render"
           className="relative z-10 flex shrink-0 items-center justify-center rounded-lg -mx-2 -my-1 px-2 py-1 text-foreground/60 hover:text-foreground focus-visible:text-foreground hover:bg-foreground/10 focus-visible:bg-foreground/10 transition-colors motion-reduce:transition-none focus-visible:outline-none h-10"
           aria-label="back to home"
         >

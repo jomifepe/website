@@ -26,7 +26,7 @@ export function RecentWorkoutCard(props: RecentWorkoutCardProps) {
             />
           ))}
         </div>
-        <CardViewMoreLink to="/workout" ariaLabel="view all workouts" label="view more workouts" hoverLabel="💪" />
+        <CardViewMoreLink to="/workout" ariaLabel="view all workouts" label="view more workouts" hoverLabel="💪" preload="render" />
       </CardContent>
     </Card>
   );

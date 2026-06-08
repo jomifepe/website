@@ -23,6 +23,7 @@ export const Route = createFileRoute("/")({
     "Cache-Control": "public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400",
   }),
   staleTime: 60 * 60 * 1000,
+  gcTime: 60 * 60 * 1000,
   component: HomePage,
 });
 

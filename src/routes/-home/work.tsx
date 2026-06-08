@@ -8,10 +8,11 @@ type CardViewMoreLinkProps = {
   ariaLabel: string;
   label: string;
   hoverLabel: string;
+  preload?: "intent" | "render" | "viewport" | false;
 };
 
 export function CardViewMoreLink(props: CardViewMoreLinkProps) {
-  const { to, ariaLabel, label, hoverLabel } = props;
+  const { to, ariaLabel, label, hoverLabel, preload } = props;
 
   const className =
     "group relative z-10 inline-flex shrink-0 cursor-pointer items-center self-start rounded-lg px-2 py-1 text-foreground/60 hover:text-foreground/80 focus-visible:text-foreground/80 hover:bg-foreground/10 focus-visible:bg-foreground/10 transition-colors motion-reduce:transition-none focus-visible:outline-none -mx-2 -my-1";
@@ -39,7 +40,7 @@ export function CardViewMoreLink(props: CardViewMoreLinkProps) {
   }
 
   return (
-    <Link className={className} to={to} aria-label={ariaLabel} viewTransition>
+    <Link className={className} to={to} aria-label={ariaLabel} viewTransition preload={preload}>
       {inner}
     </Link>
   );
