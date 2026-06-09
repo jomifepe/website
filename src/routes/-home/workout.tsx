@@ -11,9 +11,21 @@ export function RecentWorkoutCard(props: RecentWorkoutCardProps) {
   const { activities } = props;
 
   return (
-    <Card style={{ viewTransitionName: "workout-card" }} className="border-border bg-foreground/4 text-foreground shadow-none h-full flex flex-col gap-4 p-6">
+    <Card
+      className="border-border bg-foreground/4 text-foreground shadow-none h-full flex flex-col gap-4 p-6 group/workout"
+      style={{ viewTransitionName: "workout-card" }}
+    >
       <CardHeader className="p-0">
-        <CardTitle className="text-foreground text-sm font-medium tracking-wider">workout</CardTitle>
+        <CardTitle className="text-foreground text-sm font-medium tracking-wider">
+          <span className="relative inline-block">
+            work
+            <span
+              aria-hidden
+              className="absolute left-0 top-1/2 -translate-y-1/2 h-0.5 w-full origin-left scale-x-0 bg-foreground group-hover/workout:scale-x-100 transition-transform duration-300 ease-in-out motion-reduce:transition-none mt-px"
+            />
+          </span>
+          out
+        </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-1 flex-col gap-4 p-0 min-h-0">
         <div className="flex flex-1 flex-col gap-2 min-h-0">
@@ -26,7 +38,13 @@ export function RecentWorkoutCard(props: RecentWorkoutCardProps) {
             />
           ))}
         </div>
-        <CardViewMoreLink to="/workout" ariaLabel="view all workouts" label="view more workouts" hoverLabel="💪" preload="render" />
+        <CardViewMoreLink
+          to="/workout"
+          ariaLabel="view all workouts"
+          label="view more workouts"
+          hoverLabel="💪"
+          preload="render"
+        />
       </CardContent>
     </Card>
   );

@@ -29,7 +29,7 @@ const SOCIAL_LINKS: SocialLink[] = [
   },
   {
     name: "x",
-    url: "https://twitter.com/jomifepe",
+    url: "https://x.com/jomifepe",
     icon: <IconBrandX size={20} />,
     title: "x",
   },

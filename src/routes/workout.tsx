@@ -55,7 +55,7 @@ function WorkoutPage() {
       </div>
 
       <section style={{ viewTransitionName: "workout-card" }}>
-        <h1 className="text-foreground text-sm font-medium mb-8 tracking-wider">workouts</h1>
+        <h1 className="text-foreground text-sm font-medium mb-8 tracking-wider">workout</h1>
         <div className="flex flex-col items-stretch gap-8">
           {weeks.map(({ label, activities: weekActivities }) => {
             const category =
