@@ -33,8 +33,8 @@ function WorkoutPage() {
   ];
 
   return (
-    <PageLayout>
-      <div className="flex shrink-0 items-center justify-between gap-3 mb-4">
+    <PageLayout
+      headerLeft={
         <Link
           to="/"
           viewTransition
@@ -44,18 +44,20 @@ function WorkoutPage() {
         >
           <span className="mr-2">←</span>back
         </Link>
-        <SocialLink
-          name="strava"
-          url="https://www.strava.com/athletes/jomifepe"
-          title="strava"
-          hoverColor="orange"
-          useSlideHighlight={false}
-          icon={<IconBrandStrava size={20} className="shrink-0" aria-hidden />}
-        />
-      </div>
-
+      }
+    >
       <section style={{ viewTransitionName: "workout-card" }}>
-        <h1 className="text-foreground text-sm font-medium mb-8 tracking-wider">workout</h1>
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-foreground text-sm font-medium tracking-wider">workout</h1>
+          <SocialLink
+            name="strava"
+            url="https://www.strava.com/athletes/jomifepe"
+            title="strava"
+            hoverColor="orange"
+            useSlideHighlight={false}
+            icon={<IconBrandStrava size={20} className="shrink-0" aria-hidden />}
+          />
+        </div>
         <div className="flex flex-col items-stretch gap-8">
           {weeks.map(({ label, activities: weekActivities }) => {
             const category =

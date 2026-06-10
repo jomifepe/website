@@ -7,16 +7,18 @@ import { Theme, useTheme } from "~/hooks/useTheme";
 
 type PageLayoutProps = {
   children: ReactNode;
+  headerLeft?: ReactNode;
 };
 
 export function PageLayout(props: PageLayoutProps) {
-  const { children } = props;
+  const { children, headerLeft } = props;
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center">
+    <div className="min-h-screen bg-background flex flex-col items-center">
       <div className="fixed top-5 right-5 z-50 bg-background rounded-lg">
         <ThemeToggle />
       </div>
-      <main id="main-content" className="flex flex-col max-w-5xl w-full gap-4 py-12 px-5">
+      {headerLeft && <div className="flex w-full max-w-5xl px-5 pt-5 md:pt-8">{headerLeft}</div>}
+      <main id="main-content" className="flex flex-1 flex-col justify-center max-w-5xl w-full gap-4 px-5 py-8">
         {children}
       </main>
     </div>
