@@ -35,17 +35,17 @@ export function WorkoutCard(props: WorkoutCardProps) {
   return (
     <div
       className={cn(
-        "flex items-start gap-4 rounded-lg relative group/card",
-        isSmall ? "py-2" : "p-3 -mx-3",
+        "flex items-start gap-3 md:gap-4 rounded-lg relative group/card",
+        isSmall ? "py-2" : "p-2 -mx-2 md:p-3 md:-mx-3",
         activity.map?.summary_polyline && isLastItemInList && (isSmall ? "mb-6" : "mb-10"),
       )}
     >
       <div className="text-muted-foreground mt-0.5">{getWorkoutIcon(activity.sport_type)}</div>
       <div className="flex-1">
         <div className="flex flex-row items-baseline gap-2 mb-1 flex-wrap">
-          <span className="text-foreground font-medium">{title}</span>
+          <span className="text-foreground font-medium text-sm md:text-base">{title}</span>
           <span className="text-foreground/60">·</span>
-          <span className="text-foreground/80 text-sm">{dateStr}</span>
+          <span className="text-foreground/80 text-sm md:text-base">{dateStr}</span>
         </div>
         <div className="flex items-center gap-2 text-foreground/60 text-sm flex-wrap">
           <span>{timeStr}</span>

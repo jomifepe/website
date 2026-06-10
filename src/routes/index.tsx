@@ -39,7 +39,7 @@ function HomePage() {
       </p>
       <HeroParagraph sentences={sentences} />
       <div
-        className={cn("grid w-full gap-4 mt-8 md:mt-16 self-stretch", recentWorkouts.length > 0 && "md:grid-cols-2")}
+        className={cn("grid w-full gap-4 mt-6 md:mt-16 self-stretch", recentWorkouts.length > 0 && "md:grid-cols-2")}
       >
         <WorkCard />
         {recentWorkouts.length > 0 && <RecentWorkoutCard activities={recentWorkouts} />}

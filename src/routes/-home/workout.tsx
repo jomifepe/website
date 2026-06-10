@@ -12,7 +12,7 @@ export function RecentWorkoutCard(props: RecentWorkoutCardProps) {
 
   return (
     <Card
-      className="border-border bg-foreground/4 text-foreground shadow-none h-full flex flex-col gap-4 p-6 group/workout"
+      className="border-border bg-foreground/4 text-foreground shadow-none h-full flex flex-col gap-4 p-5 md:p-6 group/workout"
       style={{ viewTransitionName: "workout-card" }}
     >
       <CardHeader className="p-0">
