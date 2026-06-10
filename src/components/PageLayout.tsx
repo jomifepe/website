@@ -13,7 +13,7 @@ export function PageLayout(props: PageLayoutProps) {
   const { children } = props;
   return (
     <div className="min-h-screen bg-background flex items-center justify-center">
-      <div className="fixed top-4 right-4 z-50 bg-background rounded-lg">
+      <div className="fixed top-5 right-5 z-50 bg-background rounded-lg">
         <ThemeToggle />
       </div>
       <main id="main-content" className="flex flex-col max-w-5xl w-full gap-4 py-12 px-5">
@@ -60,7 +60,7 @@ export function ThemeToggle() {
     <Tooltip delayDuration={500}>
       <TooltipTrigger asChild>
         <motion.button
-          className="relative flex h-9 w-9 items-center justify-center rounded-lg text-foreground/50 hover:text-foreground hover:bg-foreground/10 focus-visible:bg-foreground/10 transition-[background-color] focus-visible:outline-none overflow-hidden cursor-pointer"
+          className="relative flex h-10 w-10 items-center justify-center rounded-lg text-foreground/50 hover:text-foreground hover:bg-foreground/10 focus-visible:bg-foreground/10 transition-[background-color] focus-visible:outline-none overflow-hidden cursor-pointer"
           onClick={toggleTheme}
           aria-label={nextLabel}
           whileTap={{ scale: 0.88 }}
@@ -76,7 +76,7 @@ export function ThemeToggle() {
                   // keep all the options mounted to avoid color transition bugs
                   animate={theme === currentTheme ? visible : hidden}
                 >
-                  <Icon className="text-foreground/60" size={17} strokeWidth={1.75} />
+                  <Icon className="text-foreground/60" size={20} strokeWidth={2} />
                 </motion.span>
               ))}
             </>
