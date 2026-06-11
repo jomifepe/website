@@ -12,6 +12,7 @@ alwaysApply: true
 - Required comments: non-obvious business rules, workarounds, perf/concurrency limits, intentional limits.
 - If removing comment no hurt understanding, skip it.
 - ALWAYS research about APIs, SDKs, or any packages before using them, use context7 if you have access to it. NEVER assume anything external to the project.
+- Do not write divider comments (e.g., // ─── Utilities ───────)
 
 ## TypeScript & React
 

@@ -1,6 +1,5 @@
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { ActivityDialog } from "~/components/WorkoutCard";
-import { Dialog } from "~/components/ui/dialog";
 import { getActivityDetailBySlug } from "~/lib/server-activities";
 
 export const Route = createFileRoute("/workout/$id")({
@@ -23,9 +22,5 @@ function WorkoutActivityDialog() {
     if (!open) navigate({ to: "/workout" });
   }
 
-  return (
-    <Dialog open={true} onOpenChange={handleOpenChange}>
-      <ActivityDialog activity={detail} />
-    </Dialog>
-  );
+  return <ActivityDialog activity={detail} open={true} onOpenChange={handleOpenChange} />;
 }

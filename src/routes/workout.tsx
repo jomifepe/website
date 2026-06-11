@@ -1,4 +1,4 @@
-import { IconBrandStrava } from "@tabler/icons-react";
+import { TbBrandStrava } from "react-icons/tb";
 import { createFileRoute, Link, Outlet, useLoaderData } from "@tanstack/react-router";
 import { SlideHighlightRegion } from "~/components/SlideHighlightRegion";
 import { SocialLink } from "~/components/SocialLink";
@@ -50,7 +50,7 @@ function WorkoutPage() {
             title="strava"
             hoverColor="orange"
             useSlideHighlight={false}
-            icon={<IconBrandStrava size={20} className="shrink-0" aria-hidden />}
+            icon={<TbBrandStrava size={20} className="shrink-0" aria-hidden />}
           />
         </div>
         <div className="flex flex-col items-stretch gap-8">

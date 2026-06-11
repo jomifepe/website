@@ -46,7 +46,7 @@ function DialogContent({ className, children, ...props }: ComponentProps<typeof 
         {children}
         <DialogPrimitive.Close
           data-slot="dialog-close-button"
-          className="absolute right-4 top-4 rounded-sm text-foreground/40 transition-colors hover:text-foreground focus:outline-none focus-visible:ring-1 focus-visible:ring-foreground"
+          className="absolute right-4 top-4 rounded-sm text-foreground/40 transition-colors hover:text-foreground focus:outline-none focus-visible:ring-1 focus-visible:ring-foreground cursor-pointer"
           aria-label="close"
         >
           <svg

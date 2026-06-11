@@ -1,4 +1,5 @@
-import { IconMoon, IconProps, IconSun, IconSunMoon } from "@tabler/icons-react";
+import type { IconType } from "react-icons";
+import { TbMoon, TbSun, TbSunMoon } from "react-icons/tb";
 import { motion } from "motion/react";
 import { useLayoutEffect } from "node_modules/@tanstack/react-router/dist/esm/utils";
 import { useEffect, useState, type ReactNode } from "react";
@@ -34,13 +35,13 @@ const springTransition = {
 
 type ThemeOption = {
   theme: Theme;
-  Icon: (props: IconProps) => ReactNode;
+  Icon: IconType;
 };
 
 const themeOptions: ThemeOption[] = [
-  { theme: "dark", Icon: IconMoon },
-  { theme: "light", Icon: IconSun },
-  { theme: "system", Icon: IconSunMoon },
+  { theme: "dark", Icon: TbMoon },
+  { theme: "light", Icon: TbSun },
+  { theme: "system", Icon: TbSunMoon },
 ];
 
 const themeNameMap: Record<Theme, string> = {

@@ -1,18 +1,22 @@
 import {
-  IconActivity,
-  IconArrowUp,
-  IconBarbell,
-  IconBike,
-  IconBolt,
-  IconFlame,
-  IconHeart,
-  IconMountain,
-  IconRun,
-  IconSwimming,
-  IconTrophy,
-  IconWalk,
-  IconZzz,
-} from "@tabler/icons-react";
+  TbActivity,
+  TbArrowUp,
+  TbBarbell,
+  TbBike,
+  TbBolt,
+  TbClock,
+  TbFlame,
+  TbGauge,
+  TbHeart,
+  TbMountain,
+  TbRefresh,
+  TbRoute,
+  TbRun,
+  TbSwimming,
+  TbWalk,
+  TbZzz,
+} from "react-icons/tb";
+import { FaMedal } from "react-icons/fa";
 import { Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { cn } from "~/lib/cn";
@@ -20,6 +24,7 @@ import { getActivityDetailBySlug } from "~/lib/server-activities";
 import { CardItem, CardItemContent, useCardItemWrapperProps } from "./CardItem";
 import type { SanitizedActivity, SanitizedActivityDetail, SportType } from "../lib/strava";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
+import { Badge } from "~/components/ui/badge";
 
 type WorkoutCardVariant = "default" | "small";
 
@@ -33,15 +38,15 @@ type WorkoutCardProps = {
 export function WorkoutCard(props: WorkoutCardProps) {
   const { activity, variant = "default", dialog = "route" } = props;
 
-  const [open, setOpen] = useState(false);
+  const routeWrapperProps = useCardItemWrapperProps("group/card");
+
   const isSmall = variant === "small";
   const timeStr = formatMovingTime(activity.moving_time);
   const distanceKm = activity.distance / 1000;
   const showDistance = shouldShowDistance(activity.sport_type);
-  const routeWrapperProps = useCardItemWrapperProps("group/card");
 
   const icon = (
-    <div className="w-12 h-12 rounded-md bg-foreground/8 flex items-center justify-center text-foreground/60">
+    <div className="w-12 h-12 rounded-md bg-foreground/8 flex items-center justify-center text-foreground-muted">
       {getWorkoutIcon(activity.sport_type)}
     </div>
   );
@@ -63,7 +68,7 @@ export function WorkoutCard(props: WorkoutCardProps) {
         <>
           <span>·</span>
           <span className="flex items-center gap-1">
-            <IconArrowUp size={12} /> {Math.round(activity.total_elevation_gain)}m
+            <TbArrowUp size={12} /> {Math.round(activity.total_elevation_gain)}m
           </span>
         </>
       )}
@@ -76,12 +81,10 @@ export function WorkoutCard(props: WorkoutCardProps) {
 
   if (dialog === "local") {
     return (
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger asChild>
-          <CardItem className="group/card" icon={icon} title={title} subtitle={subtitle} endSlot={endSlot} />
-        </DialogTrigger>
-        <LocalActivityDialog activity={activity} open={open} />
-      </Dialog>
+      <ActivityDialog
+        activity={activity}
+        trigger={<CardItem className="group/card" icon={icon} title={title} subtitle={subtitle} endSlot={endSlot} />}
+      />
     );
   }
 
@@ -92,36 +95,73 @@ export function WorkoutCard(props: WorkoutCardProps) {
   );
 }
 
-type ActivityDialogProps = {
-  activity: SanitizedActivityDetail;
+type PrMedalsProps = {
+  count: number;
 };
 
-export function ActivityDialog(props: ActivityDialogProps) {
+function PrMedals(props: PrMedalsProps) {
+  const { count } = props;
+  return (
+    <Badge variant="gold">
+      <FaMedal size={12} />
+      <span className="text-sm font-medium ml-1">{count}</span>
+    </Badge>
+  );
+}
+
+type DialogActivityHeaderProps = {
+  sportType: SportType;
+  title: string;
+  dateDisplay: string;
+  prCount?: number;
+};
+
+function DialogActivityHeader(props: DialogActivityHeaderProps) {
+  const { sportType, title, dateDisplay, prCount } = props;
+  return (
+    <DialogHeader className="mb-4">
+      <div className="flex items-center gap-3 pr-6">
+        <div className="w-10 h-10 rounded-md bg-foreground/8 flex items-center justify-center shrink-0 text-foreground/60">
+          {getWorkoutIcon(sportType, 18)}
+        </div>
+        <div className="flex-1 min-w-0">
+          <DialogTitle>{title}</DialogTitle>
+          <DialogDescription>{dateDisplay}</DialogDescription>
+        </div>
+        {!!prCount && <PrMedals count={prCount} />}
+      </div>
+    </DialogHeader>
+  );
+}
+
+type RouteMapContainerProps = {
+  routeSvgPaths: { card: string; dialog: string } | null;
+};
+
+function RouteMapContainer(props: RouteMapContainerProps) {
+  const { routeSvgPaths } = props;
+  if (!routeSvgPaths) return null;
+  return (
+    <div className="mb-5 rounded-lg overflow-hidden bg-foreground/4 flex items-center justify-center">
+      <RoutePreview paths={routeSvgPaths} size="dialog" />
+    </div>
+  );
+}
+
+type ActivityDialogBodyProps = {
+  activity: SanitizedActivity;
+};
+
+function ActivityDialogBody(props: ActivityDialogBodyProps) {
   const { activity } = props;
   const showDistance = shouldShowDistance(activity.sport_type);
   const isRunLike = isRunSport(activity.sport_type);
-  const stats = buildStats(activity, isRunLike, showDistance);
+  const stats = buildStats(activity as SanitizedActivityDetail, isRunLike, showDistance);
 
   return (
-    <DialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
-      <DialogHeader className="mb-4">
-        <div className="flex items-center gap-3 pr-6">
-          <div className="w-10 h-10 rounded-md bg-foreground/8 flex items-center justify-center shrink-0 text-foreground/60">
-            {getWorkoutIcon(activity.sport_type, 18)}
-          </div>
-          <div>
-            <DialogTitle>{activity.title}</DialogTitle>
-            <DialogDescription>{activity.dateDisplay}</DialogDescription>
-          </div>
-        </div>
-      </DialogHeader>
-
-      {activity.routeSvgPaths && (
-        <div className="mb-5 rounded-lg overflow-hidden bg-foreground/4 flex items-center justify-center">
-          <RoutePreview paths={activity.routeSvgPaths} size="dialog" />
-        </div>
-      )}
-
+    <>
+      <DialogActivityHeader sportType={activity.sport_type} title={activity.title} dateDisplay={activity.dateDisplay} prCount={activity.pr_count} />
+      <RouteMapContainer routeSvgPaths={activity.routeSvgPaths} />
       {stats.length > 0 && (
         <dl className="grid grid-cols-2 gap-x-6 gap-y-3">
           {stats.map((stat) => (
@@ -135,67 +175,41 @@ export function ActivityDialog(props: ActivityDialogProps) {
           ))}
         </dl>
       )}
-    </DialogContent>
+    </>
   );
 }
 
-type LocalActivityDialogProps = {
+type ActivityDialogProps = {
   activity: SanitizedActivity;
-  open: boolean;
+  trigger?: ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 };
 
-function LocalActivityDialog(props: LocalActivityDialogProps) {
-  const { activity, open } = props;
+export function ActivityDialog(props: ActivityDialogProps) {
+  const { activity, trigger, open: controlledOpen, onOpenChange } = props;
+  const [internalOpen, setInternalOpen] = useState(false);
   const [detail, setDetail] = useState<SanitizedActivityDetail | null>(null);
   const fetchedRef = useRef(false);
 
+  const isOpen = trigger ? internalOpen : (controlledOpen ?? false);
+  const handleOpenChange = trigger ? setInternalOpen : (onOpenChange ?? (() => {}));
+
   useEffect(() => {
-    if (!open || fetchedRef.current) return;
+    if (!trigger || !isOpen || fetchedRef.current) return;
     fetchedRef.current = true;
     getActivityDetailBySlug({ data: { slug: activity.slug } })
       .then(setDetail)
       .catch(() => setDetail(null));
-  }, [open, activity.slug]);
-
-  const resolved = detail ?? activity;
-  const showDistance = shouldShowDistance(resolved.sport_type);
-  const isRunLike = isRunSport(resolved.sport_type);
-  const stats = buildStats(resolved as SanitizedActivityDetail, isRunLike, showDistance);
+  }, [isOpen, activity.slug, trigger]);
 
   return (
-    <DialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
-      <DialogHeader className="mb-4">
-        <div className="flex items-center gap-2 pr-6">
-          <div className="w-10 h-10 rounded-md bg-foreground/8 flex items-center justify-center shrink-0 text-foreground/60">
-            {getWorkoutIcon(resolved.sport_type, 18)}
-          </div>
-          <div>
-            <DialogTitle>{resolved.title}</DialogTitle>
-            <DialogDescription>{resolved.dateDisplay}</DialogDescription>
-          </div>
-        </div>
-      </DialogHeader>
-
-      {resolved.routeSvgPaths && (
-        <div className="mb-5 rounded-lg overflow-hidden bg-foreground/4 flex items-center justify-center">
-          <RoutePreview paths={resolved.routeSvgPaths} size="dialog" />
-        </div>
-      )}
-
-      {stats.length > 0 && (
-        <dl className="grid grid-cols-2 gap-x-6 gap-y-3">
-          {stats.map((stat) => (
-            <div key={stat.label} className="flex flex-col gap-0.5">
-              <dt className="text-xs text-foreground/40 flex items-center gap-1">
-                {stat.icon}
-                {stat.label}
-              </dt>
-              <dd className="text-sm text-foreground font-medium">{stat.value}</dd>
-            </div>
-          ))}
-        </dl>
-      )}
-    </DialogContent>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
+      <DialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
+        <ActivityDialogBody activity={detail ?? activity} />
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -208,21 +222,33 @@ type StatEntry = {
 function buildStats(activity: SanitizedActivityDetail, isRunLike: boolean, showDistance: boolean): StatEntry[] {
   const stats: StatEntry[] = [];
 
-  stats.push({ label: "moving time", value: formatMovingTime(activity.moving_time) });
+  stats.push({ label: "moving time", value: formatMovingTime(activity.moving_time), icon: <TbClock size={10} /> });
 
   if (activity.elapsed_time && activity.elapsed_time > activity.moving_time + 30) {
-    stats.push({ label: "elapsed time", value: formatMovingTime(activity.elapsed_time) });
+    stats.push({
+      label: "elapsed time",
+      value: formatMovingTime(activity.elapsed_time),
+      icon: <TbClock size={10} />,
+    });
   }
 
   if (showDistance && activity.distance > 0) {
-    stats.push({ label: "distance", value: `${(activity.distance / 1000).toFixed(2)} km` });
+    stats.push({
+      label: "distance",
+      value: `${(activity.distance / 1000).toFixed(2)} km`,
+      icon: <TbRoute size={10} />,
+    });
   }
 
   if (activity.average_speed && activity.average_speed > 0) {
     if (isRunLike) {
-      stats.push({ label: "avg pace", value: formatPace(activity.average_speed) });
+      stats.push({ label: "avg pace", value: formatPace(activity.average_speed), icon: <TbGauge size={10} /> });
     } else {
-      stats.push({ label: "avg speed", value: `${(activity.average_speed * 3.6).toFixed(1)} km/h` });
+      stats.push({
+        label: "avg speed",
+        value: `${(activity.average_speed * 3.6).toFixed(1)} km/h`,
+        icon: <TbGauge size={10} />,
+      });
     }
   }
 
@@ -230,7 +256,7 @@ function buildStats(activity: SanitizedActivityDetail, isRunLike: boolean, showD
     stats.push({
       label: "elevation",
       value: `${Math.round(activity.total_elevation_gain)} m`,
-      icon: <IconArrowUp size={10} />,
+      icon: <TbArrowUp size={10} />,
     });
   }
 
@@ -238,7 +264,7 @@ function buildStats(activity: SanitizedActivityDetail, isRunLike: boolean, showD
     stats.push({
       label: "avg heart rate",
       value: `${Math.round(activity.average_heartrate)} bpm`,
-      icon: <IconHeart size={10} />,
+      icon: <TbHeart size={10} />,
     });
   }
 
@@ -246,19 +272,23 @@ function buildStats(activity: SanitizedActivityDetail, isRunLike: boolean, showD
     stats.push({
       label: "max heart rate",
       value: `${Math.round(activity.max_heartrate)} bpm`,
-      icon: <IconHeart size={10} />,
+      icon: <TbHeart size={10} />,
     });
   }
 
   if (activity.average_cadence && activity.average_cadence > 0) {
-    stats.push({ label: "cadence", value: `${Math.round(activity.average_cadence)} rpm` });
+    stats.push({
+      label: "cadence",
+      value: `${Math.round(activity.average_cadence)} rpm`,
+      icon: <TbRefresh size={10} />,
+    });
   }
 
   if (activity.device_watts && activity.average_watts && activity.average_watts > 0) {
     stats.push({
       label: "avg power",
       value: `${Math.round(activity.average_watts)} W`,
-      icon: <IconBolt size={10} />,
+      icon: <TbBolt size={10} />,
     });
   }
 
@@ -266,7 +296,7 @@ function buildStats(activity: SanitizedActivityDetail, isRunLike: boolean, showD
     stats.push({
       label: "norm power",
       value: `${Math.round(activity.weighted_average_watts)} W`,
-      icon: <IconBolt size={10} />,
+      icon: <TbBolt size={10} />,
     });
   }
 
@@ -274,27 +304,19 @@ function buildStats(activity: SanitizedActivityDetail, isRunLike: boolean, showD
     stats.push({
       label: "work done",
       value: `${Math.round(activity.kilojoules)} kJ`,
-      icon: <IconBolt size={10} />,
+      icon: <TbBolt size={10} />,
     });
   }
 
   if (activity.calories && activity.calories > 0) {
-    stats.push({ label: "calories", value: `${Math.round(activity.calories)} kcal`, icon: <IconFlame size={10} /> });
-  }
-
-  if (activity.pr_count && activity.pr_count > 0) {
-    stats.push({
-      label: "PRs",
-      value: activity.pr_count.toString(),
-      icon: <IconTrophy size={10} />,
-    });
+    stats.push({ label: "calories", value: `${Math.round(activity.calories)} kcal`, icon: <TbFlame size={10} /> });
   }
 
   if (activity.suffer_score && activity.suffer_score > 0) {
     stats.push({
       label: "suffer score",
       value: activity.suffer_score.toString(),
-      icon: <IconZzz size={10} />,
+      icon: <TbZzz size={10} />,
     });
   }
 
@@ -346,22 +368,22 @@ function RoutePreview(props: RoutePreviewProps) {
   );
 }
 
-export function getWorkoutIcon(sportType: SportType, size = 20) {
+export function getWorkoutIcon(sportType: SportType, size = 24) {
   const commonProps = { size, className: "shrink-0" };
 
   switch (sportType) {
     case "Run":
     case "TrailRun":
     case "VirtualRun":
-      return <IconRun {...commonProps} />;
+      return <TbRun {...commonProps} />;
     case "Walk":
-      return <IconWalk {...commonProps} />;
+      return <TbWalk {...commonProps} />;
     case "Hike":
     case "BackcountrySki":
     case "NordicSki":
     case "RollerSki":
     case "Snowshoe":
-      return <IconMountain {...commonProps} />;
+      return <TbMountain {...commonProps} />;
     case "Ride":
     case "EBikeRide":
     case "EMountainBikeRide":
@@ -370,15 +392,15 @@ export function getWorkoutIcon(sportType: SportType, size = 20) {
     case "VirtualRide":
     case "Velomobile":
     case "Handcycle":
-      return <IconBike {...commonProps} />;
+      return <TbBike {...commonProps} />;
     case "Swim":
-      return <IconSwimming {...commonProps} />;
+      return <TbSwimming {...commonProps} />;
     case "WeightTraining":
-      return <IconBarbell strokeWidth={1.5} {...commonProps} />;
+      return <TbBarbell strokeWidth={1.5} {...commonProps} />;
     case "RockClimbing":
       return <BoulderingIcon />;
     default:
-      return <IconActivity {...commonProps} />;
+      return <TbActivity {...commonProps} />;
   }
 }
 
