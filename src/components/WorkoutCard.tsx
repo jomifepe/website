@@ -14,7 +14,7 @@ import {
   IconZzz,
 } from "@tabler/icons-react";
 import { Link } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { cn } from "~/lib/cn";
 import { getActivityDetailBySlug } from "~/lib/server-activities";
 import { CardItem, CardItemContent, useCardItemWrapperProps } from "./CardItem";
@@ -92,15 +92,12 @@ export function WorkoutCard(props: WorkoutCardProps) {
   );
 }
 
-// ─── Activity Dialog ─────────────────────────────────────────────────────────
-
 type ActivityDialogProps = {
   activity: SanitizedActivityDetail;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
 };
 
-export function ActivityDialog({ activity }: ActivityDialogProps) {
+export function ActivityDialog(props: ActivityDialogProps) {
+  const { activity } = props;
   const showDistance = shouldShowDistance(activity.sport_type);
   const isRunLike = isRunSport(activity.sport_type);
   const stats = buildStats(activity, isRunLike, showDistance);
@@ -108,7 +105,7 @@ export function ActivityDialog({ activity }: ActivityDialogProps) {
   return (
     <DialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
       <DialogHeader className="mb-4">
-        <div className="flex items-center gap-2 pr-6">
+        <div className="flex items-center gap-3 pr-6">
           <div className="w-10 h-10 rounded-md bg-foreground/8 flex items-center justify-center shrink-0 text-foreground/60">
             {getWorkoutIcon(activity.sport_type, 18)}
           </div>
@@ -142,7 +139,13 @@ export function ActivityDialog({ activity }: ActivityDialogProps) {
   );
 }
 
-function LocalActivityDialog({ activity, open }: { activity: SanitizedActivity; open: boolean }) {
+type LocalActivityDialogProps = {
+  activity: SanitizedActivity;
+  open: boolean;
+};
+
+function LocalActivityDialog(props: LocalActivityDialogProps) {
+  const { activity, open } = props;
   const [detail, setDetail] = useState<SanitizedActivityDetail | null>(null);
   const fetchedRef = useRef(false);
 
@@ -163,7 +166,9 @@ function LocalActivityDialog({ activity, open }: { activity: SanitizedActivity; 
     <DialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
       <DialogHeader className="mb-4">
         <div className="flex items-center gap-2 pr-6">
-          <span className="text-muted-foreground">{getWorkoutIcon(resolved.sport_type)}</span>
+          <div className="w-10 h-10 rounded-md bg-foreground/8 flex items-center justify-center shrink-0 text-foreground/60">
+            {getWorkoutIcon(resolved.sport_type, 18)}
+          </div>
           <div>
             <DialogTitle>{resolved.title}</DialogTitle>
             <DialogDescription>{resolved.dateDisplay}</DialogDescription>
@@ -197,7 +202,7 @@ function LocalActivityDialog({ activity, open }: { activity: SanitizedActivity; 
 type StatEntry = {
   label: string;
   value: string;
-  icon?: React.ReactNode;
+  icon?: ReactNode;
 };
 
 function buildStats(activity: SanitizedActivityDetail, isRunLike: boolean, showDistance: boolean): StatEntry[] {
@@ -340,8 +345,6 @@ function RoutePreview(props: RoutePreviewProps) {
     </div>
   );
 }
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 export function getWorkoutIcon(sportType: SportType, size = 20) {
   const commonProps = { size, className: "shrink-0" };

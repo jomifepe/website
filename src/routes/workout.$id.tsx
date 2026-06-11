@@ -25,7 +25,7 @@ function WorkoutActivityDialog() {
 
   return (
     <Dialog open={true} onOpenChange={handleOpenChange}>
-      <ActivityDialog activity={detail} open={true} onOpenChange={handleOpenChange} />
+      <ActivityDialog activity={detail} />
     </Dialog>
   );
 }
