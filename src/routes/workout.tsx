@@ -1,5 +1,6 @@
 import { IconBrandStrava } from "@tabler/icons-react";
 import { createFileRoute, Link, useLoaderData } from "@tanstack/react-router";
+import { SlideHighlightRegion } from "~/components/SlideHighlightRegion";
 import { SocialLink } from "~/components/SocialLink";
 import { Badge } from "../components/ui/badge";
 import { PageLayout } from "../components/PageLayout";
@@ -87,7 +88,7 @@ function WorkoutPage() {
                   {weekActivities.length === 0 ? (
                     <p className="italic text-foreground/40 text-sm">no activities yet, get moving</p>
                   ) : (
-                    <div className="flex flex-col items-stretch gap-2">
+                    <SlideHighlightRegion className="relative flex flex-col items-stretch gap-2" variant="panel">
                       {weekActivities.map((activity, index) => (
                         <WorkoutCard
                           key={activity.id}
@@ -95,7 +96,7 @@ function WorkoutPage() {
                           isLastItemInList={index === weekActivities.length - 1}
                         />
                       ))}
-                    </div>
+                    </SlideHighlightRegion>
                   )}
                 </CardContent>
               </Card>

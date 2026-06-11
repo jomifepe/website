@@ -1,4 +1,5 @@
 import { WorkoutCard } from "~/components/WorkoutCard";
+import { SlideHighlightRegion } from "~/components/SlideHighlightRegion";
 import { CardViewMoreLink } from "./work";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import type { StravaActivity } from "~/lib/strava";
@@ -28,7 +29,7 @@ export function RecentWorkoutCard(props: RecentWorkoutCardProps) {
         </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-1 flex-col gap-4 p-0 min-h-0">
-        <div className="flex flex-1 flex-col gap-2 min-h-0">
+        <SlideHighlightRegion className="relative flex flex-1 flex-col gap-2 min-h-0" variant="panel">
           {activities.map((activity, index) => (
             <WorkoutCard
               key={activity.id}
@@ -37,7 +38,7 @@ export function RecentWorkoutCard(props: RecentWorkoutCardProps) {
               isLastItemInList={index === activities.length - 1}
             />
           ))}
-        </div>
+        </SlideHighlightRegion>
         <CardViewMoreLink
           to="/workout"
           ariaLabel="view all workouts"

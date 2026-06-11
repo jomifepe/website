@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { fetchActivities } from "./strava";
+import { fetchActivities, fetchActivityDetail } from "./strava";
 
 type InputData = {
   page?: number;
@@ -15,4 +15,10 @@ export const getActivities = createServerFn({ method: "GET" })
   }))
   .handler(async ({ data }) => {
     return fetchActivities(data.page, data.perPage);
+  });
+
+export const getActivityDetail = createServerFn({ method: "GET" })
+  .inputValidator((data: { id: number }) => data)
+  .handler(async ({ data }) => {
+    return fetchActivityDetail(data.id);
   });

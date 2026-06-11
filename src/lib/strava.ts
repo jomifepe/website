@@ -83,6 +83,7 @@ export const StravaActivitySchema = z.object({
   start_date_local: z.string(),
   distance: z.number(),
   moving_time: z.number(),
+  elapsed_time: z.number().optional(),
   total_elevation_gain: z.number(),
   map: z
     .object({
@@ -94,9 +95,28 @@ export const StravaActivitySchema = z.object({
   private: z.boolean(),
   has_heartrate: z.boolean().optional(),
   average_heartrate: z.number().optional(),
+  max_heartrate: z.number().optional(),
+  average_speed: z.number().optional(),
+  max_speed: z.number().optional(),
+  average_cadence: z.number().optional(),
+  pr_count: z.number().optional(),
+  suffer_score: z.number().optional(),
+  achievement_count: z.number().optional(),
+  kilojoules: z.number().optional(),
+  average_watts: z.number().optional(),
+  max_watts: z.number().optional(),
+  weighted_average_watts: z.number().optional(),
+  device_watts: z.boolean().optional(),
 });
 
 export type StravaActivity = z.infer<typeof StravaActivitySchema>;
+
+// Detailed activity (from GET /activities/{id}) — adds calories
+export const StravaActivityDetailSchema = StravaActivitySchema.extend({
+  calories: z.number().optional(),
+});
+
+export type StravaActivityDetail = z.infer<typeof StravaActivityDetailSchema>;
 
 async function refreshAccessToken(): Promise<StravaTokenResponse> {
   const clientId = process.env.STRAVA_CLIENT_ID;
@@ -184,4 +204,27 @@ export const fetchActivities = defineCachedFunction(fetchActivitiesRaw, {
   name: "strava-activities",
   maxAge: 60 * 60, // 1 hour
   getKey: (page: number, perPage: number = 10) => `p${page}-pp${perPage}`,
+});
+
+async function fetchActivityDetailRaw(id: number): Promise<StravaActivityDetail> {
+  const tokenData = await refreshAccessToken();
+
+  const response = await fetch(`https://www.strava.com/api/v3/activities/${id}`, {
+    headers: {
+      Authorization: `Bearer ${tokenData.access_token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch Strava activity ${id}: ${response.status} ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  return StravaActivityDetailSchema.parse(data);
+}
+
+export const fetchActivityDetail = defineCachedFunction(fetchActivityDetailRaw, {
+  name: "strava-activity-detail",
+  maxAge: 60 * 60,
+  getKey: (id: number) => `id${id}`,
 });
