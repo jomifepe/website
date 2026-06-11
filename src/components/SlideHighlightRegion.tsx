@@ -116,7 +116,7 @@ export function SlideHighlightRegion(props: SlideHighlightRegionProps) {
     <span
       aria-hidden
       className={cn(
-        "pointer-events-none absolute z-0 rounded-lg bg-foreground/10 shadow-none",
+        "pointer-events-none absolute z-0 rounded-lg bg-foreground/7 shadow-none",
         "transition-[left,top,width,height,opacity] duration-300 ease-out",
         "motion-reduce:transition-none motion-reduce:duration-150",
         backdropClassName,

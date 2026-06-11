@@ -5,6 +5,7 @@ import { useLayoutEffect } from "node_modules/@tanstack/react-router/dist/esm/ut
 import { useEffect, useState, type ReactNode } from "react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "~/components/ui/tooltip";
 import { Theme, useTheme } from "~/hooks/useTheme";
+import { cn } from "~/lib/cn";
 
 type PageLayoutProps = {
   children: ReactNode;
@@ -15,10 +16,10 @@ export function PageLayout(props: PageLayoutProps) {
   const { children, headerLeft } = props;
   return (
     <div className="min-h-screen bg-background flex flex-col items-center">
-      <div className="fixed top-5 right-5 z-50 bg-background rounded-lg">
+      <header className="flex w-full max-w-5xl items-center justify-between px-5 pt-5 md:pt-8">
+        <div className="flex items-center gap-2">{headerLeft}</div>
         <ThemeToggle />
-      </div>
-      {headerLeft && <div className="flex w-full max-w-5xl px-5 pt-5 md:pt-8">{headerLeft}</div>}
+      </header>
       <main id="main-content" className="flex flex-1 flex-col justify-center max-w-5xl w-full gap-4 px-5 py-8">
         {children}
       </main>
@@ -53,7 +54,12 @@ const themeNameMap: Record<Theme, string> = {
 const visible = { scale: 1, opacity: 1, rotate: 0 };
 const hidden = { scale: 0, opacity: 0, rotate: 90 };
 
-export function ThemeToggle() {
+type ThemeToggleProps = {
+  className?: string;
+};
+
+export function ThemeToggle(props: ThemeToggleProps) {
+  const { className } = props;
   const { theme: currentTheme, toggle: toggleTheme } = useTheme();
   const mounted = useIsMounted();
 
@@ -63,7 +69,10 @@ export function ThemeToggle() {
     <Tooltip delayDuration={500}>
       <TooltipTrigger asChild>
         <motion.button
-          className="relative flex h-10 w-10 items-center justify-center rounded-lg text-foreground/50 hover:text-foreground hover:bg-foreground/10 focus-visible:bg-foreground/10 transition-[background-color] focus-visible:outline-none overflow-hidden cursor-pointer"
+          className={cn(
+            "relative flex h-10 w-10 items-center justify-center rounded-lg text-foreground/50 hover:text-foreground hover:bg-foreground/10 bg-foreground/5 focus-visible:bg-foreground/10 transition-[background-color] focus-visible:outline-none overflow-hidden cursor-pointer",
+            className,
+          )}
           onClick={toggleTheme}
           aria-label={nextLabel}
           whileTap={{ scale: 0.88 }}

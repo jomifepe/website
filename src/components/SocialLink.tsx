@@ -71,7 +71,7 @@ export const SocialLink = forwardRef<HTMLAnchorElement, SocialLinkProps>((props,
         "relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-foreground/60 hover:text-foreground focus-visible:text-foreground",
         "transition-colors motion-reduce:transition-none focus-visible:outline-none",
         hoverColorClass[hoverColor],
-        !suppressBackdropFill && "focus-visible:bg-foreground/10 hover:bg-foreground/10",
+        !suppressBackdropFill && "focus-visible:bg-foreground/7 hover:bg-foreground/7",
         classNameProp,
       )}
       href={url}

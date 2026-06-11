@@ -1,4 +1,4 @@
-import { TbBrandStrava } from "react-icons/tb";
+import { TbBrandStrava, TbChevronLeft } from "react-icons/tb";
 import { createFileRoute, Link, Outlet, useLoaderData } from "@tanstack/react-router";
 import { SlideHighlightRegion } from "~/components/SlideHighlightRegion";
 import { SocialLink } from "~/components/SocialLink";
@@ -28,19 +28,7 @@ function WorkoutPage() {
   ];
 
   return (
-    <PageLayout
-      headerLeft={
-        <Link
-          to="/"
-          viewTransition
-          preload="render"
-          className="relative z-10 flex shrink-0 items-center justify-center rounded-lg -mx-2 -my-1 px-2 py-1 text-foreground/60 hover:text-foreground focus-visible:text-foreground hover:bg-foreground/10 focus-visible:bg-foreground/10 transition-colors motion-reduce:transition-none focus-visible:outline-none h-10"
-          aria-label="back to home"
-        >
-          <span className="mr-2">←</span>back
-        </Link>
-      }
-    >
+    <PageLayout headerLeft={<BackButton />}>
       <section style={{ viewTransitionName: "workout-card" }}>
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-foreground text-sm font-medium tracking-wider">workout</h1>
@@ -96,6 +84,23 @@ function WorkoutPage() {
       </section>
       <Outlet />
     </PageLayout>
+  );
+}
+
+function BackButton() {
+  return (
+    <Link
+      to="/"
+      viewTransition
+      preload="render"
+      className="relative z-10 flex shrink-0 items-center justify-center rounded-lg -mx-2 -my-1 px-2 py-1 text-foreground/60 hover:text-foreground focus-visible:text-foreground hover:bg-foreground/7 focus-visible:bg-foreground/7 transition-colors motion-reduce:transition-none focus-visible:outline-none h-10"
+      aria-label="back to home"
+    >
+      <span className="mr-2">
+        <TbChevronLeft size={16} />
+      </span>
+      back
+    </Link>
   );
 }
 
