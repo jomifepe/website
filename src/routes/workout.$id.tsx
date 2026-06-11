@@ -19,7 +19,7 @@ function WorkoutActivityDialog() {
   const navigate = useNavigate();
 
   function handleOpenChange(open: boolean) {
-    if (!open) navigate({ to: "/workout" });
+    if (!open) navigate({ to: "/workout", resetScroll: false });
   }
 
   return <ActivityDialog activity={detail} open={true} onOpenChange={handleOpenChange} />;
