@@ -295,7 +295,7 @@ function computeTitle(sportType: SportType, distance: number, startDateLocal: st
     const prefix = RUN_PREFIX[sportType] ? `${RUN_PREFIX[sportType]} ` : "";
     if (distance >= 42_195) sportLabel = `${prefix}marathon`;
     else if (distance >= 21_097.5) sportLabel = `${prefix}half marathon`;
-    else if (distance > 10_000) sportLabel = `${prefix}long run`;
+    else if (distance > 15_000) sportLabel = `${prefix}long run`;
     else sportLabel = `${prefix}run`;
   } else {
     sportLabel = sportType

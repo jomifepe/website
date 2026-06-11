@@ -109,31 +109,6 @@ function PrMedals(props: PrMedalsProps) {
   );
 }
 
-type DialogActivityHeaderProps = {
-  sportType: SportType;
-  title: string;
-  dateDisplay: string;
-  prCount?: number;
-};
-
-function DialogActivityHeader(props: DialogActivityHeaderProps) {
-  const { sportType, title, dateDisplay, prCount } = props;
-  return (
-    <DialogHeader className="mb-4">
-      <div className="flex items-center gap-3 pr-6">
-        <div className="w-10 h-10 rounded-md bg-foreground/8 flex items-center justify-center shrink-0 text-foreground/60">
-          {getWorkoutIcon(sportType, 18)}
-        </div>
-        <div className="flex-1 min-w-0">
-          <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>{dateDisplay}</DialogDescription>
-        </div>
-        {!!prCount && <PrMedals count={prCount} />}
-      </div>
-    </DialogHeader>
-  );
-}
-
 type RouteMapContainerProps = {
   routeSvgPaths: { card: string; dialog: string } | null;
 };
@@ -148,37 +123,6 @@ function RouteMapContainer(props: RouteMapContainerProps) {
   );
 }
 
-type ActivityDialogBodyProps = {
-  activity: SanitizedActivity;
-};
-
-function ActivityDialogBody(props: ActivityDialogBodyProps) {
-  const { activity } = props;
-  const showDistance = shouldShowDistance(activity.sport_type);
-  const isRunLike = isRunSport(activity.sport_type);
-  const stats = buildStats(activity as SanitizedActivityDetail, isRunLike, showDistance);
-
-  return (
-    <>
-      <DialogActivityHeader sportType={activity.sport_type} title={activity.title} dateDisplay={activity.dateDisplay} prCount={activity.pr_count} />
-      <RouteMapContainer routeSvgPaths={activity.routeSvgPaths} />
-      {stats.length > 0 && (
-        <dl className="grid grid-cols-2 gap-x-6 gap-y-3">
-          {stats.map((stat) => (
-            <div key={stat.label} className="flex flex-col gap-0.5">
-              <dt className="text-xs text-foreground/40 flex items-center gap-1">
-                {stat.icon}
-                {stat.label}
-              </dt>
-              <dd className="text-sm text-foreground font-medium">{stat.value}</dd>
-            </div>
-          ))}
-        </dl>
-      )}
-    </>
-  );
-}
-
 type ActivityDialogProps = {
   activity: SanitizedActivity;
   trigger?: ReactNode;
@@ -187,7 +131,7 @@ type ActivityDialogProps = {
 };
 
 export function ActivityDialog(props: ActivityDialogProps) {
-  const { activity, trigger, open: controlledOpen, onOpenChange } = props;
+  const { activity: initialActivity, trigger, open: controlledOpen, onOpenChange } = props;
   const [internalOpen, setInternalOpen] = useState(false);
   const [detail, setDetail] = useState<SanitizedActivityDetail | null>(null);
   const fetchedRef = useRef(false);
@@ -198,16 +142,47 @@ export function ActivityDialog(props: ActivityDialogProps) {
   useEffect(() => {
     if (!trigger || !isOpen || fetchedRef.current) return;
     fetchedRef.current = true;
-    getActivityDetailBySlug({ data: { slug: activity.slug } })
+    getActivityDetailBySlug({ data: { slug: initialActivity.slug } })
       .then(setDetail)
       .catch(() => setDetail(null));
-  }, [isOpen, activity.slug, trigger]);
+  }, [isOpen, initialActivity.slug, trigger]);
+
+  const activity = detail ?? initialActivity;
+
+  const showDistance = shouldShowDistance(activity.sport_type);
+  const isRunLike = isRunSport(activity.sport_type);
+  const stats = buildStats({ activity: activity, isRunLike, showDistance });
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
-        <ActivityDialogBody activity={detail ?? activity} />
+        <DialogHeader className="mb-4">
+          <div className="flex items-center gap-3 pr-6">
+            <div className="w-10 h-10 rounded-md bg-foreground/8 flex items-center justify-center shrink-0 text-foreground/60">
+              {getWorkoutIcon(activity.sport_type, 18)}
+            </div>
+            <div className="flex flex-col gap-0.5 flex-1 min-w-0">
+              <DialogTitle>{activity.title}</DialogTitle>
+              <DialogDescription>{activity.dateDisplay}</DialogDescription>
+            </div>
+            {!!activity.pr_count && <PrMedals count={activity.pr_count} />}
+          </div>
+        </DialogHeader>
+        <RouteMapContainer routeSvgPaths={activity.routeSvgPaths} />
+        {stats.length > 0 && (
+          <dl className="grid grid-cols-2 gap-x-6 gap-y-3">
+            {stats.map((stat) => (
+              <div key={stat.label} className="flex flex-col gap-0.5">
+                <dt className="text-xs text-foreground/40 flex items-center gap-1">
+                  {stat.icon}
+                  {stat.label}
+                </dt>
+                <dd className="text-sm text-foreground font-medium">{stat.value}</dd>
+              </div>
+            ))}
+          </dl>
+        )}
       </DialogContent>
     </Dialog>
   );
@@ -219,7 +194,14 @@ type StatEntry = {
   icon?: ReactNode;
 };
 
-function buildStats(activity: SanitizedActivityDetail, isRunLike: boolean, showDistance: boolean): StatEntry[] {
+type BuildStatsArgs = {
+  activity: SanitizedActivityDetail;
+  isRunLike: boolean;
+  showDistance: boolean;
+};
+
+function buildStats(args: BuildStatsArgs): StatEntry[] {
+  const { activity, isRunLike, showDistance } = args;
   const stats: StatEntry[] = [];
 
   stats.push({ label: "moving time", value: formatMovingTime(activity.moving_time), icon: <TbClock size={10} /> });

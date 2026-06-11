@@ -88,7 +88,7 @@ function DialogDescription({ className, ...props }: ComponentProps<typeof Dialog
   return (
     <DialogPrimitive.Description
       data-slot="dialog-description"
-      className={cn("text-sm text-foreground/60", className)}
+      className={cn("text-xs text-foreground/60", className)}
       {...props}
     />
   );
