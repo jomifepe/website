@@ -1,12 +1,5 @@
 import { type ReactNode } from "react";
-import {
-  IconBrandGithub,
-  IconBrandLinkedin,
-  IconBrandMedium,
-  IconBrandStrava,
-  IconBrandX,
-  IconMail,
-} from "@tabler/icons-react";
+import { TbBrandGithub, TbBrandLinkedin, TbBrandMedium, TbBrandStrava, TbBrandX, TbMail } from "react-icons/tb";
 import { SlideHighlightRegion } from "~/components/SlideHighlightRegion";
 import { SocialLink } from "~/components/SocialLink";
 import { RecentlyPlayed } from "./recently-played";
@@ -24,26 +17,26 @@ const SOCIAL_LINKS: SocialLink[] = [
   {
     name: "github",
     url: "https://github.com/jomifepe",
-    icon: <IconBrandGithub size={20} />,
+    icon: <TbBrandGithub size={20} />,
     title: "github",
   },
   {
     name: "x",
-    url: "https://twitter.com/jomifepe",
-    icon: <IconBrandX size={20} />,
+    url: "https://x.com/jomifepe",
+    icon: <TbBrandX size={20} />,
     title: "x",
   },
   {
     name: "linkedin",
     url: "https://www.linkedin.com/in/jomifepe/",
-    icon: <IconBrandLinkedin size={20} />,
+    icon: <TbBrandLinkedin size={20} />,
     title: "linkedin",
     hoverColor: "blue",
   },
   {
     name: "medium",
     url: "https://medium.com/@jomifepe",
-    icon: <IconBrandMedium size={20} />,
+    icon: <TbBrandMedium size={20} />,
     title: "medium",
   },
   {
@@ -56,7 +49,7 @@ const SOCIAL_LINKS: SocialLink[] = [
   {
     name: "strava",
     url: "https://www.strava.com/athletes/jomifepe",
-    icon: <IconBrandStrava size={20} />,
+    icon: <TbBrandStrava size={20} />,
     title: "strava",
     hoverColor: "orange",
   },
@@ -70,7 +63,7 @@ const SOCIAL_LINKS: SocialLink[] = [
   {
     name: "email",
     url: "mailto:contact@jomifepe.dev",
-    icon: <IconMail size={20} />,
+    icon: <TbMail size={20} />,
     title: "email",
   },
 ];

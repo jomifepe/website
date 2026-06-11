@@ -1,22 +1,26 @@
-import { IconMoon, IconProps, IconSun, IconSunMoon } from "@tabler/icons-react";
+import type { IconType } from "react-icons";
+import { TbMoon, TbSun, TbSunMoon } from "react-icons/tb";
 import { motion } from "motion/react";
 import { useLayoutEffect } from "node_modules/@tanstack/react-router/dist/esm/utils";
 import { useEffect, useState, type ReactNode } from "react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "~/components/ui/tooltip";
 import { Theme, useTheme } from "~/hooks/useTheme";
+import { cn } from "~/lib/cn";
 
 type PageLayoutProps = {
   children: ReactNode;
+  headerLeft?: ReactNode;
 };
 
 export function PageLayout(props: PageLayoutProps) {
-  const { children } = props;
+  const { children, headerLeft } = props;
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center">
-      <div className="fixed top-4 right-4 z-50">
+    <div className="min-h-screen bg-background flex flex-col items-center">
+      <header className="flex w-full max-w-5xl items-center justify-between px-5 pt-5 md:pt-8">
+        <div className="flex items-center gap-2">{headerLeft}</div>
         <ThemeToggle />
-      </div>
-      <main id="main-content" className="flex flex-col max-w-5xl w-full gap-4 py-12 px-5">
+      </header>
+      <main id="main-content" className="flex flex-1 flex-col justify-center max-w-5xl w-full gap-4 px-5 py-8">
         {children}
       </main>
     </div>
@@ -32,13 +36,13 @@ const springTransition = {
 
 type ThemeOption = {
   theme: Theme;
-  Icon: (props: IconProps) => ReactNode;
+  Icon: IconType;
 };
 
 const themeOptions: ThemeOption[] = [
-  { theme: "dark", Icon: IconMoon },
-  { theme: "light", Icon: IconSun },
-  { theme: "system", Icon: IconSunMoon },
+  { theme: "dark", Icon: TbMoon },
+  { theme: "light", Icon: TbSun },
+  { theme: "system", Icon: TbSunMoon },
 ];
 
 const themeNameMap: Record<Theme, string> = {
@@ -50,7 +54,12 @@ const themeNameMap: Record<Theme, string> = {
 const visible = { scale: 1, opacity: 1, rotate: 0 };
 const hidden = { scale: 0, opacity: 0, rotate: 90 };
 
-export function ThemeToggle() {
+type ThemeToggleProps = {
+  className?: string;
+};
+
+export function ThemeToggle(props: ThemeToggleProps) {
+  const { className } = props;
   const { theme: currentTheme, toggle: toggleTheme } = useTheme();
   const mounted = useIsMounted();
 
@@ -60,7 +69,10 @@ export function ThemeToggle() {
     <Tooltip delayDuration={500}>
       <TooltipTrigger asChild>
         <motion.button
-          className="relative flex h-9 w-9 items-center justify-center rounded-lg text-foreground/50 hover:text-foreground hover:bg-foreground/10 focus-visible:bg-foreground/10 transition-[background-color] focus-visible:outline-none overflow-hidden cursor-pointer"
+          className={cn(
+            "relative flex h-10 w-10 items-center justify-center rounded-lg text-foreground/50 hover:text-foreground hover:bg-foreground/10 bg-foreground/5 focus-visible:bg-foreground/10 transition-[background-color] focus-visible:outline-none overflow-hidden cursor-pointer",
+            className,
+          )}
           onClick={toggleTheme}
           aria-label={nextLabel}
           whileTap={{ scale: 0.88 }}
@@ -76,7 +88,7 @@ export function ThemeToggle() {
                   // keep all the options mounted to avoid color transition bugs
                   animate={theme === currentTheme ? visible : hidden}
                 >
-                  <Icon className="text-foreground/60" size={17} strokeWidth={1.75} />
+                  <Icon className="text-foreground/60" size={20} strokeWidth={2} />
                 </motion.span>
               ))}
             </>

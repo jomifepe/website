@@ -1,106 +1,348 @@
 import {
-  IconActivity,
-  IconBarbell,
-  IconBike,
-  IconMountain,
-  IconRun,
-  IconSwimming,
-  IconWalk,
-  IconHeart,
-  IconArrowUp,
-} from "@tabler/icons-react";
+  TbActivity,
+  TbArrowUp,
+  TbBarbell,
+  TbBike,
+  TbBolt,
+  TbClock,
+  TbFlame,
+  TbGauge,
+  TbHeart,
+  TbMountain,
+  TbRefresh,
+  TbRoute,
+  TbRun,
+  TbSwimming,
+  TbWalk,
+  TbZzz,
+} from "react-icons/tb";
+import { FaMedal } from "react-icons/fa";
+import { Link } from "@tanstack/react-router";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { cn } from "~/lib/cn";
-import { decodePolyline, polylineToSvgPath } from "~/lib/polyline";
-import type { SportType, StravaActivity } from "../lib/strava";
+import { getActivityDetailBySlug } from "~/lib/server-activities";
+import { CardItem, CardItemContent, useCardItemWrapperProps } from "./CardItem";
+import type { SanitizedActivity, SanitizedActivityDetail, SportType } from "../lib/strava";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
+import { Badge } from "~/components/ui/badge";
 
 type WorkoutCardVariant = "default" | "small";
 
 type WorkoutCardProps = {
-  activity: StravaActivity;
-  isLastItemInList?: boolean;
-  /** Compact route preview and spacing (e.g. home card grid). */
+  activity: SanitizedActivity;
   variant?: WorkoutCardVariant;
+  /** "route" (default): clicking navigates to /workout/$id. "local": opens an inline dialog. */
+  dialog?: "route" | "local";
 };
 
 export function WorkoutCard(props: WorkoutCardProps) {
-  const { activity, isLastItemInList = false, variant = "default" } = props;
-  const isSmall = variant === "small";
+  const { activity, variant = "default", dialog = "route" } = props;
 
-  const title = formatActivityTitle(activity);
-  const dateStr = formatActivityDate(activity.start_date_local);
+  const routeWrapperProps = useCardItemWrapperProps("group/card");
+
+  const isSmall = variant === "small";
   const timeStr = formatMovingTime(activity.moving_time);
   const distanceKm = activity.distance / 1000;
   const showDistance = shouldShowDistance(activity.sport_type);
 
+  const icon = (
+    <div className="w-12 h-12 rounded-md bg-foreground/8 flex items-center justify-center text-foreground-muted">
+      {getWorkoutIcon(activity.sport_type)}
+    </div>
+  );
+
+  const title = (
+    <>
+      <span className="text-foreground font-medium">{activity.title}</span>
+      <span className="text-foreground/60">·</span>
+      <span className="text-foreground/80">{activity.dateDisplay}</span>
+    </>
+  );
+
+  const subtitle = (
+    <div className="flex items-center gap-2 flex-wrap">
+      <span>{timeStr}</span>
+      {showDistance && <span>·</span>}
+      {showDistance && <span>{distanceKm.toFixed(1)} km</span>}
+      {activity.total_elevation_gain > 0 && (
+        <>
+          <span>·</span>
+          <span className="flex items-center gap-1">
+            <TbArrowUp size={12} /> {Math.round(activity.total_elevation_gain)}m
+          </span>
+        </>
+      )}
+    </div>
+  );
+
+  const endSlot = activity.routeSvgPaths ? (
+    <RoutePreview paths={activity.routeSvgPaths} size={isSmall ? "small" : "default"} />
+  ) : null;
+
+  if (dialog === "local") {
+    return (
+      <ActivityDialog
+        activity={activity}
+        trigger={<CardItem className="group/card" icon={icon} title={title} subtitle={subtitle} endSlot={endSlot} />}
+      />
+    );
+  }
+
   return (
-    <div
-      className={cn(
-        "flex items-start gap-4 rounded-lg relative group",
-        isSmall ? "py-2" : "p-3 -mx-3",
-        activity.map?.summary_polyline && isLastItemInList && (isSmall ? "mb-6" : "mb-10"),
-      )}
-    >
-      <div className="text-muted-foreground mt-0.5">{getWorkoutIcon(activity.sport_type)}</div>
-      <div className="flex-1">
-        <div className="flex flex-row items-baseline gap-2 mb-1 flex-wrap">
-          <span className="text-foreground font-medium">{title}</span>
-          <span className="text-foreground/60">·</span>
-          <span className="text-foreground/80 text-sm">{dateStr}</span>
-        </div>
-        <div className="flex items-center gap-2 text-foreground/60 text-sm flex-wrap">
-          <span>{timeStr}</span>
-          {showDistance && <span>·</span>}
-          {showDistance && <span>{distanceKm.toFixed(1)} km</span>}
-          {activity.total_elevation_gain > 0 && (
-            <>
-              <span>·</span>
-              <span className="flex items-center gap-1">
-                <IconArrowUp size={12} /> {Math.round(activity.total_elevation_gain)}m
-              </span>
-            </>
-          )}
-          {activity.has_heartrate && activity.average_heartrate && (
-            <>
-              <span>·</span>
-              <span className="flex items-center gap-1">
-                <IconHeart size={12} /> {Math.round(activity.average_heartrate)} bpm
-              </span>
-            </>
-          )}
-        </div>
-      </div>
-      {activity.map?.summary_polyline && (
-        <RoutePreview encoded={activity.map.summary_polyline} size={isSmall ? "small" : "default"} />
-      )}
+    <Link to="/workout/$id" params={{ id: activity.slug }} resetScroll={false} {...routeWrapperProps}>
+      <CardItemContent icon={icon} title={title} subtitle={subtitle} endSlot={endSlot} />
+    </Link>
+  );
+}
+
+type PrMedalsProps = {
+  count: number;
+};
+
+function PrMedals(props: PrMedalsProps) {
+  const { count } = props;
+  return (
+    <Badge variant="gold">
+      <FaMedal size={12} />
+      <span className="text-sm font-medium ml-1">{count}</span>
+    </Badge>
+  );
+}
+
+type RouteMapContainerProps = {
+  routeSvgPaths: { card: string; dialog: string } | null;
+};
+
+function RouteMapContainer(props: RouteMapContainerProps) {
+  const { routeSvgPaths } = props;
+  if (!routeSvgPaths) return null;
+  return (
+    <div className="mb-5 rounded-lg overflow-hidden bg-foreground/4 flex items-center justify-center">
+      <RoutePreview paths={routeSvgPaths} size="dialog" />
     </div>
   );
 }
 
+type ActivityDialogProps = {
+  activity: SanitizedActivity;
+  trigger?: ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+};
+
+export function ActivityDialog(props: ActivityDialogProps) {
+  const { activity: initialActivity, trigger, open: controlledOpen, onOpenChange } = props;
+  const [internalOpen, setInternalOpen] = useState(false);
+  const [detail, setDetail] = useState<SanitizedActivityDetail | null>(null);
+  const fetchedRef = useRef(false);
+
+  const isOpen = trigger ? internalOpen : (controlledOpen ?? false);
+  const handleOpenChange = trigger ? setInternalOpen : (onOpenChange ?? (() => {}));
+
+  useEffect(() => {
+    if (!trigger || !isOpen || fetchedRef.current) return;
+    fetchedRef.current = true;
+    getActivityDetailBySlug({ data: { slug: initialActivity.slug } })
+      .then(setDetail)
+      .catch(() => setDetail(null));
+  }, [isOpen, initialActivity.slug, trigger]);
+
+  const activity = detail ?? initialActivity;
+
+  const showDistance = shouldShowDistance(activity.sport_type);
+  const isRunLike = isRunSport(activity.sport_type);
+  const stats = buildStats({ activity: activity, isRunLike, showDistance });
+
+  return (
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
+      <DialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
+        <DialogHeader className="mb-4">
+          <div className="flex items-center gap-3 pr-6">
+            <div className="w-10 h-10 rounded-md bg-foreground/8 flex items-center justify-center shrink-0 text-foreground/60">
+              {getWorkoutIcon(activity.sport_type, 18)}
+            </div>
+            <div className="flex flex-col gap-0.5 flex-1 min-w-0">
+              <DialogTitle>{activity.title}</DialogTitle>
+              <DialogDescription>{activity.dateDisplay}</DialogDescription>
+            </div>
+            {!!activity.pr_count && <PrMedals count={activity.pr_count} />}
+          </div>
+        </DialogHeader>
+        <RouteMapContainer routeSvgPaths={activity.routeSvgPaths} />
+        {stats.length > 0 && (
+          <dl className="grid grid-cols-2 gap-x-6 gap-y-3">
+            {stats.map((stat) => (
+              <div key={stat.label} className="flex flex-col gap-0.5">
+                <dt className="text-xs text-foreground/40 flex items-center gap-1">
+                  {stat.icon}
+                  {stat.label}
+                </dt>
+                <dd className="text-sm text-foreground font-medium">{stat.value}</dd>
+              </div>
+            ))}
+          </dl>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+type StatEntry = {
+  label: string;
+  value: string;
+  icon?: ReactNode;
+};
+
+type BuildStatsArgs = {
+  activity: SanitizedActivityDetail;
+  isRunLike: boolean;
+  showDistance: boolean;
+};
+
+function buildStats(args: BuildStatsArgs): StatEntry[] {
+  const { activity, isRunLike, showDistance } = args;
+  const stats: StatEntry[] = [];
+
+  stats.push({ label: "moving time", value: formatMovingTime(activity.moving_time), icon: <TbClock size={10} /> });
+
+  if (activity.elapsed_time && activity.elapsed_time > activity.moving_time + 30) {
+    stats.push({
+      label: "elapsed time",
+      value: formatMovingTime(activity.elapsed_time),
+      icon: <TbClock size={10} />,
+    });
+  }
+
+  if (showDistance && activity.distance > 0) {
+    stats.push({
+      label: "distance",
+      value: `${(activity.distance / 1000).toFixed(2)} km`,
+      icon: <TbRoute size={10} />,
+    });
+  }
+
+  if (activity.average_speed && activity.average_speed > 0) {
+    if (isRunLike) {
+      stats.push({ label: "avg pace", value: formatPace(activity.average_speed), icon: <TbGauge size={10} /> });
+    } else {
+      stats.push({
+        label: "avg speed",
+        value: `${(activity.average_speed * 3.6).toFixed(1)} km/h`,
+        icon: <TbGauge size={10} />,
+      });
+    }
+  }
+
+  if (activity.total_elevation_gain > 0) {
+    stats.push({
+      label: "elevation",
+      value: `${Math.round(activity.total_elevation_gain)} m`,
+      icon: <TbArrowUp size={10} />,
+    });
+  }
+
+  if (activity.has_heartrate && activity.average_heartrate) {
+    stats.push({
+      label: "avg heart rate",
+      value: `${Math.round(activity.average_heartrate)} bpm`,
+      icon: <TbHeart size={10} />,
+    });
+  }
+
+  if (activity.max_heartrate) {
+    stats.push({
+      label: "max heart rate",
+      value: `${Math.round(activity.max_heartrate)} bpm`,
+      icon: <TbHeart size={10} />,
+    });
+  }
+
+  if (activity.average_cadence && activity.average_cadence > 0) {
+    stats.push({
+      label: "cadence",
+      value: `${Math.round(activity.average_cadence)} rpm`,
+      icon: <TbRefresh size={10} />,
+    });
+  }
+
+  if (activity.device_watts && activity.average_watts && activity.average_watts > 0) {
+    stats.push({
+      label: "avg power",
+      value: `${Math.round(activity.average_watts)} W`,
+      icon: <TbBolt size={10} />,
+    });
+  }
+
+  if (activity.device_watts && activity.weighted_average_watts && activity.weighted_average_watts > 0) {
+    stats.push({
+      label: "norm power",
+      value: `${Math.round(activity.weighted_average_watts)} W`,
+      icon: <TbBolt size={10} />,
+    });
+  }
+
+  if (activity.kilojoules && activity.kilojoules > 0) {
+    stats.push({
+      label: "work done",
+      value: `${Math.round(activity.kilojoules)} kJ`,
+      icon: <TbBolt size={10} />,
+    });
+  }
+
+  if (activity.calories && activity.calories > 0) {
+    stats.push({ label: "calories", value: `${Math.round(activity.calories)} kcal`, icon: <TbFlame size={10} /> });
+  }
+
+  if (activity.suffer_score && activity.suffer_score > 0) {
+    stats.push({
+      label: "suffer score",
+      value: activity.suffer_score.toString(),
+      icon: <TbZzz size={10} />,
+    });
+  }
+
+  return stats;
+}
+
+type RoutePreviewSize = "default" | "small" | "dialog";
+
 type RoutePreviewProps = {
-  encoded: string;
-  size?: "default" | "small";
+  paths: { card: string; dialog: string };
+  size?: RoutePreviewSize;
 };
 
 function RoutePreview(props: RoutePreviewProps) {
-  const { encoded, size = "default" } = props;
-  if (!encoded) return null;
+  const { paths, size = "default" } = props;
 
-  const coords = decodePolyline(encoded);
-  if (coords.length === 0) return null;
+  if (size === "dialog") {
+    return (
+      <svg viewBox="0 0 400 200" className="w-full h-40" xmlns="http://www.w3.org/2000/svg">
+        <path
+          d={paths.dialog}
+          stroke="currentColor"
+          strokeWidth={1.5}
+          fill="none"
+          vectorEffect="non-scaling-stroke"
+          className="text-orange-500/60"
+        />
+        <title>route map</title>
+      </svg>
+    );
+  }
 
-  const pathD = polylineToSvgPath({ coords, w: 100, h: 100, padding: 5 });
   const isSmall = size === "small";
 
   return (
     <div className={cn("absolute top-1/2 -translate-y-1/2 pointer-events-none", isSmall ? "right-2" : "right-4")}>
       <svg viewBox="0 0 100 100" className={isSmall ? "h-12 w-12" : "h-32 w-32"} xmlns="http://www.w3.org/2000/svg">
         <path
-          d={pathD}
+          d={paths.card}
           stroke="currentColor"
           strokeWidth={isSmall ? 2 : 1.5}
           fill="none"
           vectorEffect="non-scaling-stroke"
-          className="text-orange-500/20 group-hover:text-orange-500/70 transition-colors"
+          className="text-orange-500/20 group-hover/card:text-orange-500/70 transition-colors"
         />
         <title>route preview</title>
       </svg>
@@ -108,22 +350,22 @@ function RoutePreview(props: RoutePreviewProps) {
   );
 }
 
-export function getWorkoutIcon(sportType: SportType) {
-  const commonProps = { size: 24, className: "shrink-0" };
+export function getWorkoutIcon(sportType: SportType, size = 24) {
+  const commonProps = { size, className: "shrink-0" };
 
   switch (sportType) {
     case "Run":
     case "TrailRun":
     case "VirtualRun":
-      return <IconRun {...commonProps} />;
+      return <TbRun {...commonProps} />;
     case "Walk":
-      return <IconWalk {...commonProps} />;
+      return <TbWalk {...commonProps} />;
     case "Hike":
     case "BackcountrySki":
     case "NordicSki":
     case "RollerSki":
     case "Snowshoe":
-      return <IconMountain {...commonProps} />;
+      return <TbMountain {...commonProps} />;
     case "Ride":
     case "EBikeRide":
     case "EMountainBikeRide":
@@ -132,15 +374,15 @@ export function getWorkoutIcon(sportType: SportType) {
     case "VirtualRide":
     case "Velomobile":
     case "Handcycle":
-      return <IconBike {...commonProps} />;
+      return <TbBike {...commonProps} />;
     case "Swim":
-      return <IconSwimming {...commonProps} />;
+      return <TbSwimming {...commonProps} />;
     case "WeightTraining":
-      return <IconBarbell strokeWidth={1.5} {...commonProps} />;
+      return <TbBarbell strokeWidth={1.5} {...commonProps} />;
     case "RockClimbing":
       return <BoulderingIcon />;
     default:
-      return <IconActivity {...commonProps} />;
+      return <TbActivity {...commonProps} />;
   }
 }
 
@@ -188,62 +430,8 @@ function shouldShowDistance(sportType: SportType) {
 
 const RUN_SPORT_TYPES = new Set<SportType>(["Run", "TrailRun", "VirtualRun"]);
 
-const RUN_PREFIXES: Partial<Record<SportType, string>> = {
-  TrailRun: "trail",
-  VirtualRun: "virtual",
-};
-
-/**
- * Returns a distance-aware label for run sport types, or `null` for non-runs.
- * Distance thresholds (distance is in metres):
- *   ≥ 42 195 m → marathon
- *   ≥ 21 097.5 m → half marathon
- *   > 10 000 m → long run
- *   otherwise → run
- */
-function runLabel(sportType: SportType, distanceMetres: number): string | null {
-  if (!RUN_SPORT_TYPES.has(sportType)) return null;
-
-  const prefix = RUN_PREFIXES[sportType] ? `${RUN_PREFIXES[sportType]} ` : "";
-
-  if (distanceMetres >= 42_195) return `${prefix}marathon`;
-  if (distanceMetres >= 21_097.5) return `${prefix}half marathon`;
-  if (distanceMetres > 10_000) return `${prefix}long run`;
-  return `${prefix}run`;
-}
-
-/** Converts `TrailRun` → `trail run` etc. */
-function sportTypeLabel(sportType: SportType): string {
-  return sportType
-    .replace(/([A-Z])/g, " $1")
-    .trim()
-    .toLowerCase();
-}
-
-function formatActivityTitle(activity: StravaActivity): string {
-  const date = new Date(activity.start_date_local);
-  const hour = date.getHours();
-
-  let timeOfDay: string;
-  if (hour < 12) {
-    timeOfDay = "morning";
-  } else if (hour < 17) {
-    timeOfDay = "afternoon";
-  } else {
-    timeOfDay = "evening";
-  }
-
-  return `${timeOfDay} ${runLabel(activity.sport_type, activity.distance) ?? sportTypeLabel(activity.sport_type)}`;
-}
-
-function formatActivityDate(startDateLocal: string): string {
-  return new Date(startDateLocal)
-    .toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    })
-    .toLowerCase();
+function isRunSport(sportType: SportType): boolean {
+  return RUN_SPORT_TYPES.has(sportType);
 }
 
 function formatMovingTime(movingTime: number): string {
@@ -254,4 +442,12 @@ function formatMovingTime(movingTime: number): string {
   if (hours > 0) return `${hours}h ${minutes}m`;
   if (minutes > 0) return `${minutes}m ${seconds}s`;
   return `${seconds}s`;
+}
+
+function formatPace(speedMps: number): string {
+  if (speedMps <= 0) return "—";
+  const secsPerKm = 1000 / speedMps;
+  const mins = Math.floor(secsPerKm / 60);
+  const secs = Math.round(secsPerKm % 60);
+  return `${mins}:${secs.toString().padStart(2, "0")} /km`;
 }
