@@ -1,7 +1,8 @@
 import { IconBrandStrava } from "@tabler/icons-react";
-import { createFileRoute, Link, useLoaderData } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useLoaderData } from "@tanstack/react-router";
 import { SlideHighlightRegion } from "~/components/SlideHighlightRegion";
 import { SocialLink } from "~/components/SocialLink";
+import { activitySlug } from "~/lib/strava";
 import { Badge } from "../components/ui/badge";
 import { PageLayout } from "../components/PageLayout";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../components/ui/tooltip";
@@ -93,6 +94,7 @@ function WorkoutPage() {
                         <WorkoutCard
                           key={activity.id}
                           activity={activity}
+                          activitySlug={activitySlug(activity.start_date_local)}
                           isLastItemInList={index === weekActivities.length - 1}
                         />
                       ))}
@@ -104,6 +106,7 @@ function WorkoutPage() {
           })}
         </div>
       </section>
+      <Outlet />
     </PageLayout>
   );
 }

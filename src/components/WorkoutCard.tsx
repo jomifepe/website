@@ -13,20 +13,14 @@ import {
   IconTrophy,
   IconZzz,
 } from "@tabler/icons-react";
+import { Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { cn } from "~/lib/cn";
 import { decodePolyline, polylineToSvgPath } from "~/lib/polyline";
 import { getActivityDetail } from "~/lib/server-activities";
 import { useSlideHighlightRegion } from "./SlideHighlightRegion";
 import type { SportType, StravaActivity } from "../lib/strava";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "./ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 
 type WorkoutCardVariant = "default" | "small";
 
@@ -35,10 +29,12 @@ type WorkoutCardProps = {
   isLastItemInList?: boolean;
   /** Compact route preview and spacing (e.g. home card grid). */
   variant?: WorkoutCardVariant;
+  /** When provided, clicking navigates to this route slug instead of opening a local dialog. */
+  activitySlug?: string;
 };
 
 export function WorkoutCard(props: WorkoutCardProps) {
-  const { activity, isLastItemInList = false, variant = "default" } = props;
+  const { activity, isLastItemInList = false, variant = "default", activitySlug: slug } = props;
   const [open, setOpen] = useState(false);
   const isSmall = variant === "small";
   const slideHighlight = useSlideHighlightRegion();
@@ -49,46 +45,64 @@ export function WorkoutCard(props: WorkoutCardProps) {
   const distanceKm = activity.distance / 1000;
   const showDistance = shouldShowDistance(activity.sport_type);
 
+  const cardClassName = cn(
+    "flex items-start gap-3 md:gap-4 rounded-lg relative group/card cursor-pointer transition-colors",
+    isSmall ? "py-2 px-2 -mx-2" : "p-2 -mx-2 md:p-3 md:-mx-3",
+    slideHighlight != null ? "z-10" : "hover:bg-foreground/5 focus-visible:bg-foreground/5",
+    activity.map?.summary_polyline && isLastItemInList && (isSmall ? "mb-6" : "mb-10"),
+  );
+
+  const cardContent = (
+    <>
+      <div className="text-muted-foreground mt-0.5">{getWorkoutIcon(activity.sport_type)}</div>
+      <div className="flex-1">
+        <div className="flex flex-row items-baseline gap-2 mb-1 flex-wrap">
+          <span className="text-foreground font-medium text-sm md:text-base">{title}</span>
+          <span className="text-foreground/60">·</span>
+          <span className="text-foreground/80 text-sm md:text-base">{dateStr}</span>
+        </div>
+        <div className="flex items-center gap-2 text-foreground/60 text-sm flex-wrap">
+          <span>{timeStr}</span>
+          {showDistance && <span>·</span>}
+          {showDistance && <span>{distanceKm.toFixed(1)} km</span>}
+          {activity.total_elevation_gain > 0 && (
+            <>
+              <span>·</span>
+              <span className="flex items-center gap-1">
+                <IconArrowUp size={12} /> {Math.round(activity.total_elevation_gain)}m
+              </span>
+            </>
+          )}
+        </div>
+      </div>
+      {activity.map?.summary_polyline && (
+        <RoutePreview encoded={activity.map.summary_polyline} size={isSmall ? "small" : "default"} />
+      )}
+    </>
+  );
+
+  if (slug) {
+    return (
+      <Link
+        to="/workout/$id"
+        params={{ id: slug }}
+        className={cardClassName}
+        onMouseEnter={slideHighlight?.onInteract}
+        onFocus={slideHighlight?.onInteract}
+      >
+        {cardContent}
+      </Link>
+    );
+  }
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <div
-          className={cn(
-            "flex items-start gap-3 md:gap-4 rounded-lg relative group/card cursor-pointer transition-colors",
-            isSmall ? "py-2 px-2 -mx-2" : "p-2 -mx-2 md:p-3 md:-mx-3",
-            slideHighlight != null ? "z-10" : "hover:bg-foreground/5 focus-visible:bg-foreground/5",
-            activity.map?.summary_polyline && isLastItemInList && (isSmall ? "mb-6" : "mb-10"),
-          )}
-          onMouseEnter={slideHighlight?.onInteract}
-          onFocus={slideHighlight?.onInteract}
-        >
-          <div className="text-muted-foreground mt-0.5">{getWorkoutIcon(activity.sport_type)}</div>
-          <div className="flex-1">
-            <div className="flex flex-row items-baseline gap-2 mb-1 flex-wrap">
-              <span className="text-foreground font-medium text-sm md:text-base">{title}</span>
-              <span className="text-foreground/60">·</span>
-              <span className="text-foreground/80 text-sm md:text-base">{dateStr}</span>
-            </div>
-            <div className="flex items-center gap-2 text-foreground/60 text-sm flex-wrap">
-              <span>{timeStr}</span>
-              {showDistance && <span>·</span>}
-              {showDistance && <span>{distanceKm.toFixed(1)} km</span>}
-              {activity.total_elevation_gain > 0 && (
-                <>
-                  <span>·</span>
-                  <span className="flex items-center gap-1">
-                    <IconArrowUp size={12} /> {Math.round(activity.total_elevation_gain)}m
-                  </span>
-                </>
-              )}
-            </div>
-          </div>
-          {activity.map?.summary_polyline && (
-            <RoutePreview encoded={activity.map.summary_polyline} size={isSmall ? "small" : "default"} />
-          )}
+        <div className={cardClassName} onMouseEnter={slideHighlight?.onInteract} onFocus={slideHighlight?.onInteract}>
+          {cardContent}
         </div>
       </DialogTrigger>
-      <ActivityDialog activity={activity} open={open} />
+      <ActivityDialog activity={activity} open={open} onOpenChange={setOpen} />
     </Dialog>
   );
 }
@@ -98,12 +112,16 @@ export function WorkoutCard(props: WorkoutCardProps) {
 type ActivityDialogProps = {
   activity: StravaActivity;
   open: boolean;
+  onOpenChange: (open: boolean) => void;
+  /** When provided (e.g. from a route loader), skips the internal calories fetch. */
+  preloadedCalories?: number | null;
 };
 
-function ActivityDialog({ activity, open }: ActivityDialogProps) {
-  const [calories, setCalories] = useState<number | null>(null);
+export function ActivityDialog({ activity, open, preloadedCalories }: ActivityDialogProps) {
+  const hasPreloaded = preloadedCalories !== undefined;
+  const [calories, setCalories] = useState<number | null>(hasPreloaded ? (preloadedCalories ?? null) : null);
   const [caloriesLoading, setCaloriesLoading] = useState(false);
-  const fetchedRef = useRef(false);
+  const fetchedRef = useRef(hasPreloaded);
 
   useEffect(() => {
     if (!open || fetchedRef.current) return;

@@ -200,6 +200,15 @@ async function fetchActivitiesRaw(page: number, perPage: number = 10): Promise<S
   return activities;
 }
 
+/** Non-reversible FNV-1a hash of the activity's start time — used as a URL slug. */
+export function activitySlug(startDateLocal: string): string {
+  let h = 2166136261;
+  for (let i = 0; i < startDateLocal.length; i++) {
+    h = Math.imul(h ^ startDateLocal.charCodeAt(i), 16777619) >>> 0;
+  }
+  return h.toString(36);
+}
+
 export const fetchActivities = defineCachedFunction(fetchActivitiesRaw, {
   name: "strava-activities",
   maxAge: 60 * 60, // 1 hour
