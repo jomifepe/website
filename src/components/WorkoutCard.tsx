@@ -1,55 +1,50 @@
 import {
   IconActivity,
+  IconArrowUp,
   IconBarbell,
   IconBike,
+  IconBolt,
+  IconFlame,
+  IconHeart,
   IconMountain,
   IconRun,
   IconSwimming,
-  IconWalk,
-  IconArrowUp,
-  IconHeart,
-  IconFlame,
-  IconBolt,
   IconTrophy,
+  IconWalk,
   IconZzz,
 } from "@tabler/icons-react";
 import { Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { cn } from "~/lib/cn";
-import { decodePolyline, polylineToSvgPath } from "~/lib/polyline";
-import { getActivityDetail } from "~/lib/server-activities";
+import { getActivityDetailBySlug } from "~/lib/server-activities";
 import { useSlideHighlightRegion } from "./SlideHighlightRegion";
-import type { SportType, StravaActivity } from "../lib/strava";
+import type { SanitizedActivity, SanitizedActivityDetail, SportType } from "../lib/strava";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 
 type WorkoutCardVariant = "default" | "small";
 
 type WorkoutCardProps = {
-  activity: StravaActivity;
-  isLastItemInList?: boolean;
-  /** Compact route preview and spacing (e.g. home card grid). */
+  activity: SanitizedActivity;
   variant?: WorkoutCardVariant;
-  /** When provided, clicking navigates to this route slug instead of opening a local dialog. */
-  activitySlug?: string;
+  /** "route" (default): clicking navigates to /workout/$id. "local": opens an inline dialog. */
+  dialog?: "route" | "local";
 };
 
 export function WorkoutCard(props: WorkoutCardProps) {
-  const { activity, isLastItemInList = false, variant = "default", activitySlug: slug } = props;
+  const { activity, variant = "default", dialog = "route" } = props;
+
   const [open, setOpen] = useState(false);
-  const isSmall = variant === "small";
   const slideHighlight = useSlideHighlightRegion();
 
-  const title = formatActivityTitle(activity);
-  const dateStr = formatActivityDate(activity.start_date_local);
+  const isSmall = variant === "small";
   const timeStr = formatMovingTime(activity.moving_time);
   const distanceKm = activity.distance / 1000;
   const showDistance = shouldShowDistance(activity.sport_type);
 
-  const cardClassName = cn(
+  const interactiveClassName = cn(
     "flex items-start gap-3 md:gap-4 rounded-lg relative group/card cursor-pointer transition-colors",
     isSmall ? "py-2 px-2 -mx-2" : "p-2 -mx-2 md:p-3 md:-mx-3",
     slideHighlight != null ? "z-10" : "hover:bg-foreground/5 focus-visible:bg-foreground/5",
-    activity.map?.summary_polyline && isLastItemInList && (isSmall ? "mb-6" : "mb-10"),
   );
 
   const cardContent = (
@@ -57,9 +52,9 @@ export function WorkoutCard(props: WorkoutCardProps) {
       <div className="text-muted-foreground mt-0.5">{getWorkoutIcon(activity.sport_type)}</div>
       <div className="flex-1">
         <div className="flex flex-row items-baseline gap-2 mb-1 flex-wrap">
-          <span className="text-foreground font-medium text-sm md:text-base">{title}</span>
+          <span className="text-foreground font-medium text-sm md:text-base">{activity.title}</span>
           <span className="text-foreground/60">·</span>
-          <span className="text-foreground/80 text-sm md:text-base">{dateStr}</span>
+          <span className="text-foreground/80 text-sm md:text-base">{activity.dateDisplay}</span>
         </div>
         <div className="flex items-center gap-2 text-foreground/60 text-sm flex-wrap">
           <span>{timeStr}</span>
@@ -75,76 +70,52 @@ export function WorkoutCard(props: WorkoutCardProps) {
           )}
         </div>
       </div>
-      {activity.map?.summary_polyline && (
-        <RoutePreview encoded={activity.map.summary_polyline} size={isSmall ? "small" : "default"} />
-      )}
+      {activity.routeSvgPaths && <RoutePreview paths={activity.routeSvgPaths} size={isSmall ? "small" : "default"} />}
     </>
   );
 
-  if (slug) {
+  if (dialog === "local") {
     return (
-      <Link
-        to="/workout/$id"
-        params={{ id: slug }}
-        className={cardClassName}
-        onMouseEnter={slideHighlight?.onInteract}
-        onFocus={slideHighlight?.onInteract}
-      >
-        {cardContent}
-      </Link>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild>
+          <div
+            className={interactiveClassName}
+            onMouseEnter={slideHighlight?.onInteract}
+            onFocus={slideHighlight?.onInteract}
+          >
+            {cardContent}
+          </div>
+        </DialogTrigger>
+        <LocalActivityDialog activity={activity} open={open} />
+      </Dialog>
     );
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <div className={cardClassName} onMouseEnter={slideHighlight?.onInteract} onFocus={slideHighlight?.onInteract}>
-          {cardContent}
-        </div>
-      </DialogTrigger>
-      <ActivityDialog activity={activity} open={open} onOpenChange={setOpen} />
-    </Dialog>
+    <Link
+      to="/workout/$id"
+      params={{ id: activity.slug }}
+      className={interactiveClassName}
+      onMouseEnter={slideHighlight?.onInteract}
+      onFocus={slideHighlight?.onInteract}
+    >
+      {cardContent}
+    </Link>
   );
 }
 
 // ─── Activity Dialog ─────────────────────────────────────────────────────────
 
 type ActivityDialogProps = {
-  activity: StravaActivity;
+  activity: SanitizedActivityDetail;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  /** When provided (e.g. from a route loader), skips the internal calories fetch. */
-  preloadedCalories?: number | null;
 };
 
-export function ActivityDialog({ activity, open, preloadedCalories }: ActivityDialogProps) {
-  const hasPreloaded = preloadedCalories !== undefined;
-  const [calories, setCalories] = useState<number | null>(hasPreloaded ? (preloadedCalories ?? null) : null);
-  const [caloriesLoading, setCaloriesLoading] = useState(false);
-  const fetchedRef = useRef(hasPreloaded);
-
-  useEffect(() => {
-    if (!open || fetchedRef.current) return;
-    fetchedRef.current = true;
-    setCaloriesLoading(true);
-    getActivityDetail({ data: { id: activity.id } })
-      .then((detail) => {
-        setCalories(detail.calories ?? null);
-      })
-      .catch(() => {
-        setCalories(null);
-      })
-      .finally(() => {
-        setCaloriesLoading(false);
-      });
-  }, [open, activity.id]);
-
-  const title = formatActivityTitle(activity);
-  const dateStr = formatActivityDate(activity.start_date_local);
+export function ActivityDialog({ activity }: ActivityDialogProps) {
   const showDistance = shouldShowDistance(activity.sport_type);
   const isRunLike = isRunSport(activity.sport_type);
-
-  const stats = buildStats(activity, isRunLike, showDistance, calories, caloriesLoading);
+  const stats = buildStats(activity, isRunLike, showDistance);
 
   return (
     <DialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
@@ -152,15 +123,67 @@ export function ActivityDialog({ activity, open, preloadedCalories }: ActivityDi
         <div className="flex items-center gap-2 pr-6">
           <span className="text-muted-foreground">{getWorkoutIcon(activity.sport_type)}</span>
           <div>
-            <DialogTitle>{title}</DialogTitle>
-            <DialogDescription>{dateStr}</DialogDescription>
+            <DialogTitle>{activity.title}</DialogTitle>
+            <DialogDescription>{activity.dateDisplay}</DialogDescription>
           </div>
         </div>
       </DialogHeader>
 
-      {activity.map?.summary_polyline && (
+      {activity.routeSvgPaths && (
         <div className="mb-5 rounded-lg overflow-hidden bg-foreground/4 flex items-center justify-center">
-          <RoutePreview encoded={activity.map.summary_polyline} size="dialog" />
+          <RoutePreview paths={activity.routeSvgPaths} size="dialog" />
+        </div>
+      )}
+
+      {stats.length > 0 && (
+        <dl className="grid grid-cols-2 gap-x-6 gap-y-3">
+          {stats.map((stat) => (
+            <div key={stat.label} className="flex flex-col gap-0.5">
+              <dt className="text-xs text-foreground/40 flex items-center gap-1">
+                {stat.icon}
+                {stat.label}
+              </dt>
+              <dd className="text-sm text-foreground font-medium">{stat.value}</dd>
+            </div>
+          ))}
+        </dl>
+      )}
+    </DialogContent>
+  );
+}
+
+function LocalActivityDialog({ activity, open }: { activity: SanitizedActivity; open: boolean }) {
+  const [detail, setDetail] = useState<SanitizedActivityDetail | null>(null);
+  const fetchedRef = useRef(false);
+
+  useEffect(() => {
+    if (!open || fetchedRef.current) return;
+    fetchedRef.current = true;
+    getActivityDetailBySlug({ data: { slug: activity.slug } })
+      .then(setDetail)
+      .catch(() => setDetail(null));
+  }, [open, activity.slug]);
+
+  const resolved = detail ?? activity;
+  const showDistance = shouldShowDistance(resolved.sport_type);
+  const isRunLike = isRunSport(resolved.sport_type);
+  const stats = buildStats(resolved as SanitizedActivityDetail, isRunLike, showDistance);
+
+  return (
+    <DialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
+      <DialogHeader className="mb-4">
+        <div className="flex items-center gap-2 pr-6">
+          <span className="text-muted-foreground">{getWorkoutIcon(resolved.sport_type)}</span>
+          <div>
+            <DialogTitle>{resolved.title}</DialogTitle>
+            <DialogDescription>{resolved.dateDisplay}</DialogDescription>
+          </div>
+        </div>
+      </DialogHeader>
+
+      {resolved.routeSvgPaths && (
+        <div className="mb-5 rounded-lg overflow-hidden bg-foreground/4 flex items-center justify-center">
+          <RoutePreview paths={resolved.routeSvgPaths} size="dialog" />
         </div>
       )}
 
@@ -187,13 +210,7 @@ type StatEntry = {
   icon?: React.ReactNode;
 };
 
-function buildStats(
-  activity: StravaActivity,
-  isRunLike: boolean,
-  showDistance: boolean,
-  calories: number | null,
-  caloriesLoading: boolean,
-): StatEntry[] {
+function buildStats(activity: SanitizedActivityDetail, isRunLike: boolean, showDistance: boolean): StatEntry[] {
   const stats: StatEntry[] = [];
 
   stats.push({ label: "moving time", value: formatMovingTime(activity.moving_time) });
@@ -266,10 +283,8 @@ function buildStats(
     });
   }
 
-  if (caloriesLoading) {
-    stats.push({ label: "calories", value: "…", icon: <IconFlame size={10} /> });
-  } else if (calories && calories > 0) {
-    stats.push({ label: "calories", value: `${Math.round(calories)} kcal`, icon: <IconFlame size={10} /> });
+  if (activity.calories && activity.calories > 0) {
+    stats.push({ label: "calories", value: `${Math.round(activity.calories)} kcal`, icon: <IconFlame size={10} /> });
   }
 
   if (activity.pr_count && activity.pr_count > 0) {
@@ -291,28 +306,21 @@ function buildStats(
   return stats;
 }
 
-// ─── Route Preview ────────────────────────────────────────────────────────────
-
 type RoutePreviewSize = "default" | "small" | "dialog";
 
 type RoutePreviewProps = {
-  encoded: string;
+  paths: { card: string; dialog: string };
   size?: RoutePreviewSize;
 };
 
 function RoutePreview(props: RoutePreviewProps) {
-  const { encoded, size = "default" } = props;
-  if (!encoded) return null;
-
-  const coords = decodePolyline(encoded);
-  if (coords.length === 0) return null;
+  const { paths, size = "default" } = props;
 
   if (size === "dialog") {
-    const pathD = polylineToSvgPath({ coords, w: 400, h: 200, padding: 16 });
     return (
       <svg viewBox="0 0 400 200" className="w-full h-40" xmlns="http://www.w3.org/2000/svg">
         <path
-          d={pathD}
+          d={paths.dialog}
           stroke="currentColor"
           strokeWidth={1.5}
           fill="none"
@@ -325,13 +333,12 @@ function RoutePreview(props: RoutePreviewProps) {
   }
 
   const isSmall = size === "small";
-  const pathD = polylineToSvgPath({ coords, w: 100, h: 100, padding: 5 });
 
   return (
     <div className={cn("absolute top-1/2 -translate-y-1/2 pointer-events-none", isSmall ? "right-2" : "right-4")}>
       <svg viewBox="0 0 100 100" className={isSmall ? "h-12 w-12" : "h-32 w-32"} xmlns="http://www.w3.org/2000/svg">
         <path
-          d={pathD}
+          d={paths.card}
           stroke="currentColor"
           strokeWidth={isSmall ? 2 : 1.5}
           fill="none"
@@ -430,64 +437,6 @@ function isRunSport(sportType: SportType): boolean {
   return RUN_SPORT_TYPES.has(sportType);
 }
 
-const RUN_PREFIXES: Partial<Record<SportType, string>> = {
-  TrailRun: "trail",
-  VirtualRun: "virtual",
-};
-
-/**
- * Returns a distance-aware label for run sport types, or `null` for non-runs.
- * Distance thresholds (distance is in metres):
- *   ≥ 42 195 m → marathon
- *   ≥ 21 097.5 m → half marathon
- *   > 10 000 m → long run
- *   otherwise → run
- */
-function runLabel(sportType: SportType, distanceMetres: number): string | null {
-  if (!RUN_SPORT_TYPES.has(sportType)) return null;
-
-  const prefix = RUN_PREFIXES[sportType] ? `${RUN_PREFIXES[sportType]} ` : "";
-
-  if (distanceMetres >= 42_195) return `${prefix}marathon`;
-  if (distanceMetres >= 21_097.5) return `${prefix}half marathon`;
-  if (distanceMetres > 10_000) return `${prefix}long run`;
-  return `${prefix}run`;
-}
-
-/** Converts `TrailRun` → `trail run` etc. */
-function sportTypeLabel(sportType: SportType): string {
-  return sportType
-    .replace(/([A-Z])/g, " $1")
-    .trim()
-    .toLowerCase();
-}
-
-function formatActivityTitle(activity: StravaActivity): string {
-  const date = new Date(activity.start_date_local);
-  const hour = date.getHours();
-
-  let timeOfDay: string;
-  if (hour < 12) {
-    timeOfDay = "morning";
-  } else if (hour < 17) {
-    timeOfDay = "afternoon";
-  } else {
-    timeOfDay = "evening";
-  }
-
-  return `${timeOfDay} ${runLabel(activity.sport_type, activity.distance) ?? sportTypeLabel(activity.sport_type)}`;
-}
-
-function formatActivityDate(startDateLocal: string): string {
-  return new Date(startDateLocal)
-    .toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    })
-    .toLowerCase();
-}
-
 function formatMovingTime(movingTime: number): string {
   const hours = Math.floor(movingTime / 3600);
   const minutes = Math.floor((movingTime % 3600) / 60);
@@ -498,7 +447,6 @@ function formatMovingTime(movingTime: number): string {
   return `${seconds}s`;
 }
 
-/** Converts speed in m/s to a min/km pace string like "5:32 /km" */
 function formatPace(speedMps: number): string {
   if (speedMps <= 0) return "—";
   const secsPerKm = 1000 / speedMps;

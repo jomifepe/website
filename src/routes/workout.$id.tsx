@@ -1,16 +1,16 @@
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { ActivityDialog } from "~/components/WorkoutCard";
 import { Dialog } from "~/components/ui/dialog";
-import { getActivities, getActivityDetail } from "~/lib/server-activities";
-import { activitySlug } from "~/lib/strava";
+import { getActivityDetailBySlug } from "~/lib/server-activities";
 
 export const Route = createFileRoute("/workout/$id")({
   loader: async ({ params }) => {
-    const activities = await getActivities();
-    const match = activities.find((a) => activitySlug(a.start_date_local) === params.id);
-    if (!match) throw redirect({ to: "/workout" });
-    const detail = await getActivityDetail({ data: { id: match.id } });
-    return { detail };
+    try {
+      const detail = await getActivityDetailBySlug({ data: { slug: params.id } });
+      return { detail };
+    } catch {
+      throw redirect({ to: "/workout" });
+    }
   },
   component: WorkoutActivityDialog,
 });
@@ -25,12 +25,7 @@ function WorkoutActivityDialog() {
 
   return (
     <Dialog open={true} onOpenChange={handleOpenChange}>
-      <ActivityDialog
-        activity={detail}
-        open={true}
-        onOpenChange={handleOpenChange}
-        preloadedCalories={detail.calories ?? null}
-      />
+      <ActivityDialog activity={detail} open={true} onOpenChange={handleOpenChange} />
     </Dialog>
   );
 }

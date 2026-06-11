@@ -2,10 +2,10 @@ import { WorkoutCard } from "~/components/WorkoutCard";
 import { SlideHighlightRegion } from "~/components/SlideHighlightRegion";
 import { CardViewMoreLink } from "./work";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import type { StravaActivity } from "~/lib/strava";
+import type { SanitizedActivity } from "~/lib/strava";
 
 type RecentWorkoutCardProps = {
-  activities: StravaActivity[];
+  activities: SanitizedActivity[];
 };
 
 export function RecentWorkoutCard(props: RecentWorkoutCardProps) {
@@ -32,9 +32,10 @@ export function RecentWorkoutCard(props: RecentWorkoutCardProps) {
         <SlideHighlightRegion className="relative flex flex-1 flex-col gap-2 min-h-0" variant="panel">
           {activities.map((activity, index) => (
             <WorkoutCard
-              key={activity.id}
+              key={activity.slug}
               activity={activity}
               variant="small"
+              dialog="local"
               isLastItemInList={index === activities.length - 1}
             />
           ))}

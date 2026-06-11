@@ -1,5 +1,6 @@
 import { defineCachedFunction } from "nitro/cache";
 import { z } from "zod";
+import { decodePolyline, polylineToSvgPath } from "./polyline";
 
 /** https://developers.strava.com/docs/reference/#api-models-SportType */
 const sportTypeValues = [
@@ -237,3 +238,109 @@ export const fetchActivityDetail = defineCachedFunction(fetchActivityDetailRaw, 
   maxAge: 60 * 60,
   getKey: (id: number) => `id${id}`,
 });
+
+// ─── Sanitized activity (safe for the client) ─────────────────────────────────
+// Strips: id, start_date_local, map.summary_polyline (GPS coords), private.
+// All time/location-derived values are computed server-side before sending.
+
+export type SanitizedActivity = {
+  slug: string;
+  sport_type: SportType;
+  timeOfDay: "morning" | "afternoon" | "evening";
+  dateDisplay: string;
+  title: string;
+  moving_time: number;
+  elapsed_time?: number;
+  distance: number;
+  total_elevation_gain: number;
+  /** Pre-computed SVG path strings — no coordinates reachable from the client. */
+  routeSvgPaths: { card: string; dialog: string } | null;
+  has_heartrate?: boolean;
+  average_heartrate?: number;
+  max_heartrate?: number;
+  average_speed?: number;
+  average_cadence?: number;
+  pr_count?: number;
+  suffer_score?: number;
+  kilojoules?: number;
+  average_watts?: number;
+  max_watts?: number;
+  weighted_average_watts?: number;
+  device_watts?: boolean;
+};
+
+export type SanitizedActivityDetail = SanitizedActivity & { calories?: number | null };
+
+function computeTimeOfDay(startDateLocal: string): SanitizedActivity["timeOfDay"] {
+  const h = new Date(startDateLocal).getHours();
+  if (h < 12) return "morning";
+  if (h < 17) return "afternoon";
+  return "evening";
+}
+
+function computeDateDisplay(startDateLocal: string): string {
+  return new Date(startDateLocal)
+    .toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+    .toLowerCase();
+}
+
+const RUN_SPORT_SET = new Set<SportType>(["Run", "TrailRun", "VirtualRun"]);
+const RUN_PREFIX: Partial<Record<SportType, string>> = { TrailRun: "trail", VirtualRun: "virtual" };
+
+function computeTitle(sportType: SportType, distance: number, startDateLocal: string): string {
+  const tod = computeTimeOfDay(startDateLocal);
+
+  let sportLabel: string;
+  if (RUN_SPORT_SET.has(sportType)) {
+    const prefix = RUN_PREFIX[sportType] ? `${RUN_PREFIX[sportType]} ` : "";
+    if (distance >= 42_195) sportLabel = `${prefix}marathon`;
+    else if (distance >= 21_097.5) sportLabel = `${prefix}half marathon`;
+    else if (distance > 10_000) sportLabel = `${prefix}long run`;
+    else sportLabel = `${prefix}run`;
+  } else {
+    sportLabel = sportType.replace(/([A-Z])/g, " $1").trim().toLowerCase();
+  }
+
+  return `${tod} ${sportLabel}`;
+}
+
+function computeRouteSvgPaths(summaryPolyline: string | null | undefined): SanitizedActivity["routeSvgPaths"] {
+  if (!summaryPolyline) return null;
+  const coords = decodePolyline(summaryPolyline);
+  if (coords.length === 0) return null;
+  return {
+    card: polylineToSvgPath({ coords, w: 100, h: 100, padding: 5 }),
+    dialog: polylineToSvgPath({ coords, w: 400, h: 200, padding: 16 }),
+  };
+}
+
+export function sanitizeActivity(a: StravaActivity): SanitizedActivity {
+  return {
+    slug: activitySlug(a.start_date_local),
+    sport_type: a.sport_type,
+    timeOfDay: computeTimeOfDay(a.start_date_local),
+    dateDisplay: computeDateDisplay(a.start_date_local),
+    title: computeTitle(a.sport_type, a.distance, a.start_date_local),
+    moving_time: a.moving_time,
+    elapsed_time: a.elapsed_time,
+    distance: a.distance,
+    total_elevation_gain: a.total_elevation_gain,
+    routeSvgPaths: computeRouteSvgPaths(a.map?.summary_polyline),
+    has_heartrate: a.has_heartrate,
+    average_heartrate: a.average_heartrate,
+    max_heartrate: a.max_heartrate,
+    average_speed: a.average_speed,
+    average_cadence: a.average_cadence,
+    pr_count: a.pr_count,
+    suffer_score: a.suffer_score,
+    kilojoules: a.kilojoules,
+    average_watts: a.average_watts,
+    max_watts: a.max_watts,
+    weighted_average_watts: a.weighted_average_watts,
+    device_watts: a.device_watts,
+  };
+}
+
+export function sanitizeActivityDetail(a: StravaActivityDetail): SanitizedActivityDetail {
+  return { ...sanitizeActivity(a), calories: a.calories };
+}

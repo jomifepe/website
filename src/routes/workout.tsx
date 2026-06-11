@@ -2,22 +2,15 @@ import { IconBrandStrava } from "@tabler/icons-react";
 import { createFileRoute, Link, Outlet, useLoaderData } from "@tanstack/react-router";
 import { SlideHighlightRegion } from "~/components/SlideHighlightRegion";
 import { SocialLink } from "~/components/SocialLink";
-import { activitySlug } from "~/lib/strava";
 import { Badge } from "../components/ui/badge";
 import { PageLayout } from "../components/PageLayout";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../components/ui/tooltip";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { WorkoutCard } from "../components/WorkoutCard";
-import { getActivities } from "../lib/server-activities";
-import type { StravaActivity } from "~/lib/strava";
+import { getWorkoutPageActivities } from "../lib/server-activities";
 
 export const Route = createFileRoute("/workout")({
-  // Fetch ~2 weeks of activities
-  loader: async () => {
-    const activities = await getActivities();
-    const { current, last } = groupByCalendarWeek(activities);
-    return { current, last };
-  },
+  loader: async () => getWorkoutPageActivities(),
   headers: () => ({
     "Cache-Control": "public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400",
   }),
@@ -90,13 +83,8 @@ function WorkoutPage() {
                     <p className="italic text-foreground/40 text-sm">no activities yet, get moving</p>
                   ) : (
                     <SlideHighlightRegion className="relative flex flex-col items-stretch gap-2" variant="panel">
-                      {weekActivities.map((activity, index) => (
-                        <WorkoutCard
-                          key={activity.id}
-                          activity={activity}
-                          activitySlug={activitySlug(activity.start_date_local)}
-                          isLastItemInList={index === weekActivities.length - 1}
-                        />
+                      {weekActivities.map((activity) => (
+                        <WorkoutCard key={activity.slug} activity={activity} />
                       ))}
                     </SlideHighlightRegion>
                   )}
@@ -109,38 +97,6 @@ function WorkoutPage() {
       <Outlet />
     </PageLayout>
   );
-}
-
-function getWeekBounds() {
-  const today = new Date();
-  const dayOfWeek = today.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
-  const offsetFromMonday = (dayOfWeek - 1 + 7) % 7;
-
-  const currentMonday = new Date(today);
-  currentMonday.setHours(0, 0, 0, 0);
-  currentMonday.setDate(today.getDate() - offsetFromMonday);
-
-  const lastMonday = new Date(currentMonday);
-  lastMonday.setDate(currentMonday.getDate() - 7);
-
-  return { currentMonday, lastMonday };
-}
-
-function groupByCalendarWeek<T extends StravaActivity>(activities: T[]) {
-  const { currentMonday, lastMonday } = getWeekBounds();
-  const current: T[] = [];
-  const last: T[] = [];
-
-  for (const activity of activities) {
-    const date = new Date(activity.start_date_local);
-    if (date >= currentMonday) {
-      current.push(activity);
-    } else if (date >= lastMonday) {
-      last.push(activity);
-    }
-  }
-
-  return { current, last };
 }
 
 type WeekCategory = {
