@@ -298,7 +298,10 @@ function computeTitle(sportType: SportType, distance: number, startDateLocal: st
     else if (distance > 10_000) sportLabel = `${prefix}long run`;
     else sportLabel = `${prefix}run`;
   } else {
-    sportLabel = sportType.replace(/([A-Z])/g, " $1").trim().toLowerCase();
+    sportLabel = sportType
+      .replace(/([A-Z])/g, " $1")
+      .trim()
+      .toLowerCase();
   }
 
   return `${tod} ${sportLabel}`;

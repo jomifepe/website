@@ -17,7 +17,7 @@ import { Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { cn } from "~/lib/cn";
 import { getActivityDetailBySlug } from "~/lib/server-activities";
-import { useSlideHighlightRegion } from "./SlideHighlightRegion";
+import { CardItem, CardItemContent, useCardItemWrapperProps } from "./CardItem";
 import type { SanitizedActivity, SanitizedActivityDetail, SportType } from "../lib/strava";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 
@@ -34,57 +34,51 @@ export function WorkoutCard(props: WorkoutCardProps) {
   const { activity, variant = "default", dialog = "route" } = props;
 
   const [open, setOpen] = useState(false);
-  const slideHighlight = useSlideHighlightRegion();
-
   const isSmall = variant === "small";
   const timeStr = formatMovingTime(activity.moving_time);
   const distanceKm = activity.distance / 1000;
   const showDistance = shouldShowDistance(activity.sport_type);
+  const routeWrapperProps = useCardItemWrapperProps("group/card");
 
-  const interactiveClassName = cn(
-    "flex items-start gap-3 md:gap-4 rounded-lg relative group/card cursor-pointer transition-colors",
-    isSmall ? "py-2 px-2 -mx-2" : "p-2 -mx-2 md:p-3 md:-mx-3",
-    slideHighlight != null ? "z-10" : "hover:bg-foreground/5 focus-visible:bg-foreground/5",
+  const icon = (
+    <div className="w-12 h-12 rounded-md bg-foreground/8 flex items-center justify-center text-foreground/60">
+      {getWorkoutIcon(activity.sport_type)}
+    </div>
   );
 
-  const cardContent = (
+  const title = (
     <>
-      <div className="text-muted-foreground mt-0.5">{getWorkoutIcon(activity.sport_type)}</div>
-      <div className="flex-1">
-        <div className="flex flex-row items-baseline gap-2 mb-1 flex-wrap">
-          <span className="text-foreground font-medium text-sm md:text-base">{activity.title}</span>
-          <span className="text-foreground/60">·</span>
-          <span className="text-foreground/80 text-sm md:text-base">{activity.dateDisplay}</span>
-        </div>
-        <div className="flex items-center gap-2 text-foreground/60 text-sm flex-wrap">
-          <span>{timeStr}</span>
-          {showDistance && <span>·</span>}
-          {showDistance && <span>{distanceKm.toFixed(1)} km</span>}
-          {activity.total_elevation_gain > 0 && (
-            <>
-              <span>·</span>
-              <span className="flex items-center gap-1">
-                <IconArrowUp size={12} /> {Math.round(activity.total_elevation_gain)}m
-              </span>
-            </>
-          )}
-        </div>
-      </div>
-      {activity.routeSvgPaths && <RoutePreview paths={activity.routeSvgPaths} size={isSmall ? "small" : "default"} />}
+      <span className="text-foreground font-medium">{activity.title}</span>
+      <span className="text-foreground/60">·</span>
+      <span className="text-foreground/80">{activity.dateDisplay}</span>
     </>
   );
+
+  const subtitle = (
+    <div className="flex items-center gap-2 flex-wrap">
+      <span>{timeStr}</span>
+      {showDistance && <span>·</span>}
+      {showDistance && <span>{distanceKm.toFixed(1)} km</span>}
+      {activity.total_elevation_gain > 0 && (
+        <>
+          <span>·</span>
+          <span className="flex items-center gap-1">
+            <IconArrowUp size={12} /> {Math.round(activity.total_elevation_gain)}m
+          </span>
+        </>
+      )}
+    </div>
+  );
+
+  const endSlot = activity.routeSvgPaths ? (
+    <RoutePreview paths={activity.routeSvgPaths} size={isSmall ? "small" : "default"} />
+  ) : null;
 
   if (dialog === "local") {
     return (
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
-          <div
-            className={interactiveClassName}
-            onMouseEnter={slideHighlight?.onInteract}
-            onFocus={slideHighlight?.onInteract}
-          >
-            {cardContent}
-          </div>
+          <CardItem className="group/card" icon={icon} title={title} subtitle={subtitle} endSlot={endSlot} />
         </DialogTrigger>
         <LocalActivityDialog activity={activity} open={open} />
       </Dialog>
@@ -92,14 +86,8 @@ export function WorkoutCard(props: WorkoutCardProps) {
   }
 
   return (
-    <Link
-      to="/workout/$id"
-      params={{ id: activity.slug }}
-      className={interactiveClassName}
-      onMouseEnter={slideHighlight?.onInteract}
-      onFocus={slideHighlight?.onInteract}
-    >
-      {cardContent}
+    <Link to="/workout/$id" params={{ id: activity.slug }} {...routeWrapperProps}>
+      <CardItemContent icon={icon} title={title} subtitle={subtitle} endSlot={endSlot} />
     </Link>
   );
 }
@@ -121,7 +109,9 @@ export function ActivityDialog({ activity }: ActivityDialogProps) {
     <DialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
       <DialogHeader className="mb-4">
         <div className="flex items-center gap-2 pr-6">
-          <span className="text-muted-foreground">{getWorkoutIcon(activity.sport_type)}</span>
+          <div className="w-10 h-10 rounded-md bg-foreground/8 flex items-center justify-center shrink-0 text-foreground/60">
+            {getWorkoutIcon(activity.sport_type, 18)}
+          </div>
           <div>
             <DialogTitle>{activity.title}</DialogTitle>
             <DialogDescription>{activity.dateDisplay}</DialogDescription>
@@ -353,8 +343,8 @@ function RoutePreview(props: RoutePreviewProps) {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-export function getWorkoutIcon(sportType: SportType) {
-  const commonProps = { size: 24, className: "shrink-0" };
+export function getWorkoutIcon(sportType: SportType, size = 20) {
+  const commonProps = { size, className: "shrink-0" };
 
   switch (sportType) {
     case "Run":

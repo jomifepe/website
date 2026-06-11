@@ -30,14 +30,8 @@ export function RecentWorkoutCard(props: RecentWorkoutCardProps) {
       </CardHeader>
       <CardContent className="flex flex-1 flex-col gap-4 p-0 min-h-0">
         <SlideHighlightRegion className="relative flex flex-1 flex-col gap-2 min-h-0" variant="panel">
-          {activities.map((activity, index) => (
-            <WorkoutCard
-              key={activity.slug}
-              activity={activity}
-              variant="small"
-              dialog="local"
-              isLastItemInList={index === activities.length - 1}
-            />
+          {activities.map((activity) => (
+            <WorkoutCard key={activity.slug} activity={activity} variant="small" dialog="local" />
           ))}
         </SlideHighlightRegion>
         <CardViewMoreLink

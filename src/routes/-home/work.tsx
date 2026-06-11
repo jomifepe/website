@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
-import { SlideHighlightRegion, useSlideHighlightRegion } from "~/components/SlideHighlightRegion";
+import { CardItem } from "~/components/CardItem";
+import { SlideHighlightRegion } from "~/components/SlideHighlightRegion";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { cn } from "~/lib/cn";
 
 export function WorkCard() {
   return (
@@ -53,33 +53,24 @@ type WorkItemProps = {
 
 function WorkItem(props: WorkItemProps) {
   const { company, companyRole: role, startDate, endDate, logo, url } = props;
-  const slideHighlight = useSlideHighlightRegion();
 
   return (
-    <a
+    <CardItem
+      as="a"
       href={url}
       target="_blank"
       rel="noopener noreferrer"
       aria-label={`${company} - ${role} (opens in new tab)`}
-      className={cn(
-        "relative flex cursor-pointer items-start gap-4 rounded-lg -mx-2 px-2 py-2 md:-mx-3 md:px-3 md:py-3 transition-colors focus-visible:outline-none",
-        slideHighlight != null ? "z-10" : "hover:bg-foreground/5 focus-visible:bg-foreground/5",
-      )}
-      onFocus={slideHighlight != null ? slideHighlight.onInteract : undefined}
-      onMouseEnter={slideHighlight != null ? slideHighlight.onInteract : undefined}
-    >
-      {logo && <img src={logo} alt={`${company} logo`} className="w-12 h-12 rounded-md object-contain shrink-0" />}
-      <div className="flex-1">
-        <div className="flex flex-row items-baseline gap-2 mb-1 flex-wrap">
-          <span className="text-foreground font-medium text-sm md:text-base">{company}</span>
+      icon={logo && <img src={logo} alt={`${company} logo`} className="w-12 h-12 rounded-md object-contain" />}
+      title={
+        <>
+          <span className="text-foreground font-medium">{company}</span>
           <span className="text-foreground/60">·</span>
-          <span className="text-foreground/80 text-sm md:text-base">{role}</span>
-        </div>
-        <div className="text-foreground/60 text-sm md:text-base">
-          {startDate} – {endDate || "current"}
-        </div>
-      </div>
-    </a>
+          <span className="text-foreground/80">{role}</span>
+        </>
+      }
+      subtitle={`${startDate} – ${endDate ?? "current"}`}
+    />
   );
 }
 
