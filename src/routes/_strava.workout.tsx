@@ -7,24 +7,22 @@ import { PageLayout } from "../components/PageLayout";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../components/ui/tooltip";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { WorkoutCard } from "../components/WorkoutCard";
-import { getWorkoutPageActivities } from "../lib/server-activities";
+import type { SanitizedActivity } from "../lib/strava";
 
-export const Route = createFileRoute("/workout")({
-  loader: async () => getWorkoutPageActivities(),
+export const Route = createFileRoute("/_strava/workout")({
   headers: () => ({
-    "Cache-Control": "public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400",
+    "Cache-Control": "public, max-age=300, s-maxage=300, stale-while-revalidate=60",
   }),
-  staleTime: 60 * 60 * 1000,
-  gcTime: 60 * 60 * 1000,
   component: WorkoutPage,
 });
 
 function WorkoutPage() {
-  const activities = useLoaderData({ from: "/workout" });
+  const activities = useLoaderData({ from: "/_strava" });
+  const { current, last } = groupActivitiesByWeek(activities);
 
   const weeks = [
-    { label: "current week", activities: activities.current },
-    { label: "last week", activities: activities.last },
+    { label: "current week", activities: current },
+    { label: "last week", activities: last },
   ];
 
   return (
@@ -152,4 +150,30 @@ function categorizeWeek(activityCount: number): WeekCategory {
     color: "red",
     description: `trained ${activityCount} day${activityCount === 1 ? "" : "s"}`,
   };
+}
+
+function groupActivitiesByWeek(activities: SanitizedActivity[]): {
+  current: SanitizedActivity[];
+  last: SanitizedActivity[];
+} {
+  const today = new Date();
+  const offsetFromMonday = (today.getDay() - 1 + 7) % 7;
+
+  const currentMondayDate = new Date(today);
+  currentMondayDate.setDate(today.getDate() - offsetFromMonday);
+  const currentMonday = currentMondayDate.toISOString().slice(0, 10);
+
+  const lastMondayDate = new Date(currentMondayDate);
+  lastMondayDate.setDate(currentMondayDate.getDate() - 7);
+  const lastMonday = lastMondayDate.toISOString().slice(0, 10);
+
+  const current: SanitizedActivity[] = [];
+  const last: SanitizedActivity[] = [];
+
+  for (const activity of activities) {
+    if (activity.startDate >= currentMonday) current.push(activity);
+    else if (activity.startDate >= lastMonday) last.push(activity);
+  }
+
+  return { current, last };
 }

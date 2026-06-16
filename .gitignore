@@ -13,3 +13,6 @@ count.txt
 todos.json
 .vercel/output/
 .claude/
+runs.json
+recent-activities.json
+activity-*.json

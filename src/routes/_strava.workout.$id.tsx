@@ -2,7 +2,7 @@ import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { ActivityDialog } from "~/components/WorkoutCard";
 import { getActivityDetailBySlug } from "~/lib/server-activities";
 
-export const Route = createFileRoute("/workout/$id")({
+export const Route = createFileRoute("/_strava/workout/$id")({
   loader: async ({ params }) => {
     try {
       const detail = await getActivityDetailBySlug({ data: { slug: params.id } });

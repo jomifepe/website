@@ -9,95 +9,125 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as WorkoutRouteImport } from './routes/workout'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as WorkoutIdRouteImport } from './routes/workout.$id'
+import { Route as StravaRouteImport } from './routes/_strava'
+import { Route as StravaIndexRouteImport } from './routes/_strava.index'
+import { Route as StravaWorkoutRouteImport } from './routes/_strava.workout'
+import { Route as StravaWorkoutIdRouteImport } from './routes/_strava.workout.$id'
 
-const WorkoutRoute = WorkoutRouteImport.update({
-  id: '/workout',
-  path: '/workout',
+const StravaRoute = StravaRouteImport.update({
+  id: '/_strava',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
+const StravaIndexRoute = StravaIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => StravaRoute,
 } as any)
-const WorkoutIdRoute = WorkoutIdRouteImport.update({
+const StravaWorkoutRoute = StravaWorkoutRouteImport.update({
+  id: '/workout',
+  path: '/workout',
+  getParentRoute: () => StravaRoute,
+} as any)
+const StravaWorkoutIdRoute = StravaWorkoutIdRouteImport.update({
   id: '/$id',
   path: '/$id',
-  getParentRoute: () => WorkoutRoute,
+  getParentRoute: () => StravaWorkoutRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/workout': typeof WorkoutRouteWithChildren
-  '/workout/$id': typeof WorkoutIdRoute
+  '/': typeof StravaIndexRoute
+  '/workout': typeof StravaWorkoutRouteWithChildren
+  '/workout/$id': typeof StravaWorkoutIdRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/workout': typeof WorkoutRouteWithChildren
-  '/workout/$id': typeof WorkoutIdRoute
+  '/workout': typeof StravaWorkoutRouteWithChildren
+  '/': typeof StravaIndexRoute
+  '/workout/$id': typeof StravaWorkoutIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/workout': typeof WorkoutRouteWithChildren
-  '/workout/$id': typeof WorkoutIdRoute
+  '/_strava': typeof StravaRouteWithChildren
+  '/_strava/workout': typeof StravaWorkoutRouteWithChildren
+  '/_strava/': typeof StravaIndexRoute
+  '/_strava/workout/$id': typeof StravaWorkoutIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths: '/' | '/workout' | '/workout/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/workout' | '/workout/$id'
-  id: '__root__' | '/' | '/workout' | '/workout/$id'
+  to: '/workout' | '/' | '/workout/$id'
+  id:
+    | '__root__'
+    | '/_strava'
+    | '/_strava/workout'
+    | '/_strava/'
+    | '/_strava/workout/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  WorkoutRoute: typeof WorkoutRouteWithChildren
+  StravaRoute: typeof StravaRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/workout': {
-      id: '/workout'
-      path: '/workout'
-      fullPath: '/workout'
-      preLoaderRoute: typeof WorkoutRouteImport
+    '/_strava': {
+      id: '/_strava'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof StravaRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
+    '/_strava/': {
+      id: '/_strava/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof StravaIndexRouteImport
+      parentRoute: typeof StravaRoute
     }
-    '/workout/$id': {
-      id: '/workout/$id'
+    '/_strava/workout': {
+      id: '/_strava/workout'
+      path: '/workout'
+      fullPath: '/workout'
+      preLoaderRoute: typeof StravaWorkoutRouteImport
+      parentRoute: typeof StravaRoute
+    }
+    '/_strava/workout/$id': {
+      id: '/_strava/workout/$id'
       path: '/$id'
       fullPath: '/workout/$id'
-      preLoaderRoute: typeof WorkoutIdRouteImport
-      parentRoute: typeof WorkoutRoute
+      preLoaderRoute: typeof StravaWorkoutIdRouteImport
+      parentRoute: typeof StravaWorkoutRoute
     }
   }
 }
 
-interface WorkoutRouteChildren {
-  WorkoutIdRoute: typeof WorkoutIdRoute
+interface StravaWorkoutRouteChildren {
+  StravaWorkoutIdRoute: typeof StravaWorkoutIdRoute
 }
 
-const WorkoutRouteChildren: WorkoutRouteChildren = {
-  WorkoutIdRoute: WorkoutIdRoute,
+const StravaWorkoutRouteChildren: StravaWorkoutRouteChildren = {
+  StravaWorkoutIdRoute: StravaWorkoutIdRoute,
 }
 
-const WorkoutRouteWithChildren =
-  WorkoutRoute._addFileChildren(WorkoutRouteChildren)
+const StravaWorkoutRouteWithChildren = StravaWorkoutRoute._addFileChildren(
+  StravaWorkoutRouteChildren,
+)
+
+interface StravaRouteChildren {
+  StravaWorkoutRoute: typeof StravaWorkoutRouteWithChildren
+  StravaIndexRoute: typeof StravaIndexRoute
+}
+
+const StravaRouteChildren: StravaRouteChildren = {
+  StravaWorkoutRoute: StravaWorkoutRouteWithChildren,
+  StravaIndexRoute: StravaIndexRoute,
+}
+
+const StravaRouteWithChildren =
+  StravaRoute._addFileChildren(StravaRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  WorkoutRoute: WorkoutRouteWithChildren,
+  StravaRoute: StravaRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

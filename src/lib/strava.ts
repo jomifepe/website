@@ -245,6 +245,7 @@ export const fetchActivityDetail = defineCachedFunction(fetchActivityDetailRaw, 
 
 export type SanitizedActivity = {
   slug: string;
+  startDate: string; // YYYY-MM-DD in athlete's local timezone
   sport_type: SportType;
   timeOfDay: "morning" | "afternoon" | "evening";
   dateDisplay: string;
@@ -320,6 +321,7 @@ function computeRouteSvgPaths(summaryPolyline: string | null | undefined): Sanit
 export function sanitizeActivity(a: StravaActivity): SanitizedActivity {
   return {
     slug: activitySlug(a.start_date_local),
+    startDate: a.start_date_local.slice(0, 10),
     sport_type: a.sport_type,
     timeOfDay: computeTimeOfDay(a.start_date_local),
     dateDisplay: computeDateDisplay(a.start_date_local),
