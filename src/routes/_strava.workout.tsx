@@ -10,9 +10,6 @@ import { WorkoutCard } from "../components/WorkoutCard";
 import type { SanitizedActivity } from "../lib/strava";
 
 export const Route = createFileRoute("/_strava/workout")({
-  headers: () => ({
-    "Cache-Control": "public, max-age=300, s-maxage=300, stale-while-revalidate=60",
-  }),
   component: WorkoutPage,
 });
 

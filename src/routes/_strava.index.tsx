@@ -14,11 +14,7 @@ export const Route = createFileRoute("/_strava/")({
     const recentTrack = await getRecentlyPlayed();
     return { recentTrack, sentences: pickSentences() };
   },
-  headers: () => ({
-    "Cache-Control": "public, max-age=300, s-maxage=300, stale-while-revalidate=60",
-  }),
   staleTime: 5 * 60 * 1000,
-  gcTime: 60 * 60 * 1000,
   component: HomePage,
 });
 
