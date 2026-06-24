@@ -1,6 +1,6 @@
 import { type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
-import { cn } from "~/lib/cn";
+import { cn } from "~/lib/utils";
 
 const codingPhrases = [
   "builds things",

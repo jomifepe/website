@@ -1,5 +1,5 @@
 import type { ComponentPropsWithoutRef, ElementType, ReactNode } from "react";
-import { cn } from "~/lib/cn";
+import { cn } from "~/lib/utils";
 import { useSlideHighlightRegion } from "./SlideHighlightRegion";
 
 type CardItemOwnProps = {

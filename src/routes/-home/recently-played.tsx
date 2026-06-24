@@ -1,5 +1,5 @@
 import type { RecentTrack } from "~/lib/statsfm";
-import { cn } from "~/lib/cn";
+import { cn } from "~/lib/utils";
 import { TbDiscFilled } from "react-icons/tb";
 
 type RecentlyPlayedProps = {

@@ -7,7 +7,7 @@ import { PageLayout } from "../components/PageLayout";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../components/ui/tooltip";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { WorkoutCard } from "../components/WorkoutCard";
-import type { SanitizedActivity } from "../lib/strava";
+import { computeSportSet, type SanitizedActivity } from "../lib/strava";
 
 export const Route = createFileRoute("/_strava/workout")({
   component: WorkoutPage,
@@ -39,9 +39,7 @@ function WorkoutPage() {
         <div className="flex flex-col items-stretch gap-8">
           {weeks.map(({ label, activities: weekActivities }) => {
             const category =
-              label === "current week"
-                ? categorizeCurrentWeek(weekActivities.length)
-                : categorizeWeek(weekActivities.length);
+              label === "current week" ? categorizeCurrentWeek(weekActivities.length) : categorizeWeek(weekActivities);
 
             return (
               <Card
@@ -113,39 +111,53 @@ function categorizeCurrentWeek(activityCount: number): WeekCategory {
   };
 }
 
-function categorizeWeek(activityCount: number): WeekCategory {
-  if (activityCount >= 6) {
+function categorizeWeek(activities: SanitizedActivity[]): WeekCategory {
+  const activityCount = activities.length;
+  const description = `trained ${activityCount} days`;
+
+  const weeklyGoal = checkWeeklyGoal(activities);
+  if (weeklyGoal.wasMet) {
     return {
       label: "outstanding 🥇",
       color: "gold",
-      description: `trained 6 or more days`,
+      description: `${description}. reached goal of ${weeklyGoalDescription}`,
     };
   }
-  if (activityCount === 5) {
-    return {
-      label: "strong",
-      color: "purple",
-      description: "trained 5 days",
-    };
+
+  if (activityCount >= 5) {
+    return { label: "strong", color: "purple", description };
   }
   if (activityCount >= 3) {
-    return {
-      label: "good",
-      color: "green",
-      description: `trained ${activityCount} days`,
-    };
+    return { label: "good", color: "green", description };
   }
   if (activityCount === 2) {
-    return {
-      label: "okay",
-      color: "green",
-      description: "trained 2 days",
-    };
+    return { label: "okay", color: "green", description };
   }
   return {
     label: "slacking 😴",
     color: "red",
     description: `trained ${activityCount} day${activityCount === 1 ? "" : "s"}`,
+  };
+}
+
+/** current weekly goal, adapt as needed */
+const weeklyGoal = { run: 3, lift: 3 };
+const weeklyGoalDescription = Object.entries(weeklyGoal)
+  .map(([key, value]) => `${value}+ ${key}${value === 1 ? "" : "s"}`)
+  .join(", ")
+  .replace(/, ([^,]*)$/, " and $1");
+
+function checkWeeklyGoal(activities: SanitizedActivity[]) {
+  const counts = { run: 0, lift: 0 };
+  for (const activity of activities) {
+    const sportSet = computeSportSet(activity.sport_type);
+    if (sportSet === "run") counts.run++;
+    if (sportSet === "lift") counts.lift++;
+  }
+
+  return {
+    wasMet: Object.entries(counts).every(([key, count]) => count >= weeklyGoal[key as keyof typeof weeklyGoal]),
+    description: weeklyGoalDescription,
   };
 }
 

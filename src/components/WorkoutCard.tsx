@@ -19,7 +19,7 @@ import {
 import { FaMedal } from "react-icons/fa";
 import { Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { cn } from "~/lib/cn";
+import { cn } from "~/lib/utils";
 import { getActivityDetailBySlug } from "~/lib/server-activities";
 import { CardItem, CardItemContent, useCardItemWrapperProps } from "./CardItem";
 import type { SanitizedActivity, SanitizedActivityDetail, SportType } from "../lib/strava";

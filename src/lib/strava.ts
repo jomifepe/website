@@ -285,15 +285,42 @@ function computeDateDisplay(startDateLocal: string): string {
     .toLowerCase();
 }
 
-const RUN_SPORT_SET = new Set<SportType>(["Run", "TrailRun", "VirtualRun"]);
-const RUN_PREFIX: Partial<Record<SportType, string>> = { TrailRun: "trail", VirtualRun: "virtual" };
+export type SportSet = "run" | "ride" | "lift";
+export function computeSportSet(sportType: SportType) {
+  switch (sportType) {
+    case "Run":
+    case "TrailRun":
+    case "VirtualRun": {
+      return "run";
+    }
+    case "Ride":
+    case "EBikeRide":
+    case "EMountainBikeRide":
+    case "MountainBikeRide":
+    case "GravelRide":
+    case "VirtualRide":
+    case "Velomobile":
+    case "Handcycle": {
+      return "ride";
+    }
+    case "WeightTraining": {
+      return "lift";
+    }
+    default:
+      return undefined;
+  }
+}
 
 function computeTitle(sportType: SportType, distance: number, startDateLocal: string): string {
   const tod = computeTimeOfDay(startDateLocal);
+  const sportSet = computeSportSet(sportType);
 
-  let sportLabel: string;
-  if (RUN_SPORT_SET.has(sportType)) {
-    const prefix = RUN_PREFIX[sportType] ? `${RUN_PREFIX[sportType]} ` : "";
+  let sportLabel = sportSet;
+  if (sportSet === "run") {
+    let prefix = "";
+    if (sportType === "TrailRun") prefix = "trail ";
+    if (sportType === "VirtualRun") prefix = "virtual ";
+
     if (distance >= 42_195) sportLabel = `${prefix}marathon`;
     else if (distance >= 21_097.5) sportLabel = `${prefix}half marathon`;
     else if (distance > 15_000) sportLabel = `${prefix}long run`;

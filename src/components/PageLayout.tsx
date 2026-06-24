@@ -5,7 +5,7 @@ import { useLayoutEffect } from "node_modules/@tanstack/react-router/dist/esm/ut
 import { useEffect, useState, type ReactNode } from "react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "~/components/ui/tooltip";
 import { Theme, useTheme } from "~/hooks/useTheme";
-import { cn } from "~/lib/cn";
+import { cn } from "~/lib/utils";
 
 type PageLayoutProps = {
   children: ReactNode;

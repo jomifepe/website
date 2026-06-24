@@ -7,7 +7,7 @@ import {
   type ReactNode,
 } from "react";
 import { useSlideHighlightRegion } from "~/components/SlideHighlightRegion";
-import { cn } from "~/lib/cn";
+import { cn } from "~/lib/utils";
 
 const hoverColorClass = {
   green: "hover:text-green-400 focus-visible:text-green-400",

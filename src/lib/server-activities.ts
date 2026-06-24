@@ -26,4 +26,3 @@ export const getActivityDetailBySlug = createServerFn({ method: "GET" })
     const detail = await fetchActivityDetail(match.id);
     return sanitizeActivityDetail(detail);
   });
-
