@@ -2,7 +2,6 @@ import { createFileRoute, useLoaderData } from "@tanstack/react-router";
 import { PageLayout } from "~/components/PageLayout";
 import { cn } from "~/lib/cn";
 
-import { getActivities } from "~/lib/server-activities";
 import { getRecentlyPlayed } from "~/lib/server-statsfm";
 
 import { HeroParagraph, pickSentences } from "./-home/sentences";
@@ -10,25 +9,19 @@ import { WorkCard } from "./-home/work";
 import { RecentWorkoutCard } from "./-home/workout";
 import { SocialLinksGroup } from "./-home/social-links";
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/_strava/")({
   loader: async () => {
-    const [activities, recentTrack] = await Promise.all([getActivities(), getRecentlyPlayed()]);
-    return {
-      recentWorkouts: activities.slice(0, 2),
-      recentTrack,
-      sentences: pickSentences(),
-    };
+    const recentTrack = await getRecentlyPlayed();
+    return { recentTrack, sentences: pickSentences() };
   },
-  headers: () => ({
-    "Cache-Control": "public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400",
-  }),
-  staleTime: 60 * 60 * 1000,
-  gcTime: 60 * 60 * 1000,
+  staleTime: 5 * 60 * 1000,
   component: HomePage,
 });
 
 function HomePage() {
-  const { recentWorkouts, recentTrack, sentences } = useLoaderData({ from: "/" });
+  const activities = useLoaderData({ from: "/_strava" });
+  const { recentTrack, sentences } = useLoaderData({ from: "/_strava/" });
+  const recentWorkouts = activities.slice(0, 2);
 
   return (
     <PageLayout>
