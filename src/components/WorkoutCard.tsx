@@ -89,7 +89,7 @@ export function WorkoutCard(props: WorkoutCardProps) {
   }
 
   return (
-    <Link to="/workout/$id" params={{ id: activity.slug }} resetScroll={false} {...routeWrapperProps}>
+    <Link to="/workout/$id" params={{ id: activity.slug }} resetScroll={false} replace {...routeWrapperProps}>
       <CardItemContent icon={icon} title={title} subtitle={subtitle} endSlot={endSlot} />
     </Link>
   );
