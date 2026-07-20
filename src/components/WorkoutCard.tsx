@@ -18,7 +18,7 @@ import {
 } from "react-icons/tb";
 import { FaMedal } from "react-icons/fa";
 import { Link } from "@tanstack/react-router";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { Suspense, use, useEffect, useRef, useState, type ReactNode } from "react";
 import { cn } from "~/lib/utils";
 import { getActivityDetailBySlug } from "~/lib/server-activities";
 import { CardItem, CardItemContent, useCardItemWrapperProps } from "./CardItem";
@@ -89,7 +89,13 @@ export function WorkoutCard(props: WorkoutCardProps) {
   }
 
   return (
-    <Link to="/workout/$id" params={{ id: activity.slug }} resetScroll={false} {...routeWrapperProps}>
+    <Link
+      to="/workout/$id"
+      params={{ id: activity.slug }}
+      resetScroll={false}
+      {...routeWrapperProps}
+      className={cn(routeWrapperProps.className, "transition-opacity data-[transitioning=transitioning]:opacity-50")}
+    >
       <CardItemContent icon={icon} title={title} subtitle={subtitle} endSlot={endSlot} />
     </Link>
   );
@@ -128,10 +134,12 @@ type ActivityDialogProps = {
   trigger?: ReactNode;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  /** Non-blocking promise for supplementary fields (e.g. calories), streamed in via <Await>. */
+  deferredDetail?: Promise<SanitizedActivityDetail | null>;
 };
 
 export function ActivityDialog(props: ActivityDialogProps) {
-  const { activity: initialActivity, trigger, open: controlledOpen, onOpenChange } = props;
+  const { activity: initialActivity, trigger, open: controlledOpen, onOpenChange, deferredDetail } = props;
   const [internalOpen, setInternalOpen] = useState(false);
   const [detail, setDetail] = useState<SanitizedActivityDetail | null>(null);
   const fetchedRef = useRef(false);
@@ -147,11 +155,8 @@ export function ActivityDialog(props: ActivityDialogProps) {
       .catch(() => setDetail(null));
   }, [isOpen, initialActivity.slug, trigger]);
 
-  const activity = detail ?? initialActivity;
-
-  const showDistance = shouldShowDistance(activity.sport_type);
-  const isRunLike = isRunSport(activity.sport_type);
-  const stats = buildStats({ activity: activity, isRunLike, showDistance });
+  const showDistance = shouldShowDistance(initialActivity.sport_type);
+  const isRunLike = isRunSport(initialActivity.sport_type);
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
@@ -160,31 +165,69 @@ export function ActivityDialog(props: ActivityDialogProps) {
         <DialogHeader className="mb-4">
           <div className="flex items-center gap-3 pr-6">
             <div className="w-10 h-10 rounded-md bg-foreground/8 flex items-center justify-center shrink-0 text-foreground/60">
-              {getWorkoutIcon(activity.sport_type, 18)}
+              {getWorkoutIcon(initialActivity.sport_type, 18)}
             </div>
             <div className="flex flex-col gap-0.5 flex-1 min-w-0">
-              <DialogTitle>{activity.title}</DialogTitle>
-              <DialogDescription>{activity.dateDisplay}</DialogDescription>
+              <DialogTitle>{initialActivity.title}</DialogTitle>
+              <DialogDescription>{initialActivity.dateDisplay}</DialogDescription>
             </div>
-            {!!activity.pr_count && <PrMedals count={activity.pr_count} />}
+            {!!initialActivity.pr_count && <PrMedals count={initialActivity.pr_count} />}
           </div>
         </DialogHeader>
-        <RouteMapContainer routeSvgPaths={activity.routeSvgPaths} />
-        {stats.length > 0 && (
-          <dl className="grid grid-cols-2 gap-x-6 gap-y-3">
-            {stats.map((stat) => (
-              <div key={stat.label} className="flex flex-col gap-0.5">
-                <dt className="text-xs text-foreground/40 flex items-center gap-1">
-                  {stat.icon}
-                  {stat.label}
-                </dt>
-                <dd className="text-sm text-foreground font-medium">{stat.value}</dd>
-              </div>
-            ))}
-          </dl>
+        <RouteMapContainer routeSvgPaths={initialActivity.routeSvgPaths} />
+        {deferredDetail ? (
+          <Suspense fallback={<StatsSection activity={initialActivity} isRunLike={isRunLike} showDistance={showDistance} />}>
+            <DeferredStats
+              promise={deferredDetail}
+              fallbackActivity={initialActivity}
+              isRunLike={isRunLike}
+              showDistance={showDistance}
+            />
+          </Suspense>
+        ) : (
+          <StatsSection activity={detail ?? initialActivity} isRunLike={isRunLike} showDistance={showDistance} />
         )}
       </DialogContent>
     </Dialog>
+  );
+}
+
+type DeferredStatsProps = {
+  promise: Promise<SanitizedActivityDetail | null>;
+  fallbackActivity: SanitizedActivity;
+  isRunLike: boolean;
+  showDistance: boolean;
+};
+
+function DeferredStats(props: DeferredStatsProps) {
+  const { promise, fallbackActivity, isRunLike, showDistance } = props;
+  const resolved = use(promise);
+  return <StatsSection activity={resolved ?? fallbackActivity} isRunLike={isRunLike} showDistance={showDistance} />;
+}
+
+type StatsSectionProps = {
+  activity: SanitizedActivityDetail;
+  isRunLike: boolean;
+  showDistance: boolean;
+};
+
+function StatsSection(props: StatsSectionProps) {
+  const { activity, isRunLike, showDistance } = props;
+  const stats = buildStats({ activity, isRunLike, showDistance });
+  if (stats.length === 0) return null;
+
+  return (
+    <dl className="grid grid-cols-2 gap-x-6 gap-y-3">
+      {stats.map((stat) => (
+        <div key={stat.label} className="flex flex-col gap-0.5">
+          <dt className="text-xs text-foreground/40 flex items-center gap-1">
+            {stat.icon}
+            {stat.label}
+          </dt>
+          <dd className="text-sm text-foreground font-medium">{stat.value}</dd>
+        </div>
+      ))}
+    </dl>
   );
 }
 
