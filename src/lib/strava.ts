@@ -1,4 +1,3 @@
-import { defineCachedFunction } from "nitro/cache";
 import { z } from "zod";
 import { decodePolyline, polylineToSvgPath } from "./polyline";
 
@@ -167,7 +166,7 @@ async function refreshAccessToken(): Promise<StravaTokenResponse> {
   return tokenData;
 }
 
-async function fetchActivitiesRaw(page: number, perPage: number = 10): Promise<StravaActivity[]> {
+export async function fetchActivities(page: number, perPage: number = 10): Promise<StravaActivity[]> {
   const tokenData = await refreshAccessToken();
 
   const url = new URL("https://www.strava.com/api/v3/athlete/activities");
@@ -210,13 +209,7 @@ export function activitySlug(startDateLocal: string): string {
   return h.toString(36);
 }
 
-export const fetchActivities = defineCachedFunction(fetchActivitiesRaw, {
-  name: "strava-activities",
-  maxAge: 60 * 60, // 1 hour
-  getKey: (page: number, perPage: number = 10) => `p${page}-pp${perPage}`,
-});
-
-async function fetchActivityDetailRaw(id: number): Promise<StravaActivityDetail> {
+export async function fetchActivityDetail(id: number): Promise<StravaActivityDetail> {
   const tokenData = await refreshAccessToken();
 
   const response = await fetch(`https://www.strava.com/api/v3/activities/${id}`, {
@@ -232,12 +225,6 @@ async function fetchActivityDetailRaw(id: number): Promise<StravaActivityDetail>
   const data = await response.json();
   return StravaActivityDetailSchema.parse(data);
 }
-
-export const fetchActivityDetail = defineCachedFunction(fetchActivityDetailRaw, {
-  name: "strava-activity-detail",
-  maxAge: 60 * 60,
-  getKey: (id: number) => `id${id}`,
-});
 
 // ─── Sanitized activity (safe for the client) ─────────────────────────────────
 // Strips: id, start_date_local, map.summary_polyline (GPS coords), private.

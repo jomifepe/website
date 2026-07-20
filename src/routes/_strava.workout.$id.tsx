@@ -11,7 +11,7 @@ export const Route = createFileRoute("/_strava/workout/$id")({
       throw redirect({ to: "/workout" });
     }
   },
-  staleTime: 60 * 60 * 1000,
+  staleTime: 60 * 60 * 1000, // 1 hour
   component: WorkoutActivityDialog,
 });
 
