@@ -11,7 +11,7 @@ count.txt
 .output
 .vinxi
 todos.json
-.vercel/output/
+.vercel/
 .claude/
 runs.json
 recent-activities.json
