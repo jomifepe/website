@@ -434,7 +434,7 @@ function isRunSport(sportType: SportType): boolean {
   return RUN_SPORT_TYPES.has(sportType);
 }
 
-function formatMovingTime(movingTime: number): string {
+export function formatMovingTime(movingTime: number): string {
   const hours = Math.floor(movingTime / 3600);
   const minutes = Math.floor((movingTime % 3600) / 60);
   const seconds = movingTime % 60;
