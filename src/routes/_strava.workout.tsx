@@ -42,7 +42,7 @@ function WorkoutPage() {
               label === "current week" ? categorizeCurrentWeek(weekActivities.length) : categorizeWeek(weekActivities);
 
             return (
-              <div key={label} className="flex flex-col items-stretch gap-4 lg:flex-row lg:items-start">
+              <div key={label} className="relative flex flex-col items-stretch gap-4 lg:flex-row lg:items-stretch">
                 <Card className="flex min-w-0 flex-1 flex-col gap-4 border-border bg-foreground/4 p-6 text-foreground shadow-none">
                   <CardHeader className="p-0">
                     <div className="flex flex-row flex-wrap items-center gap-3">
@@ -97,19 +97,23 @@ function WeekSummaryCard(props: WeekSummaryCardProps) {
   ];
 
   return (
-    <Card className="-order-1 shrink-0 gap-0 border-border bg-foreground/4 p-4 text-foreground shadow-none lg:order-0 lg:sticky lg:top-4 lg:w-44">
-      <dl className="flex flex-row flex-wrap gap-x-6 gap-y-3 lg:flex-col">
-        {stats.map((stat) => (
-          <div key={stat.label} className="flex flex-col gap-0.5">
-            <dt className="flex items-center gap-1 text-xs text-foreground/40">
-              {stat.icon}
-              {stat.label}
-            </dt>
-            <dd className="text-sm font-medium text-foreground">{stat.value}</dd>
-          </div>
-        ))}
-      </dl>
-    </Card>
+    // 2xl+ is the first breakpoint where the viewport gutter is wide enough to hold
+    // the card outside the max-w-5xl content column without causing horizontal scroll.
+    <div className="-order-1 shrink-0 lg:order-0 2xl:absolute 2xl:top-0 2xl:left-full 2xl:h-full 2xl:ml-4">
+      <Card className="gap-0 border-border bg-foreground/4 p-4 text-foreground shadow-none lg:sticky lg:top-4 lg:w-44">
+        <dl className="flex flex-row flex-wrap gap-x-6 gap-y-3 lg:flex-col">
+          {stats.map((stat) => (
+            <div key={stat.label} className="flex flex-col gap-0.5">
+              <dt className="flex items-center gap-1 text-xs text-foreground/40">
+                {stat.icon}
+                {stat.label}
+              </dt>
+              <dd className="text-sm font-medium text-foreground">{stat.value}</dd>
+            </div>
+          ))}
+        </dl>
+      </Card>
+    </div>
   );
 }
 
