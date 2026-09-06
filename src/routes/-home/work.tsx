@@ -17,7 +17,7 @@ export function WorkCard() {
         >
           <WorkItem
             company="prismic"
-            companyRole="software engineer"
+            companyRole="senior software engineer"
             startDate="2024"
             logo="/logos/prismic.svg"
             url="https://prismic.io"
