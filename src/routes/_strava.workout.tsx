@@ -1,4 +1,4 @@
-import { TbBrandStrava, TbChevronLeft } from "react-icons/tb";
+import { TbActivity, TbBrandStrava, TbChevronLeft, TbClock, TbRoute } from "react-icons/tb";
 import { createFileRoute, Link, Outlet, useLoaderData } from "@tanstack/react-router";
 import { SlideHighlightRegion } from "~/components/SlideHighlightRegion";
 import { SocialLink } from "~/components/SocialLink";
@@ -6,7 +6,7 @@ import { Badge } from "../components/ui/badge";
 import { PageLayout } from "../components/PageLayout";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../components/ui/tooltip";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
-import { WorkoutCard } from "../components/WorkoutCard";
+import { WorkoutCard, formatMovingTime } from "../components/WorkoutCard";
 import { computeSportSet, type SanitizedActivity } from "../lib/strava";
 
 export const Route = createFileRoute("/_strava/workout")({
@@ -42,41 +42,76 @@ function WorkoutPage() {
               label === "current week" ? categorizeCurrentWeek(weekActivities.length) : categorizeWeek(weekActivities);
 
             return (
-              <Card
-                key={label}
-                className="flex h-full flex-col gap-4 border-border bg-foreground/4 p-6 text-foreground shadow-none"
-              >
-                <CardHeader className="p-0">
-                  <div className="flex flex-row flex-wrap items-center gap-3">
-                    <CardTitle className="font-medium tracking-wider text-sm text-foreground">{label}</CardTitle>
-                    <Tooltip delayDuration={0}>
-                      <TooltipTrigger asChild>
-                        <Badge className="cursor-help" variant={category.color}>
-                          {category.label}
-                        </Badge>
-                      </TooltipTrigger>
-                      <TooltipContent>{category.description}</TooltipContent>
-                    </Tooltip>
-                  </div>
-                </CardHeader>
-                <CardContent className="flex min-h-0 flex-1 flex-col gap-2 p-0">
-                  {weekActivities.length === 0 ? (
-                    <p className="italic text-foreground/40 text-sm">no activities yet, get moving</p>
-                  ) : (
-                    <SlideHighlightRegion className="relative flex flex-col items-stretch gap-2" variant="panel">
-                      {weekActivities.map((activity) => (
-                        <WorkoutCard key={activity.slug} activity={activity} />
-                      ))}
-                    </SlideHighlightRegion>
-                  )}
-                </CardContent>
-              </Card>
+              // the negative margin at 2xl widens the row past the max-w-5xl column so the
+              // summary lands in the viewport gutter while staying in flow (-mr = card + gap)
+              <div key={label} className="flex flex-col items-stretch gap-4 lg:flex-row lg:items-start 2xl:-mr-48">
+                <Card className="flex min-w-0 flex-1 flex-col gap-4 border-border bg-foreground/4 p-6 text-foreground shadow-none">
+                  <CardHeader className="p-0">
+                    <div className="flex flex-row flex-wrap items-center gap-3">
+                      <CardTitle className="font-medium tracking-wider text-sm text-foreground">{label}</CardTitle>
+                      <Tooltip delayDuration={0}>
+                        <TooltipTrigger asChild>
+                          <Badge className="cursor-help" variant={category.color}>
+                            {category.label}
+                          </Badge>
+                        </TooltipTrigger>
+                        <TooltipContent>{category.description}</TooltipContent>
+                      </Tooltip>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="flex min-h-0 flex-1 flex-col gap-2 p-0">
+                    {weekActivities.length === 0 ? (
+                      <p className="italic text-foreground/40 text-sm">no activities yet, get moving</p>
+                    ) : (
+                      <SlideHighlightRegion className="relative flex flex-col items-stretch gap-2" variant="panel">
+                        {weekActivities.map((activity) => (
+                          <WorkoutCard key={activity.slug} activity={activity} />
+                        ))}
+                      </SlideHighlightRegion>
+                    )}
+                  </CardContent>
+                </Card>
+                <WeekSummaryCard activities={weekActivities} />
+              </div>
             );
           })}
         </div>
       </section>
       <Outlet />
     </PageLayout>
+  );
+}
+
+type WeekSummaryCardProps = {
+  activities: SanitizedActivity[];
+};
+
+function WeekSummaryCard(props: WeekSummaryCardProps) {
+  const { activities } = props;
+
+  const totalDistance = activities.reduce((total, activity) => total + activity.distance, 0);
+  const totalMovingTime = activities.reduce((total, activity) => total + activity.moving_time, 0);
+
+  const stats = [
+    { label: "activities", value: activities.length.toString(), icon: <TbActivity size={12} /> },
+    { label: "distance", value: `${(totalDistance / 1000).toFixed(1)} km`, icon: <TbRoute size={12} /> },
+    { label: "time", value: formatMovingTime(totalMovingTime), icon: <TbClock size={12} /> },
+  ];
+
+  return (
+    <Card className="-order-1 shrink-0 gap-0 border-border bg-foreground/4 p-4 text-foreground shadow-none lg:order-0 lg:sticky lg:top-4 lg:w-44">
+      <dl className="flex flex-row flex-wrap gap-x-6 gap-y-3 lg:flex-col">
+        {stats.map((stat) => (
+          <div key={stat.label} className="flex flex-col gap-0.5">
+            <dt className="flex items-center gap-1 text-xs text-foreground/40">
+              {stat.icon}
+              {stat.label}
+            </dt>
+            <dd className="text-sm font-medium text-foreground">{stat.value}</dd>
+          </div>
+        ))}
+      </dl>
+    </Card>
   );
 }
 
