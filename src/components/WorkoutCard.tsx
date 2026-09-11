@@ -21,6 +21,7 @@ import { Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { getActivityDetailBySlug } from "~/lib/server-activities";
 import { CardItem, CardItemContent, useCardItemWrapperProps } from "./CardItem";
+import { RouteCanvas } from "./RouteCanvas";
 import type { SanitizedActivity, SanitizedActivityDetail, SportType } from "../lib/strava";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { Badge } from "~/components/ui/badge";
@@ -310,19 +311,7 @@ function RoutePreview(props: RoutePreviewProps) {
   const { paths, variant = "card" } = props;
 
   if (variant === "dialog") {
-    return (
-      <svg viewBox="0 0 400 200" className="w-full h-40" xmlns="http://www.w3.org/2000/svg">
-        <path
-          d={paths.dialog}
-          stroke="currentColor"
-          strokeWidth={1.5}
-          fill="none"
-          vectorEffect="non-scaling-stroke"
-          className="text-orange-500/60"
-        />
-        <title>route map</title>
-      </svg>
-    );
+    return <RouteCanvas d={paths.dialog} className="w-full h-40 text-orange-500" />;
   }
 
   return (
