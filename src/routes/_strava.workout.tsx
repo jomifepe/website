@@ -7,7 +7,7 @@ import { PageLayout } from "../components/PageLayout";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../components/ui/tooltip";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { WorkoutCard, formatMovingTime } from "../components/WorkoutCard";
-import { computeSportSet, type SanitizedActivity } from "../lib/strava";
+import { computeSportSet, groupActivitiesByWeek, type SanitizedActivity } from "../lib/strava";
 
 export const Route = createFileRoute("/_strava/workout")({
   component: WorkoutPage,
@@ -194,30 +194,4 @@ function checkWeeklyGoal(activities: SanitizedActivity[]) {
     wasMet: Object.entries(counts).every(([key, count]) => count >= weeklyGoal[key as keyof typeof weeklyGoal]),
     description: weeklyGoalDescription,
   };
-}
-
-function groupActivitiesByWeek(activities: SanitizedActivity[]): {
-  current: SanitizedActivity[];
-  last: SanitizedActivity[];
-} {
-  const today = new Date();
-  const offsetFromMonday = (today.getDay() - 1 + 7) % 7;
-
-  const currentMondayDate = new Date(today);
-  currentMondayDate.setDate(today.getDate() - offsetFromMonday);
-  const currentMonday = currentMondayDate.toISOString().slice(0, 10);
-
-  const lastMondayDate = new Date(currentMondayDate);
-  lastMondayDate.setDate(currentMondayDate.getDate() - 7);
-  const lastMonday = lastMondayDate.toISOString().slice(0, 10);
-
-  const current: SanitizedActivity[] = [];
-  const last: SanitizedActivity[] = [];
-
-  for (const activity of activities) {
-    if (activity.startDate >= currentMonday) current.push(activity);
-    else if (activity.startDate >= lastMonday) last.push(activity);
-  }
-
-  return { current, last };
 }

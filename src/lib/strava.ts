@@ -285,6 +285,42 @@ function computeDateDisplay(startDateLocal: string): string {
     .toLowerCase();
 }
 
+/**
+ * YYYY-MM-DD in the local timezone. Activities carry `startDate` derived from Strava's
+ * `start_date_local`, so week boundaries have to be local too — going through
+ * `toISOString()` would shift the date by a day whenever local time is offset from UTC.
+ */
+function toLocalDateString(date: Date): string {
+  const month = `${date.getMonth() + 1}`.padStart(2, "0");
+  const day = `${date.getDate()}`.padStart(2, "0");
+  return `${date.getFullYear()}-${month}-${day}`;
+}
+
+export function groupActivitiesByWeek(
+  activities: SanitizedActivity[],
+  now: Date = new Date(),
+): { current: SanitizedActivity[]; last: SanitizedActivity[] } {
+  const offsetFromMonday = (now.getDay() - 1 + 7) % 7;
+
+  const currentMondayDate = new Date(now);
+  currentMondayDate.setDate(now.getDate() - offsetFromMonday);
+  const currentMonday = toLocalDateString(currentMondayDate);
+
+  const lastMondayDate = new Date(currentMondayDate);
+  lastMondayDate.setDate(currentMondayDate.getDate() - 7);
+  const lastMonday = toLocalDateString(lastMondayDate);
+
+  const current: SanitizedActivity[] = [];
+  const last: SanitizedActivity[] = [];
+
+  for (const activity of activities) {
+    if (activity.startDate >= currentMonday) current.push(activity);
+    else if (activity.startDate >= lastMonday) last.push(activity);
+  }
+
+  return { current, last };
+}
+
 export type SportSet = "run" | "ride" | "lift";
 export function computeSportSet(sportType: SportType) {
   switch (sportType) {
