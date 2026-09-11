@@ -22,6 +22,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { cn } from "~/lib/utils";
 import { getActivityDetailBySlug } from "~/lib/server-activities";
 import { CardItem, CardItemContent, useCardItemWrapperProps } from "./CardItem";
+import { RouteCanvas } from "./RouteCanvas";
 import type { SanitizedActivity, SanitizedActivityDetail, SportType } from "../lib/strava";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { Badge } from "~/components/ui/badge";
@@ -316,37 +317,7 @@ function RoutePreview(props: RoutePreviewProps) {
   const { paths, size = "default" } = props;
 
   if (size === "dialog") {
-    return (
-      <svg viewBox="0 0 400 200" className="w-full h-40 text-orange-500" xmlns="http://www.w3.org/2000/svg">
-        <path
-          d={paths.dialog}
-          stroke="currentColor"
-          strokeWidth={1.5}
-          fill="none"
-          vectorEffect="non-scaling-stroke"
-          className="opacity-20"
-        />
-        <path
-          d={paths.dialog}
-          pathLength={1}
-          strokeDasharray={1}
-          stroke="currentColor"
-          strokeWidth={2}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          fill="none"
-          vectorEffect="non-scaling-stroke"
-          className="animate-route-draw opacity-90"
-        />
-        <circle
-          r={3.5}
-          fill="currentColor"
-          className="animate-route-head"
-          style={{ offsetPath: `path("${paths.dialog}")` }}
-        />
-        <title>route map</title>
-      </svg>
-    );
+    return <RouteCanvas d={paths.dialog} className="w-full h-40 text-orange-500" />;
   }
 
   const isSmall = size === "small";
