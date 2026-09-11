@@ -45,7 +45,7 @@ function WorkoutPage() {
               // the negative margin at 2xl widens the row past the max-w-5xl column so the
               // summary lands in the viewport gutter while staying in flow (-mr = card + gap)
               <div key={label} className="flex flex-col items-stretch gap-4 lg:flex-row lg:items-start 2xl:-mr-48">
-                <Card className="flex min-w-0 flex-1 flex-col gap-4 border-border bg-foreground/4 p-6 text-foreground shadow-none">
+                <Card className="flex min-w-0 flex-1 flex-col gap-4 overflow-hidden border-border bg-foreground/4 p-4 text-foreground shadow-none lg:p-6">
                   <CardHeader className="p-0">
                     <div className="flex flex-row flex-wrap items-center gap-3">
                       <CardTitle className="font-medium tracking-wider text-sm text-foreground">{label}</CardTitle>
