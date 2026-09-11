@@ -317,14 +317,32 @@ function RoutePreview(props: RoutePreviewProps) {
 
   if (size === "dialog") {
     return (
-      <svg viewBox="0 0 400 200" className="w-full h-40" xmlns="http://www.w3.org/2000/svg">
+      <svg viewBox="0 0 400 200" className="w-full h-40 text-orange-500" xmlns="http://www.w3.org/2000/svg">
         <path
           d={paths.dialog}
           stroke="currentColor"
           strokeWidth={1.5}
           fill="none"
           vectorEffect="non-scaling-stroke"
-          className="text-orange-500/60"
+          className="opacity-20"
+        />
+        <path
+          d={paths.dialog}
+          pathLength={1}
+          strokeDasharray={1}
+          stroke="currentColor"
+          strokeWidth={2}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          fill="none"
+          vectorEffect="non-scaling-stroke"
+          className="animate-route-draw opacity-90"
+        />
+        <circle
+          r={3.5}
+          fill="currentColor"
+          className="animate-route-head"
+          style={{ offsetPath: `path("${paths.dialog}")` }}
         />
         <title>route map</title>
       </svg>
