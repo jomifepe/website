@@ -13,7 +13,7 @@ export function RecentWorkoutCard(props: RecentWorkoutCardProps) {
 
   return (
     <Card
-      className="border-border bg-foreground/4 text-foreground shadow-none h-full flex flex-col gap-4 p-5 md:p-6 group/workout"
+      className="border-border bg-foreground/4 text-foreground shadow-none h-full flex flex-col gap-4 overflow-hidden p-5 md:p-6 group/workout"
       style={{ viewTransitionName: "workout-card" }}
     >
       <CardHeader className="p-0">
@@ -31,7 +31,7 @@ export function RecentWorkoutCard(props: RecentWorkoutCardProps) {
       <CardContent className="flex flex-1 flex-col gap-4 p-0 min-h-0">
         <SlideHighlightRegion className="relative flex flex-1 flex-col gap-2 min-h-0" variant="panel">
           {activities.map((activity) => (
-            <WorkoutCard key={activity.slug} activity={activity} variant="small" dialog="local" />
+            <WorkoutCard key={activity.slug} activity={activity} dialog="local" />
           ))}
         </SlideHighlightRegion>
         <CardViewMoreLink

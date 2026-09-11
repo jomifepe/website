@@ -249,6 +249,8 @@ export type SanitizedActivity = {
   sport_type: SportType;
   timeOfDay: "morning" | "afternoon" | "evening";
   dateDisplay: string;
+  /** same date without the year, for narrow layouts */
+  dateDisplayShort: string;
   title: string;
   moving_time: number;
   elapsed_time?: number;
@@ -279,10 +281,46 @@ function computeTimeOfDay(startDateLocal: string): SanitizedActivity["timeOfDay"
   return "evening";
 }
 
-function computeDateDisplay(startDateLocal: string): string {
+function computeDateDisplay(startDateLocal: string, options: Intl.DateTimeFormatOptions = {}): string {
   return new Date(startDateLocal)
-    .toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+    .toLocaleDateString("en-US", { month: "short", day: "numeric", ...options })
     .toLowerCase();
+}
+
+/**
+ * YYYY-MM-DD in the local timezone. Activities carry `startDate` derived from Strava's
+ * `start_date_local`, so week boundaries have to be local too — going through
+ * `toISOString()` would shift the date by a day whenever local time is offset from UTC.
+ */
+function toLocalDateString(date: Date): string {
+  const month = `${date.getMonth() + 1}`.padStart(2, "0");
+  const day = `${date.getDate()}`.padStart(2, "0");
+  return `${date.getFullYear()}-${month}-${day}`;
+}
+
+export function groupActivitiesByWeek(
+  activities: SanitizedActivity[],
+  now: Date = new Date(),
+): { current: SanitizedActivity[]; last: SanitizedActivity[] } {
+  const offsetFromMonday = (now.getDay() - 1 + 7) % 7;
+
+  const currentMondayDate = new Date(now);
+  currentMondayDate.setDate(now.getDate() - offsetFromMonday);
+  const currentMonday = toLocalDateString(currentMondayDate);
+
+  const lastMondayDate = new Date(currentMondayDate);
+  lastMondayDate.setDate(currentMondayDate.getDate() - 7);
+  const lastMonday = toLocalDateString(lastMondayDate);
+
+  const current: SanitizedActivity[] = [];
+  const last: SanitizedActivity[] = [];
+
+  for (const activity of activities) {
+    if (activity.startDate >= currentMonday) current.push(activity);
+    else if (activity.startDate >= lastMonday) last.push(activity);
+  }
+
+  return { current, last };
 }
 
 export type SportSet = "run" | "ride" | "lift";
@@ -352,7 +390,8 @@ export function sanitizeActivity(a: StravaActivity): SanitizedActivity {
     startDate: a.start_date_local.slice(0, 10),
     sport_type: a.sport_type,
     timeOfDay: computeTimeOfDay(a.start_date_local),
-    dateDisplay: computeDateDisplay(a.start_date_local),
+    dateDisplay: computeDateDisplay(a.start_date_local, { year: "numeric" }),
+    dateDisplayShort: computeDateDisplay(a.start_date_local),
     title: computeTitle(a.sport_type, a.distance, a.start_date_local),
     moving_time: a.moving_time,
     elapsed_time: a.elapsed_time,

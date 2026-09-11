@@ -19,7 +19,6 @@ import {
 import { FaMedal } from "react-icons/fa";
 import { Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { cn } from "~/lib/utils";
 import { getActivityDetailBySlug } from "~/lib/server-activities";
 import { CardItem, CardItemContent, useCardItemWrapperProps } from "./CardItem";
 import { RouteCanvas } from "./RouteCanvas";
@@ -27,21 +26,17 @@ import type { SanitizedActivity, SanitizedActivityDetail, SportType } from "../l
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { Badge } from "~/components/ui/badge";
 
-type WorkoutCardVariant = "default" | "small";
-
 type WorkoutCardProps = {
   activity: SanitizedActivity;
-  variant?: WorkoutCardVariant;
   /** "route" (default): clicking navigates to /workout/$id. "local": opens an inline dialog. */
   dialog?: "route" | "local";
 };
 
 export function WorkoutCard(props: WorkoutCardProps) {
-  const { activity, variant = "default", dialog = "route" } = props;
+  const { activity, dialog = "route" } = props;
 
   const routeWrapperProps = useCardItemWrapperProps("group/card");
 
-  const isSmall = variant === "small";
   const timeStr = formatMovingTime(activity.moving_time);
   const distanceKm = activity.distance / 1000;
   const showDistance = shouldShowDistance(activity.sport_type);
@@ -56,7 +51,10 @@ export function WorkoutCard(props: WorkoutCardProps) {
     <>
       <span className="text-foreground font-medium">{activity.title}</span>
       <span className="text-foreground/60">·</span>
-      <span className="text-foreground/80">{activity.dateDisplay}</span>
+      <span className="text-foreground/80">
+        <span className="md:hidden">{activity.dateDisplayShort}</span>
+        <span className="hidden md:inline">{activity.dateDisplay}</span>
+      </span>
     </>
   );
 
@@ -76,9 +74,7 @@ export function WorkoutCard(props: WorkoutCardProps) {
     </div>
   );
 
-  const endSlot = activity.routeSvgPaths ? (
-    <RoutePreview paths={activity.routeSvgPaths} size={isSmall ? "small" : "default"} />
-  ) : null;
+  const endSlot = activity.routeSvgPaths ? <RoutePreview paths={activity.routeSvgPaths} /> : null;
 
   if (dialog === "local") {
     return (
@@ -119,7 +115,7 @@ function RouteMapContainer(props: RouteMapContainerProps) {
   if (!routeSvgPaths) return null;
   return (
     <div className="mb-5 rounded-lg overflow-hidden bg-foreground/4 flex items-center justify-center">
-      <RoutePreview paths={routeSvgPaths} size="dialog" />
+      <RoutePreview paths={routeSvgPaths} variant="dialog" />
     </div>
   );
 }
@@ -306,29 +302,25 @@ function buildStats(args: BuildStatsArgs): StatEntry[] {
   return stats;
 }
 
-type RoutePreviewSize = "default" | "small" | "dialog";
-
 type RoutePreviewProps = {
   paths: { card: string; dialog: string };
-  size?: RoutePreviewSize;
+  variant?: "card" | "dialog";
 };
 
 function RoutePreview(props: RoutePreviewProps) {
-  const { paths, size = "default" } = props;
+  const { paths, variant = "card" } = props;
 
-  if (size === "dialog") {
+  if (variant === "dialog") {
     return <RouteCanvas d={paths.dialog} className="w-full h-40 text-orange-500" />;
   }
 
-  const isSmall = size === "small";
-
   return (
-    <div className={cn("absolute top-1/2 -translate-y-1/2 pointer-events-none", isSmall ? "right-2" : "right-4")}>
-      <svg viewBox="0 0 100 100" className={isSmall ? "h-12 w-12" : "h-32 w-32"} xmlns="http://www.w3.org/2000/svg">
+    <div className="absolute top-1/2 right-2 -translate-y-1/2 pointer-events-none">
+      <svg viewBox="0 0 100 100" className="h-12 w-12" xmlns="http://www.w3.org/2000/svg">
         <path
           d={paths.card}
           stroke="currentColor"
-          strokeWidth={isSmall ? 2 : 1.5}
+          strokeWidth={2}
           fill="none"
           vectorEffect="non-scaling-stroke"
           className="text-orange-500/20 group-hover/card:text-orange-500/70 transition-colors"
