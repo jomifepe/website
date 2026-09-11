@@ -249,6 +249,8 @@ export type SanitizedActivity = {
   sport_type: SportType;
   timeOfDay: "morning" | "afternoon" | "evening";
   dateDisplay: string;
+  /** same date without the year, for narrow layouts */
+  dateDisplayShort: string;
   title: string;
   moving_time: number;
   elapsed_time?: number;
@@ -279,9 +281,9 @@ function computeTimeOfDay(startDateLocal: string): SanitizedActivity["timeOfDay"
   return "evening";
 }
 
-function computeDateDisplay(startDateLocal: string): string {
+function computeDateDisplay(startDateLocal: string, options: Intl.DateTimeFormatOptions = {}): string {
   return new Date(startDateLocal)
-    .toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+    .toLocaleDateString("en-US", { month: "short", day: "numeric", ...options })
     .toLowerCase();
 }
 
@@ -388,7 +390,8 @@ export function sanitizeActivity(a: StravaActivity): SanitizedActivity {
     startDate: a.start_date_local.slice(0, 10),
     sport_type: a.sport_type,
     timeOfDay: computeTimeOfDay(a.start_date_local),
-    dateDisplay: computeDateDisplay(a.start_date_local),
+    dateDisplay: computeDateDisplay(a.start_date_local, { year: "numeric" }),
+    dateDisplayShort: computeDateDisplay(a.start_date_local),
     title: computeTitle(a.sport_type, a.distance, a.start_date_local),
     moving_time: a.moving_time,
     elapsed_time: a.elapsed_time,

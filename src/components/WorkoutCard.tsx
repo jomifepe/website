@@ -50,7 +50,10 @@ export function WorkoutCard(props: WorkoutCardProps) {
     <>
       <span className="text-foreground font-medium">{activity.title}</span>
       <span className="text-foreground/60">·</span>
-      <span className="text-foreground/80">{activity.dateDisplay}</span>
+      <span className="text-foreground/80">
+        <span className="md:hidden">{activity.dateDisplayShort}</span>
+        <span className="hidden md:inline">{activity.dateDisplay}</span>
+      </span>
     </>
   );
 
