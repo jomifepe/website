@@ -116,12 +116,10 @@ export function RouteCanvas(props: RouteCanvasProps) {
 
       // Comet tail: brighter and thicker as it approaches the head.
       const tailStart = Math.max(0, head - Math.round(last * TAIL_FRACTION));
-      ctx.shadowColor = color;
       for (let i = tailStart; i < head; i++) {
         const t = (i - tailStart) / Math.max(1, head - tailStart);
         ctx.globalAlpha = 0.25 + 0.75 * t;
         ctx.lineWidth = (1.75 + 1.25 * t) * unit;
-        ctx.shadowBlur = 6 * t;
         ctx.beginPath();
         ctx.moveTo(points[i].x, points[i].y);
         ctx.lineTo(points[i + 1].x, points[i + 1].y);
@@ -129,6 +127,7 @@ export function RouteCanvas(props: RouteCanvasProps) {
       }
 
       ctx.globalAlpha = 1;
+      ctx.shadowColor = color;
       ctx.shadowBlur = 8;
       ctx.fillStyle = color;
       ctx.beginPath();
