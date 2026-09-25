@@ -212,7 +212,7 @@ export function activitySlug(startDateLocal: string): string {
 
 export const fetchActivities = defineCachedFunction(fetchActivitiesRaw, {
   name: "strava-activities",
-  maxAge: 60 * 60, // 1 hour
+  maxAge: 5 * 60, // short so ISR re-renders (hourly) get fresh data; still shields Strava from client navigations
   getKey: (page: number, perPage: number = 10) => `p${page}-pp${perPage}`,
 });
 

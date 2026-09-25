@@ -16,12 +16,18 @@ const config = defineConfig({
   },
   plugins: [
     devtools(),
-    nitro({ preset: "vercel" }),
+    nitro({
+      preset: "vercel",
+      // Vercel ISR: served from cache; after `isr` seconds the next hit triggers a background re-render
+      routeRules: {
+        "/": { isr: 60 * 60 },
+        "/workout": { isr: 60 * 60 },
+      },
+    }),
     // this is the plugin that enables path aliases
     viteTsConfigPaths({ projects: ["./tsconfig.json"] }),
     tailwindcss(),
-    // no prerender: it freezes Strava data at build time. pages are SSR'd and CDN-cached via
-    // the Cache-Control header in routes/_strava.tsx
+    // no prerender: it freezes Strava data at build time and never refreshes. ISR above handles it
     tanstackStart(),
     viteReact(),
   ],
