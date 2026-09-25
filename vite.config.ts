@@ -20,10 +20,9 @@ const config = defineConfig({
     // this is the plugin that enables path aliases
     viteTsConfigPaths({ projects: ["./tsconfig.json"] }),
     tailwindcss(),
-    tanstackStart({
-      prerender: { enabled: true },
-      pages: [{ path: "/" }, { path: "/workout" }],
-    }),
+    // no prerender: it freezes Strava data at build time. pages are SSR'd and CDN-cached via
+    // the Cache-Control header in routes/_strava.tsx
+    tanstackStart(),
     viteReact(),
   ],
 });
