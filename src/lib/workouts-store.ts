@@ -91,9 +91,9 @@ export async function readWorkoutsDocument(): Promise<WorkoutsDocument | null> {
   if (!blobConfigured()) return null;
 
   const result = await get(WORKOUTS_BLOB_PATH, { access: "private" });
-  if (!result || result.statusCode !== 200) return null;
+  if (!result || result.statusCode !== 200 || !result.stream) return null;
 
-  const text = await result.text();
+  const text = await new Response(result.stream).text();
   return WorkoutsDocumentSchema.parse(JSON.parse(text));
 }
 
