@@ -8,6 +8,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "../components/ui/toolti
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { WorkoutCard, formatMovingTime } from "../components/WorkoutCard";
 import { BEST_EFFORT_TARGETS, formatDurationNoSeconds, type AllTimeBestEfforts } from "../lib/best-efforts";
+import { cn } from "../lib/utils";
 import { computeSportSet, groupActivitiesByWeek, type SanitizedActivity } from "../lib/strava";
 
 export const Route = createFileRoute("/_strava/workout")({
@@ -37,9 +38,14 @@ function WorkoutPage() {
             icon={<TbBrandStrava size={20} className="shrink-0" aria-hidden />}
           />
         </div>
-        <div className="flex flex-col items-stretch gap-8 lg:flex-row lg:items-start 2xl:-ml-48">
+        <div
+          className={cn(
+            "flex flex-col items-stretch gap-8",
+            bestEfforts && "lg:flex-row lg:items-start 2xl:-ml-48",
+          )}
+        >
           {bestEfforts && <BestEffortsCard bestEfforts={bestEfforts} />}
-          <div className="flex min-w-0 flex-1 flex-col gap-8">
+          <div className={cn("flex min-w-0 flex-col gap-8", bestEfforts && "flex-1")}>
             {weeks.map(({ label, activities: weekActivities }) => {
               const category =
                 label === "current week"
