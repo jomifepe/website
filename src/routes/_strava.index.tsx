@@ -19,7 +19,7 @@ export const Route = createFileRoute("/_strava/")({
 });
 
 function HomePage() {
-  const activities = useLoaderData({ from: "/_strava" });
+  const { activities } = useLoaderData({ from: "/_strava" });
   const { recentTrack, sentences } = useLoaderData({ from: "/_strava/" });
   const recentWorkouts = activities.slice(0, 2);
 

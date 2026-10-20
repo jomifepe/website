@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as StravaRouteImport } from './routes/_strava'
 import { Route as StravaIndexRouteImport } from './routes/_strava.index'
+import { Route as ApiStravaSyncRouteImport } from './routes/api.strava-sync'
 import { Route as StravaWorkoutRouteImport } from './routes/_strava.workout'
 import { Route as StravaWorkoutIdRouteImport } from './routes/_strava.workout.$id'
 
@@ -22,6 +23,11 @@ const StravaIndexRoute = StravaIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => StravaRoute,
+} as any)
+const ApiStravaSyncRoute = ApiStravaSyncRouteImport.update({
+  id: '/api/strava-sync',
+  path: '/api/strava-sync',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const StravaWorkoutRoute = StravaWorkoutRouteImport.update({
   id: '/workout',
@@ -37,10 +43,12 @@ const StravaWorkoutIdRoute = StravaWorkoutIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof StravaIndexRoute
   '/workout': typeof StravaWorkoutRouteWithChildren
+  '/api/strava-sync': typeof ApiStravaSyncRoute
   '/workout/$id': typeof StravaWorkoutIdRoute
 }
 export interface FileRoutesByTo {
   '/workout': typeof StravaWorkoutRouteWithChildren
+  '/api/strava-sync': typeof ApiStravaSyncRoute
   '/': typeof StravaIndexRoute
   '/workout/$id': typeof StravaWorkoutIdRoute
 }
@@ -48,24 +56,27 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_strava': typeof StravaRouteWithChildren
   '/_strava/workout': typeof StravaWorkoutRouteWithChildren
+  '/api/strava-sync': typeof ApiStravaSyncRoute
   '/_strava/': typeof StravaIndexRoute
   '/_strava/workout/$id': typeof StravaWorkoutIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/workout' | '/workout/$id'
+  fullPaths: '/' | '/workout' | '/api/strava-sync' | '/workout/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/workout' | '/' | '/workout/$id'
+  to: '/workout' | '/api/strava-sync' | '/' | '/workout/$id'
   id:
     | '__root__'
     | '/_strava'
     | '/_strava/workout'
+    | '/api/strava-sync'
     | '/_strava/'
     | '/_strava/workout/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   StravaRoute: typeof StravaRouteWithChildren
+  ApiStravaSyncRoute: typeof ApiStravaSyncRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -83,6 +94,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof StravaIndexRouteImport
       parentRoute: typeof StravaRoute
+    }
+    '/api/strava-sync': {
+      id: '/api/strava-sync'
+      path: '/api/strava-sync'
+      fullPath: '/api/strava-sync'
+      preLoaderRoute: typeof ApiStravaSyncRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_strava/workout': {
       id: '/_strava/workout'
@@ -128,6 +146,7 @@ const StravaRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   StravaRoute: StravaRouteWithChildren,
+  ApiStravaSyncRoute: ApiStravaSyncRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

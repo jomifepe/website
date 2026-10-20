@@ -7,6 +7,7 @@ import { PageLayout } from "../components/PageLayout";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../components/ui/tooltip";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { WorkoutCard, formatMovingTime } from "../components/WorkoutCard";
+import { BEST_EFFORT_TARGETS, formatDurationNoSeconds, type AllTimeBestEfforts } from "../lib/best-efforts";
 import { computeSportSet, groupActivitiesByWeek, type SanitizedActivity } from "../lib/strava";
 
 export const Route = createFileRoute("/_strava/workout")({
@@ -14,7 +15,7 @@ export const Route = createFileRoute("/_strava/workout")({
 });
 
 function WorkoutPage() {
-  const activities = useLoaderData({ from: "/_strava" });
+  const { activities, bestEfforts } = useLoaderData({ from: "/_strava" });
   const { current, last } = groupActivitiesByWeek(activities);
 
   const weeks = [
@@ -36,49 +37,85 @@ function WorkoutPage() {
             icon={<TbBrandStrava size={20} className="shrink-0" aria-hidden />}
           />
         </div>
-        <div className="flex flex-col items-stretch gap-8">
-          {weeks.map(({ label, activities: weekActivities }) => {
-            const category =
-              label === "current week" ? categorizeCurrentWeek(weekActivities.length) : categorizeWeek(weekActivities);
+        <div className="flex flex-col items-stretch gap-8 lg:flex-row lg:items-start 2xl:-ml-48">
+          {bestEfforts && <BestEffortsCard bestEfforts={bestEfforts} />}
+          <div className="flex min-w-0 flex-1 flex-col gap-8">
+            {weeks.map(({ label, activities: weekActivities }) => {
+              const category =
+                label === "current week"
+                  ? categorizeCurrentWeek(weekActivities.length)
+                  : categorizeWeek(weekActivities);
 
-            return (
-              // the negative margin at 2xl widens the row past the max-w-5xl column so the
-              // summary lands in the viewport gutter while staying in flow (-mr = card + gap)
-              <div key={label} className="flex flex-col items-stretch gap-4 lg:flex-row lg:items-start 2xl:-mr-48">
-                <Card className="flex min-w-0 flex-1 flex-col gap-4 overflow-hidden border-border bg-foreground/4 p-4 text-foreground shadow-none lg:p-6">
-                  <CardHeader className="p-0">
-                    <div className="flex flex-row flex-wrap items-center gap-3">
-                      <CardTitle className="font-medium tracking-wider text-sm text-foreground">{label}</CardTitle>
-                      <Tooltip delayDuration={0}>
-                        <TooltipTrigger asChild>
-                          <Badge className="cursor-help" variant={category.color}>
-                            {category.label}
-                          </Badge>
-                        </TooltipTrigger>
-                        <TooltipContent>{category.description}</TooltipContent>
-                      </Tooltip>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="flex min-h-0 flex-1 flex-col gap-2 p-0">
-                    {weekActivities.length === 0 ? (
-                      <p className="italic text-foreground/40 text-sm">no activities yet, get moving</p>
-                    ) : (
-                      <SlideHighlightRegion className="relative flex flex-col items-stretch gap-2" variant="panel">
-                        {weekActivities.map((activity) => (
-                          <WorkoutCard key={activity.slug} activity={activity} />
-                        ))}
-                      </SlideHighlightRegion>
-                    )}
-                  </CardContent>
-                </Card>
-                <WeekSummaryCard activities={weekActivities} />
-              </div>
-            );
-          })}
+              return (
+                // the negative margin at 2xl widens the row past the max-w-5xl column so the
+                // summary lands in the viewport gutter while staying in flow (-mr = card + gap)
+                <div key={label} className="flex flex-col items-stretch gap-4 lg:flex-row lg:items-start 2xl:-mr-48">
+                  <Card className="flex min-w-0 flex-1 flex-col gap-4 overflow-hidden border-border bg-foreground/4 p-4 text-foreground shadow-none lg:p-6">
+                    <CardHeader className="p-0">
+                      <div className="flex flex-row flex-wrap items-center gap-3">
+                        <CardTitle className="font-medium tracking-wider text-sm text-foreground">{label}</CardTitle>
+                        <Tooltip delayDuration={0}>
+                          <TooltipTrigger asChild>
+                            <Badge className="cursor-help" variant={category.color}>
+                              {category.label}
+                            </Badge>
+                          </TooltipTrigger>
+                          <TooltipContent>{category.description}</TooltipContent>
+                        </Tooltip>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="flex min-h-0 flex-1 flex-col gap-2 p-0">
+                      {weekActivities.length === 0 ? (
+                        <p className="italic text-foreground/40 text-sm">no activities yet, get moving</p>
+                      ) : (
+                        <SlideHighlightRegion className="relative flex flex-col items-stretch gap-2" variant="panel">
+                          {weekActivities.map((activity) => (
+                            <WorkoutCard key={activity.slug} activity={activity} />
+                          ))}
+                        </SlideHighlightRegion>
+                      )}
+                    </CardContent>
+                  </Card>
+                  <WeekSummaryCard activities={weekActivities} />
+                </div>
+              );
+            })}
+          </div>
         </div>
       </section>
       <Outlet />
     </PageLayout>
+  );
+}
+
+type BestEffortsCardProps = {
+  bestEfforts: AllTimeBestEfforts;
+};
+
+function BestEffortsCard(props: BestEffortsCardProps) {
+  const { bestEfforts } = props;
+
+  return (
+    <Card className="-order-1 shrink-0 gap-3 border-border bg-foreground/4 p-4 text-foreground shadow-none lg:order-0 lg:sticky lg:top-4 lg:w-44 lg:self-start">
+      <CardHeader className="p-0">
+        <CardTitle className="font-medium tracking-wider text-sm text-foreground">Best efforts</CardTitle>
+      </CardHeader>
+      <CardContent className="p-0">
+        <dl className="flex flex-col gap-2">
+          {BEST_EFFORT_TARGETS.map((target) => {
+            const elapsed = bestEfforts[target.key];
+            const value = elapsed !== undefined ? formatDurationNoSeconds(elapsed) : "—";
+
+            return (
+              <div key={target.key} className="flex items-baseline justify-between gap-3 text-sm">
+                <dt className="text-foreground/60">{target.label}</dt>
+                <dd className="font-medium tabular-nums text-foreground">{value}</dd>
+              </div>
+            );
+          })}
+        </dl>
+      </CardContent>
+    </Card>
   );
 }
 

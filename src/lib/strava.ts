@@ -112,9 +112,15 @@ export const StravaActivitySchema = z.object({
 
 export type StravaActivity = z.infer<typeof StravaActivitySchema>;
 
-// Detailed activity (from GET /activities/{id}) — adds calories
+const StravaBestEffortSchema = z.object({
+  distance: z.number(),
+  elapsed_time: z.number(),
+});
+
+// Detailed activity (from GET /activities/{id}) — adds calories and run best efforts
 export const StravaActivityDetailSchema = StravaActivitySchema.extend({
   calories: z.number().optional(),
+  best_efforts: z.array(StravaBestEffortSchema).optional(),
 });
 
 export type StravaActivityDetail = z.infer<typeof StravaActivityDetailSchema>;
@@ -167,7 +173,7 @@ async function refreshAccessToken(): Promise<StravaTokenResponse> {
   return tokenData;
 }
 
-async function fetchActivitiesRaw(page: number, perPage: number = 10): Promise<StravaActivity[]> {
+export async function fetchActivitiesRaw(page: number, perPage: number = 10): Promise<StravaActivity[]> {
   const tokenData = await refreshAccessToken();
 
   const url = new URL("https://www.strava.com/api/v3/athlete/activities");
@@ -201,6 +207,16 @@ async function fetchActivitiesRaw(page: number, perPage: number = 10): Promise<S
   return activities;
 }
 
+export async function fetchAllPublicActivities(perPage: number = 200): Promise<StravaActivity[]> {
+  const all: StravaActivity[] = [];
+  for (let page = 1; page <= 50; page++) {
+    const batch = await fetchActivitiesRaw(page, perPage);
+    all.push(...batch);
+    if (batch.length < perPage) break;
+  }
+  return all;
+}
+
 /** Non-reversible FNV-1a hash of the activity's start time — used as a URL slug. */
 export function activitySlug(startDateLocal: string): string {
   let h = 2166136261;
@@ -216,7 +232,7 @@ export const fetchActivities = defineCachedFunction(fetchActivitiesRaw, {
   getKey: (page: number, perPage: number = 10) => `p${page}-pp${perPage}`,
 });
 
-async function fetchActivityDetailRaw(id: number): Promise<StravaActivityDetail> {
+export async function fetchActivityDetailRaw(id: number): Promise<StravaActivityDetail> {
   const tokenData = await refreshAccessToken();
 
   const response = await fetch(`https://www.strava.com/api/v3/activities/${id}`, {
