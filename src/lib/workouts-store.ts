@@ -57,6 +57,8 @@ const StoredActivitySchema = SanitizedActivitySchema.extend({
   stravaId: z.number(),
   calories: z.number().optional(),
   runBestEfforts: z.record(z.string(), z.number()).optional(),
+  /** From the activity list API — detail responses can disagree on moving_time. */
+  listFingerprint: z.string().optional(),
 });
 
 const WorkoutsDocumentSchema = z.object({
@@ -109,6 +111,10 @@ async function writeWorkoutsDocument(doc: WorkoutsDocument) {
   });
 }
 
+function listFingerprint(summary: StravaActivity) {
+  return `${summary.distance}:${summary.moving_time}`;
+}
+
 function storedFromListActivity(activity: StravaActivity, existing?: StoredActivity): StoredActivity {
   const sanitized = sanitizeActivity(activity);
   return {
@@ -117,6 +123,7 @@ function storedFromListActivity(activity: StravaActivity, existing?: StoredActiv
     stravaId: activity.id,
     calories: existing?.calories,
     runBestEfforts: existing?.runBestEfforts,
+    listFingerprint: listFingerprint(activity),
   };
 }
 
@@ -128,9 +135,8 @@ function isRunActivity(activity: StoredActivity | StravaActivity) {
 function needsDetailFetch(stored: StoredActivity, summary: StravaActivity, previous?: StoredActivity) {
   if (!isRunActivity(stored)) return false;
   if (stored.runBestEfforts === undefined) return true;
-  if (!previous) return true;
-  if (previous.distance !== summary.distance || previous.moving_time !== summary.moving_time) return true;
-  return false;
+  if (!previous?.listFingerprint) return false;
+  return previous.listFingerprint !== listFingerprint(summary);
 }
 
 function computeBackfillComplete(activities: StoredActivity[]) {
@@ -154,6 +160,7 @@ async function applyDetailBudget(activities: StoredActivity[], ids: number[]) {
       stravaId: id,
       calories: detail.calories,
       runBestEfforts: runBestEfforts ?? (isRunActivity(stored) ? {} : undefined),
+      listFingerprint: stored.listFingerprint,
     };
   }
 }
