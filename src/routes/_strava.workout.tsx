@@ -1,3 +1,4 @@
+import { FaMedal } from "react-icons/fa";
 import { TbActivity, TbBrandStrava, TbChevronLeft, TbClock, TbRoute } from "react-icons/tb";
 import { createFileRoute, Link, Outlet, useLoaderData } from "@tanstack/react-router";
 import { SlideHighlightRegion } from "~/components/SlideHighlightRegion";
@@ -5,7 +6,7 @@ import { SocialLink } from "~/components/SocialLink";
 import { Badge } from "../components/ui/badge";
 import { PageLayout } from "../components/PageLayout";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../components/ui/tooltip";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { Card, CardAction, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { WorkoutCard, formatMovingTime } from "../components/WorkoutCard";
 import { BEST_EFFORT_TARGETS, formatDurationNoSeconds, type AllTimeBestEfforts } from "../lib/best-efforts";
 import { cn } from "../lib/utils";
@@ -38,10 +39,11 @@ function WorkoutPage() {
             icon={<TbBrandStrava size={20} className="shrink-0" aria-hidden />}
           />
         </div>
+        {/* 2xl negative margin = Best efforts w-44 + row gap so week columns stay aligned with the heading */}
         <div
           className={cn(
             "flex flex-col items-stretch gap-8",
-            bestEfforts && "lg:flex-row lg:items-start 2xl:-ml-48",
+            bestEfforts && "lg:flex-row lg:items-start lg:gap-6 2xl:-ml-[12.5rem]",
           )}
         >
           {bestEfforts && <BestEffortsCard bestEfforts={bestEfforts} />}
@@ -105,6 +107,9 @@ function BestEffortsCard(props: BestEffortsCardProps) {
     <Card className="-order-1 shrink-0 gap-3 border-border bg-foreground/4 p-4 text-foreground shadow-none lg:order-0 lg:sticky lg:top-4 lg:w-44 lg:self-start">
       <CardHeader className="p-0">
         <CardTitle className="font-medium tracking-wider text-sm text-foreground">Best efforts</CardTitle>
+        <CardAction className="row-span-1 self-center">
+          <FaMedal aria-hidden className="text-amber-500" size={12} />
+        </CardAction>
       </CardHeader>
       <CardContent className="p-0">
         <dl className="flex flex-col gap-2">
@@ -113,9 +118,9 @@ function BestEffortsCard(props: BestEffortsCardProps) {
             const value = elapsed !== undefined ? formatDurationNoSeconds(elapsed) : "—";
 
             return (
-              <div key={target.key} className="flex items-baseline justify-between gap-3 text-sm">
-                <dt className="text-foreground/60">{target.label}</dt>
-                <dd className="font-medium tabular-nums text-foreground">{value}</dd>
+              <div key={target.key} className="flex items-baseline justify-between gap-2 text-sm whitespace-nowrap">
+                <dt className="min-w-0 truncate text-foreground/60">{target.label}</dt>
+                <dd className="shrink-0 font-medium tabular-nums text-foreground">{value}</dd>
               </div>
             );
           })}

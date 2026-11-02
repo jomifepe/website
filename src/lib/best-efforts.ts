@@ -1,5 +1,5 @@
 export const BEST_EFFORT_TARGETS = [
-  { key: "halfMarathon", meters: 21_097.5, label: "Half Marathon" },
+  { key: "halfMarathon", meters: 21_097.5, label: "Half" },
   { key: "km15", meters: 15_000, label: "15km" },
   { key: "km10", meters: 10_000, label: "10km" },
   { key: "km5", meters: 5_000, label: "5km" },
