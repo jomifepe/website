@@ -10,17 +10,22 @@ import { cn } from "~/lib/utils";
 type PageLayoutProps = {
   children: ReactNode;
   headerLeft?: ReactNode;
+  /** "center" vertically centers the content; "start" pins it under the header. */
+  align?: "center" | "start";
 };
 
 export function PageLayout(props: PageLayoutProps) {
-  const { children, headerLeft } = props;
+  const { children, headerLeft, align = "center" } = props;
   return (
     <div className="min-h-screen bg-background flex flex-col items-center">
       <header className="flex w-full max-w-5xl items-center justify-between px-5 pt-5 md:pt-8">
         <div className="flex items-center gap-2">{headerLeft}</div>
         <ThemeToggle />
       </header>
-      <main id="main-content" className="flex flex-1 flex-col justify-center max-w-5xl w-full gap-4 px-5 py-8">
+      <main
+        id="main-content"
+        className={cn("flex flex-1 flex-col max-w-5xl w-full gap-4 px-5 py-8", align === "center" && "justify-center")}
+      >
         {children}
       </main>
     </div>
