@@ -22,11 +22,11 @@ function WorkoutPage() {
 
   const weeks = [
     { label: "current week", activities: current },
-    { label: "last week", activities: last },
+    ...(last.length > 0 ? [{ label: "last week", activities: last }] : []),
   ];
 
   return (
-    <PageLayout headerLeft={<BackButton />}>
+    <PageLayout headerLeft={<BackButton />} align="start">
       <section style={{ viewTransitionName: "workout-card" }}>
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-foreground text-sm font-medium tracking-wider">workout</h1>
