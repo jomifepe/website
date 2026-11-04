@@ -11,8 +11,8 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as StravaRouteImport } from './routes/_strava'
 import { Route as StravaIndexRouteImport } from './routes/_strava.index'
-import { Route as ApiStravaSyncRouteImport } from './routes/api.strava-sync'
 import { Route as StravaWorkoutRouteImport } from './routes/_strava.workout'
+import { Route as ApiStravaSyncRouteImport } from './routes/api.strava-sync'
 import { Route as StravaWorkoutIdRouteImport } from './routes/_strava.workout.$id'
 
 const StravaRoute = StravaRouteImport.update({
@@ -24,15 +24,15 @@ const StravaIndexRoute = StravaIndexRouteImport.update({
   path: '/',
   getParentRoute: () => StravaRoute,
 } as any)
-const ApiStravaSyncRoute = ApiStravaSyncRouteImport.update({
-  id: '/api/strava-sync',
-  path: '/api/strava-sync',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const StravaWorkoutRoute = StravaWorkoutRouteImport.update({
   id: '/workout',
   path: '/workout',
   getParentRoute: () => StravaRoute,
+} as any)
+const ApiStravaSyncRoute = ApiStravaSyncRouteImport.update({
+  id: '/api/strava-sync',
+  path: '/api/strava-sync',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const StravaWorkoutIdRoute = StravaWorkoutIdRouteImport.update({
   id: '/$id',
@@ -95,19 +95,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StravaIndexRouteImport
       parentRoute: typeof StravaRoute
     }
-    '/api/strava-sync': {
-      id: '/api/strava-sync'
-      path: '/api/strava-sync'
-      fullPath: '/api/strava-sync'
-      preLoaderRoute: typeof ApiStravaSyncRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/_strava/workout': {
       id: '/_strava/workout'
       path: '/workout'
       fullPath: '/workout'
       preLoaderRoute: typeof StravaWorkoutRouteImport
       parentRoute: typeof StravaRoute
+    }
+    '/api/strava-sync': {
+      id: '/api/strava-sync'
+      path: '/api/strava-sync'
+      fullPath: '/api/strava-sync'
+      preLoaderRoute: typeof ApiStravaSyncRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_strava/workout/$id': {
       id: '/_strava/workout/$id'
