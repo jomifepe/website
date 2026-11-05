@@ -1,3 +1,3 @@
-Refer to .cursor/rules/coding-standards.mdc for coding standards.
+Refer to `.cursor/rules/coding-standards.mdc` for coding standards.
 
-PR titles follow Conventional Commits (e.g. `feat(workout): ...`, `fix: ...`, `chore(deps): ...`).
+Refer to `.cursor/rules/contributing.mdc` for commits, PR titles, and contribution workflow.
