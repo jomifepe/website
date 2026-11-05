@@ -1,24 +1,26 @@
 import { Dialog as DialogPrimitive } from "radix-ui";
 import type { ComponentProps } from "react";
+
 import { cn } from "~/lib/utils";
 
-function Dialog({ ...props }: ComponentProps<typeof DialogPrimitive.Root>) {
+function Dialog(props: ComponentProps<typeof DialogPrimitive.Root>) {
   return <DialogPrimitive.Root data-slot="dialog" {...props} />;
 }
 
-function DialogTrigger({ ...props }: ComponentProps<typeof DialogPrimitive.Trigger>) {
+function DialogTrigger(props: ComponentProps<typeof DialogPrimitive.Trigger>) {
   return <DialogPrimitive.Trigger data-slot="dialog-trigger" {...props} />;
 }
 
-function DialogPortal({ ...props }: ComponentProps<typeof DialogPrimitive.Portal>) {
+function DialogPortal(props: ComponentProps<typeof DialogPrimitive.Portal>) {
   return <DialogPrimitive.Portal data-slot="dialog-portal" {...props} />;
 }
 
-function DialogClose({ ...props }: ComponentProps<typeof DialogPrimitive.Close>) {
+function DialogClose(props: ComponentProps<typeof DialogPrimitive.Close>) {
   return <DialogPrimitive.Close data-slot="dialog-close" {...props} />;
 }
 
-function DialogOverlay({ className, ...props }: ComponentProps<typeof DialogPrimitive.Overlay>) {
+function DialogOverlay(props: ComponentProps<typeof DialogPrimitive.Overlay>) {
+  const { className, ...rest } = props;
   return (
     <DialogPrimitive.Overlay
       data-slot="dialog-overlay"
@@ -26,12 +28,13 @@ function DialogOverlay({ className, ...props }: ComponentProps<typeof DialogPrim
         "fixed inset-0 z-50 bg-background/80 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
         className,
       )}
-      {...props}
+      {...rest}
     />
   );
 }
 
-function DialogContent({ className, children, ...props }: ComponentProps<typeof DialogPrimitive.Content>) {
+function DialogContent(props: ComponentProps<typeof DialogPrimitive.Content>) {
+  const { className, children, ...rest } = props;
   return (
     <DialogPortal>
       <DialogOverlay />
@@ -41,7 +44,7 @@ function DialogContent({ className, children, ...props }: ComponentProps<typeof 
           "fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-xl border border-border bg-card p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
           className,
         )}
-        {...props}
+        {...rest}
       >
         {children}
         <DialogPrimitive.Close
@@ -70,26 +73,29 @@ function DialogContent({ className, children, ...props }: ComponentProps<typeof 
   );
 }
 
-function DialogHeader({ className, ...props }: ComponentProps<"div">) {
-  return <div data-slot="dialog-header" className={cn("flex flex-col gap-1.5", className)} {...props} />;
+function DialogHeader(props: ComponentProps<"div">) {
+  const { className, ...rest } = props;
+  return <div data-slot="dialog-header" className={cn("flex flex-col gap-1.5", className)} {...rest} />;
 }
 
-function DialogTitle({ className, ...props }: ComponentProps<typeof DialogPrimitive.Title>) {
+function DialogTitle(props: ComponentProps<typeof DialogPrimitive.Title>) {
+  const { className, ...rest } = props;
   return (
     <DialogPrimitive.Title
       data-slot="dialog-title"
       className={cn("text-base font-medium leading-none text-foreground", className)}
-      {...props}
+      {...rest}
     />
   );
 }
 
-function DialogDescription({ className, ...props }: ComponentProps<typeof DialogPrimitive.Description>) {
+function DialogDescription(props: ComponentProps<typeof DialogPrimitive.Description>) {
+  const { className, ...rest } = props;
   return (
     <DialogPrimitive.Description
       data-slot="dialog-description"
       className={cn("text-xs text-foreground/60", className)}
-      {...props}
+      {...rest}
     />
   );
 }

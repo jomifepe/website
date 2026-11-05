@@ -1,30 +1,28 @@
 import { get, put } from "@vercel/blob";
 import { z } from "zod";
-import {
-  extractRunBestEfforts,
-  reduceAllTimeBestEfforts,
-  type AllTimeBestEfforts,
-} from "./best-efforts";
+
+import { extractRunBestEfforts, reduceAllTimeBestEfforts, type BestEfforts } from "./best-efforts";
 import {
   computeSportSet,
-  fetchActivityDetailRaw,
-  fetchActivitiesRaw,
+  fetchActivities,
+  fetchActivityDetail,
   fetchAllPublicActivities,
   sanitizeActivity,
   sanitizeActivityDetail,
+  SportTypeSchema,
   type SanitizedActivity,
   type SanitizedActivityDetail,
-  type SportType,
   type StravaActivity,
 } from "./strava";
 
 const WORKOUTS_BLOB_PATH = "workouts.json";
 const DETAIL_BUDGET_PER_RUN = 40;
+const RECENT_ACTIVITIES_PAGE_SIZE = 28;
 
 const SanitizedActivitySchema = z.object({
   slug: z.string(),
   startDate: z.string(),
-  sport_type: z.string(),
+  sport_type: SportTypeSchema,
   timeOfDay: z.enum(["morning", "afternoon", "evening"]),
   dateDisplay: z.string(),
   dateDisplayShort: z.string(),
@@ -73,7 +71,7 @@ type WorkoutsDocument = z.infer<typeof WorkoutsDocumentSchema>;
 
 export type WorkoutsLoaderData = {
   activities: SanitizedActivity[];
-  bestEfforts: AllTimeBestEfforts | null;
+  bestEfforts: BestEfforts | null;
 };
 
 function blobConfigured() {
@@ -119,7 +117,6 @@ function storedFromListActivity(activity: StravaActivity, existing?: StoredActiv
   const sanitized = sanitizeActivity(activity);
   return {
     ...sanitized,
-    sport_type: sanitized.sport_type as SportType,
     stravaId: activity.id,
     calories: existing?.calories,
     runBestEfforts: existing?.runBestEfforts,
@@ -128,8 +125,7 @@ function storedFromListActivity(activity: StravaActivity, existing?: StoredActiv
 }
 
 function isRunActivity(activity: StoredActivity | StravaActivity) {
-  const sportType = "sport_type" in activity ? activity.sport_type : activity.sport_type;
-  return computeSportSet(sportType as SportType) === "run";
+  return computeSportSet(activity.sport_type) === "run";
 }
 
 function needsDetailFetch(stored: StoredActivity, summary: StravaActivity, previous?: StoredActivity) {
@@ -151,7 +147,7 @@ async function applyDetailBudget(activities: StoredActivity[], ids: number[]) {
     if (index === -1) continue;
 
     const stored = activities[index];
-    const detail = await fetchActivityDetailRaw(id);
+    const detail = await fetchActivityDetail(id);
     const sanitizedDetail = sanitizeActivityDetail(detail);
     const runBestEfforts = isRunActivity(stored) ? extractRunBestEfforts(detail.best_efforts) : undefined;
 
@@ -159,7 +155,7 @@ async function applyDetailBudget(activities: StoredActivity[], ids: number[]) {
       ...sanitizedDetail,
       stravaId: id,
       calories: detail.calories,
-      runBestEfforts: runBestEfforts ?? (isRunActivity(stored) ? {} : undefined),
+      runBestEfforts,
       listFingerprint: stored.listFingerprint,
     };
   }
@@ -200,7 +196,7 @@ export async function syncWorkoutsStore() {
 
 /** First visit before nightly sync: one Strava page so the site is not empty. */
 export async function seedWorkoutsStoreFromOnePage() {
-  const summaries = await fetchActivitiesRaw(1, 28);
+  const summaries = await fetchActivities(1, RECENT_ACTIVITIES_PAGE_SIZE);
   const activities = summaries.map((summary) => storedFromListActivity(summary));
 
   const doc: WorkoutsDocument = {
@@ -216,10 +212,7 @@ export async function seedWorkoutsStoreFromOnePage() {
 
 function toClientActivity(stored: StoredActivity): SanitizedActivity {
   const { stravaId: _id, calories: _calories, runBestEfforts: _efforts, ...activity } = stored;
-  return {
-    ...activity,
-    sport_type: activity.sport_type as SportType,
-  };
+  return activity;
 }
 
 export function documentToLoaderData(doc: WorkoutsDocument): WorkoutsLoaderData {
@@ -242,7 +235,7 @@ export async function loadWorkoutsForSite(): Promise<WorkoutsLoaderData> {
 }
 
 async function loadWorkoutsLiveFallback(): Promise<WorkoutsLoaderData> {
-  const raw = await fetchActivitiesRaw(1, 28);
+  const raw = await fetchActivities(1, RECENT_ACTIVITIES_PAGE_SIZE);
   return {
     activities: raw.map(sanitizeActivity),
     bestEfforts: null,
@@ -258,7 +251,6 @@ export function storedToActivityDetail(stored: StoredActivity): SanitizedActivit
   const { stravaId: _id, runBestEfforts: _efforts, ...rest } = stored;
   return {
     ...rest,
-    sport_type: rest.sport_type as SportType,
     calories: stored.calories ?? null,
   };
 }
@@ -270,15 +262,15 @@ export async function loadActivityDetailBySlug(slug: string): Promise<SanitizedA
       if (stored.calories !== undefined) {
         return storedToActivityDetail(stored);
       }
-      const detail = await fetchActivityDetailRaw(stored.stravaId);
+      const detail = await fetchActivityDetail(stored.stravaId);
       return sanitizeActivityDetail(detail);
     }
   }
 
-  const raw = await fetchActivitiesRaw(1, 28);
+  const raw = await fetchActivities(1, RECENT_ACTIVITIES_PAGE_SIZE);
   const match = raw.find((activity) => sanitizeActivity(activity).slug === slug);
   if (!match) throw new Error(`Activity not found: ${slug}`);
 
-  const detail = await fetchActivityDetailRaw(match.id);
+  const detail = await fetchActivityDetail(match.id);
   return sanitizeActivityDetail(detail);
 }

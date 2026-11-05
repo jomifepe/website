@@ -72,13 +72,11 @@ export function RouteCanvas(props: RouteCanvasProps) {
     let frame = 0;
     let start = 0;
 
-    // Map viewBox units onto the canvas the way SVG's default "xMidYMid meet" would.
-    function fitToCanvas() {
+    const fitToCanvas = () => {
       const { width, height } = canvas.getBoundingClientRect();
       const dpr = window.devicePixelRatio || 1;
       const w = Math.round(width * dpr);
       const h = Math.round(height * dpr);
-      // Assigning width/height reallocates the buffer, so only do it on a real resize.
       if (canvas.width !== w || canvas.height !== h) {
         canvas.width = w;
         canvas.height = h;
@@ -89,10 +87,9 @@ export function RouteCanvas(props: RouteCanvasProps) {
       ctx.translate((width - VIEW_W * scale) / 2, (height - VIEW_H * scale) / 2);
       ctx.scale(scale, scale);
       return scale;
-    }
+    };
 
-    function render(progress: number, scale: number) {
-      // Keep stroke weights constant on screen regardless of the fit scale.
+    const render = (progress: number, scale: number) => {
       const unit = 1 / scale;
 
       ctx.save();
@@ -114,7 +111,6 @@ export function RouteCanvas(props: RouteCanvasProps) {
       ctx.lineWidth = 1.75 * unit;
       traceSegment(ctx, points, 0, head);
 
-      // Comet tail: brighter and thicker as it approaches the head.
       const tailStart = Math.max(0, head - Math.round(last * TAIL_FRACTION));
       for (let i = tailStart; i < head; i++) {
         const t = (i - tailStart) / Math.max(1, head - tailStart);
@@ -136,9 +132,9 @@ export function RouteCanvas(props: RouteCanvasProps) {
 
       ctx.shadowBlur = 0;
       ctx.globalAlpha = 1;
-    }
+    };
 
-    function drawStatic() {
+    const drawStatic = () => {
       const scale = fitToCanvas();
       ctx.lineCap = "round";
       ctx.lineJoin = "round";
@@ -146,16 +142,16 @@ export function RouteCanvas(props: RouteCanvasProps) {
       ctx.globalAlpha = 0.7;
       ctx.lineWidth = 1.75 / scale;
       traceSegment(ctx, points, 0, last);
-    }
+    };
 
-    function tick(now: number) {
+    const tick = (now: number) => {
       const scale = fitToCanvas();
       if (!start) start = now;
 
       const elapsed = (now - start) % (DRAW_MS + HOLD_MS);
       render(Math.min(1, elapsed / DRAW_MS), scale);
       frame = requestAnimationFrame(tick);
-    }
+    };
 
     if (reduceMotion) {
       drawStatic();

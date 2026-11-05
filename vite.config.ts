@@ -5,13 +5,9 @@ import { devtools } from "@tanstack/devtools-vite";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import viteReact from "@vitejs/plugin-react";
 import { nitro } from "nitro/vite";
-import { defineConfig } from "vitest/config";
-import viteTsConfigPaths from "vite-tsconfig-paths";
+import { defineConfig } from "vite";
 
 const config = defineConfig({
-  test: {
-    environment: "node",
-  },
   resolve: {
     alias: {
       "~": fileURLToPath(new URL("./src", import.meta.url)),
@@ -27,8 +23,6 @@ const config = defineConfig({
         "/workout": { isr: 60 * 60 },
       },
     }),
-    // this is the plugin that enables path aliases
-    viteTsConfigPaths({ projects: ["./tsconfig.json"] }),
     tailwindcss(),
     // no prerender: it freezes Strava data at build time and never refreshes. ISR above handles it
     tanstackStart(),

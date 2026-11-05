@@ -1,3 +1,6 @@
+import { Link } from "@tanstack/react-router";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { FaMedal } from "react-icons/fa";
 import {
   TbActivity,
   TbArrowUp,
@@ -16,15 +19,21 @@ import {
   TbWalk,
   TbZzz,
 } from "react-icons/tb";
-import { FaMedal } from "react-icons/fa";
-import { Link } from "@tanstack/react-router";
-import { useEffect, useRef, useState, type ReactNode } from "react";
-import { getActivityDetailBySlug } from "~/lib/server-activities";
-import { CardItem, CardItemContent, useCardItemWrapperProps } from "./CardItem";
-import { RouteCanvas } from "./RouteCanvas";
-import type { SanitizedActivity, SanitizedActivityDetail, SportType } from "../lib/strava";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
+
+import { CardItem, CardItemContent, useCardItemWrapperProps } from "~/components/CardItem";
+import { RouteCanvas } from "~/components/RouteCanvas";
 import { Badge } from "~/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "~/components/ui/dialog";
+import { formatMovingTime } from "~/lib/format";
+import { getActivityDetailBySlug } from "~/lib/server-activities";
+import { computeSportSet, type SanitizedActivity, type SanitizedActivityDetail, type SportType } from "~/lib/strava";
 
 type WorkoutCardProps = {
   activity: SanitizedActivity;
@@ -74,7 +83,7 @@ export function WorkoutCard(props: WorkoutCardProps) {
     </div>
   );
 
-  const endSlot = activity.routeSvgPaths ? <RoutePreview paths={activity.routeSvgPaths} /> : null;
+  const endSlot = activity.routeSvgPaths && <RoutePreview d={activity.routeSvgPaths.card} />;
 
   if (dialog === "local") {
     return (
@@ -107,7 +116,7 @@ function PrMedals(props: PrMedalsProps) {
 }
 
 type RouteMapContainerProps = {
-  routeSvgPaths: { card: string; dialog: string } | null;
+  routeSvgPaths: SanitizedActivity["routeSvgPaths"];
 };
 
 function RouteMapContainer(props: RouteMapContainerProps) {
@@ -115,7 +124,7 @@ function RouteMapContainer(props: RouteMapContainerProps) {
   if (!routeSvgPaths) return null;
   return (
     <div className="mb-5 rounded-lg overflow-hidden bg-foreground/4 flex items-center justify-center">
-      <RoutePreview paths={routeSvgPaths} variant="dialog" />
+      <RouteCanvas d={routeSvgPaths.dialog} className="w-full h-40 text-orange-500" />
     </div>
   );
 }
@@ -147,8 +156,8 @@ export function ActivityDialog(props: ActivityDialogProps) {
   const activity = detail ?? initialActivity;
 
   const showDistance = shouldShowDistance(activity.sport_type);
-  const isRunLike = isRunSport(activity.sport_type);
-  const stats = buildStats({ activity: activity, isRunLike, showDistance });
+  const isRunLike = computeSportSet(activity.sport_type) === "run";
+  const stats = buildStats({ activity, isRunLike, showDistance });
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
@@ -167,19 +176,17 @@ export function ActivityDialog(props: ActivityDialogProps) {
           </div>
         </DialogHeader>
         <RouteMapContainer routeSvgPaths={activity.routeSvgPaths} />
-        {stats.length > 0 && (
-          <dl className="grid grid-cols-2 gap-x-6 gap-y-3">
-            {stats.map((stat) => (
-              <div key={stat.label} className="flex flex-col gap-0.5">
-                <dt className="text-xs text-foreground/40 flex items-center gap-1">
-                  {stat.icon}
-                  {stat.label}
-                </dt>
-                <dd className="text-sm text-foreground font-medium">{stat.value}</dd>
-              </div>
-            ))}
-          </dl>
-        )}
+        <dl className="grid grid-cols-2 gap-x-6 gap-y-3">
+          {stats.map((stat) => (
+            <div key={stat.label} className="flex flex-col gap-0.5">
+              <dt className="text-xs text-foreground/40 flex items-center gap-1">
+                {stat.icon}
+                {stat.label}
+              </dt>
+              <dd className="text-sm text-foreground font-medium">{stat.value}</dd>
+            </div>
+          ))}
+        </dl>
       </DialogContent>
     </Dialog>
   );
@@ -199,9 +206,9 @@ type BuildStatsArgs = {
 
 function buildStats(args: BuildStatsArgs): StatEntry[] {
   const { activity, isRunLike, showDistance } = args;
-  const stats: StatEntry[] = [];
-
-  stats.push({ label: "moving time", value: formatMovingTime(activity.moving_time), icon: <TbClock size={10} /> });
+  const stats: StatEntry[] = [
+    { label: "moving time", value: formatMovingTime(activity.moving_time), icon: <TbClock size={10} /> },
+  ];
 
   if (activity.elapsed_time && activity.elapsed_time > activity.moving_time + 30) {
     stats.push({
@@ -303,22 +310,17 @@ function buildStats(args: BuildStatsArgs): StatEntry[] {
 }
 
 type RoutePreviewProps = {
-  paths: { card: string; dialog: string };
-  variant?: "card" | "dialog";
+  d: string;
 };
 
 function RoutePreview(props: RoutePreviewProps) {
-  const { paths, variant = "card" } = props;
-
-  if (variant === "dialog") {
-    return <RouteCanvas d={paths.dialog} className="w-full h-40 text-orange-500" />;
-  }
+  const { d } = props;
 
   return (
     <div className="absolute top-1/2 right-2 -translate-y-1/2 pointer-events-none">
       <svg viewBox="0 0 100 100" className="h-12 w-12" xmlns="http://www.w3.org/2000/svg">
         <path
-          d={paths.card}
+          d={d}
           stroke="currentColor"
           strokeWidth={2}
           fill="none"
@@ -331,7 +333,7 @@ function RoutePreview(props: RoutePreviewProps) {
   );
 }
 
-export function getWorkoutIcon(sportType: SportType, size = 24) {
+function getWorkoutIcon(sportType: SportType, size = 24) {
   const commonProps = { size, className: "shrink-0" };
 
   switch (sportType) {
@@ -409,24 +411,7 @@ function shouldShowDistance(sportType: SportType) {
   }
 }
 
-const RUN_SPORT_TYPES = new Set<SportType>(["Run", "TrailRun", "VirtualRun"]);
-
-function isRunSport(sportType: SportType): boolean {
-  return RUN_SPORT_TYPES.has(sportType);
-}
-
-export function formatMovingTime(movingTime: number): string {
-  const hours = Math.floor(movingTime / 3600);
-  const minutes = Math.floor((movingTime % 3600) / 60);
-  const seconds = movingTime % 60;
-
-  if (hours > 0) return `${hours}h ${minutes}m`;
-  if (minutes > 0) return `${minutes}m ${seconds}s`;
-  return `${seconds}s`;
-}
-
-function formatPace(speedMps: number): string {
-  if (speedMps <= 0) return "—";
+function formatPace(speedMps: number) {
   const secsPerKm = 1000 / speedMps;
   const mins = Math.floor(secsPerKm / 60);
   const secs = Math.round(secsPerKm % 60);

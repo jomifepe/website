@@ -1,6 +1,7 @@
+import { TbDiscFilled } from "react-icons/tb";
+
 import type { RecentTrack } from "~/lib/statsfm";
 import { cn } from "~/lib/utils";
-import { TbDiscFilled } from "react-icons/tb";
 
 type RecentlyPlayedProps = {
   track: RecentTrack | null;

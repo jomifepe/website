@@ -2,9 +2,10 @@ import { TanStackDevtools } from "@tanstack/react-devtools";
 import { createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import type { ReactNode } from "react";
+
 import { TooltipProvider } from "~/components/ui/tooltip";
 
-import appCss from "../styles.css?url";
+import appCss from "~/styles.css?url";
 
 export const Route = createRootRoute({
   head: () => ({
@@ -60,7 +61,7 @@ function RootDocument(props: RootDocumentProps) {
           Skip to main content
         </a>
         <TooltipProvider delayDuration={800}>{children}</TooltipProvider>
-        {process.env.NODE_ENV !== "production" && (
+        {import.meta.env.DEV && (
           <TanStackDevtools
             config={{
               position: "bottom-right",
