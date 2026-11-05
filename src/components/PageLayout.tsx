@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import { useLayoutEffect, useState, type ReactNode } from "react";
+import { useSyncExternalStore, type ReactNode } from "react";
 import type { IconType } from "react-icons";
 import { TbMoon, TbSun, TbSunMoon } from "react-icons/tb";
 
@@ -94,13 +94,15 @@ function getNextLabel(theme: Theme) {
   return `switch to ${next === "system" ? "automatic" : next} mode`;
 }
 
+function subscribeToNothing() {
+  return () => {};
+}
+
+/** false while rendering on the server and hydrating, true once running on the client */
 function useIsMounted() {
-  const [mounted, setMounted] = useState(false);
-
-  // layout effect so the browser never paints the wrong theme icon
-  useLayoutEffect(() => {
-    setMounted(true);
-  }, []);
-
-  return mounted;
+  return useSyncExternalStore(
+    subscribeToNothing,
+    () => true,
+    () => false,
+  );
 }

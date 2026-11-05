@@ -69,8 +69,9 @@ export function RouteCanvas(props: RouteCanvasProps) {
     const color = getComputedStyle(canvas).color;
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    let frame = 0;
-    let start = 0;
+    const animation = { frame: 0 };
+    // same clock as the requestAnimationFrame timestamps
+    const start = performance.now();
 
     const fitToCanvas = () => {
       const { width, height } = canvas.getBoundingClientRect();
@@ -146,11 +147,9 @@ export function RouteCanvas(props: RouteCanvasProps) {
 
     const tick = (now: number) => {
       const scale = fitToCanvas();
-      if (!start) start = now;
-
       const elapsed = (now - start) % (DRAW_MS + HOLD_MS);
       render(Math.min(1, elapsed / DRAW_MS), scale);
-      frame = requestAnimationFrame(tick);
+      animation.frame = requestAnimationFrame(tick);
     };
 
     if (reduceMotion) {
@@ -160,8 +159,8 @@ export function RouteCanvas(props: RouteCanvasProps) {
       return () => observer.disconnect();
     }
 
-    frame = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frame);
+    animation.frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(animation.frame);
   }, [d]);
 
   return <canvas ref={canvasRef} className={className} aria-label="route map" role="img" />;
