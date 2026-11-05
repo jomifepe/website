@@ -1,19 +1,12 @@
-import { type ReactNode } from "react";
 import { TbBrandGithub, TbBrandLinkedin, TbBrandMedium, TbBrandStrava, TbBrandX, TbMail } from "react-icons/tb";
+
 import { SlideHighlightRegion } from "~/components/SlideHighlightRegion";
-import { SocialLink } from "~/components/SocialLink";
-import { RecentlyPlayed } from "./recently-played";
+import { SocialLink, type SocialLinkProps } from "~/components/SocialLink";
 import type { RecentTrack } from "~/lib/statsfm";
 
-type SocialLink = {
-  name: string;
-  url: string;
-  icon: ReactNode;
-  title: string;
-  hoverColor?: "green" | "orange" | "purple" | "red" | "blue";
-};
+import { RecentlyPlayed } from "./recently-played";
 
-const SOCIAL_LINKS: SocialLink[] = [
+const SOCIAL_LINKS: SocialLinkProps[] = [
   {
     name: "github",
     url: "https://github.com/jomifepe",
@@ -54,7 +47,7 @@ const SOCIAL_LINKS: SocialLink[] = [
     hoverColor: "orange",
   },
   {
-    name: "last.fm",
+    name: "stats.fm",
     url: "https://stats.fm/jomifepe",
     icon: <StatsFmIcon />,
     title: "stats.fm",
@@ -84,14 +77,7 @@ export function SocialLinksGroup(props: SocialLinksGroupProps) {
         className="relative flex flex-wrap items-center justify-center sm:justify-end gap-1 sm:ml-auto"
       >
         {SOCIAL_LINKS.map((item) => (
-          <SocialLink
-            key={item.name}
-            icon={item.icon}
-            title={item.title}
-            hoverColor={item.hoverColor}
-            name={item.name}
-            url={item.url}
-          />
+          <SocialLink key={item.name} {...item} />
         ))}
       </SlideHighlightRegion>
     </div>

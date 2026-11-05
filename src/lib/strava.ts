@@ -1,5 +1,5 @@
-import { defineCachedFunction } from "nitro/cache";
 import { z } from "zod";
+
 import { decodePolyline, polylineToSvgPath } from "./polyline";
 
 /** https://developers.strava.com/docs/reference/#api-models-SportType */
@@ -56,31 +56,19 @@ const sportTypeValues = [
   "Yoga",
 ] as const;
 
-export type SportType = (typeof sportTypeValues)[number];
+// one new sport type from Strava would otherwise fail the whole activity list
+export const SportTypeSchema = z.enum(sportTypeValues).catch("Workout");
 
-// Strava Token Response Schema
+export type SportType = z.infer<typeof SportTypeSchema>;
+
 const StravaTokenResponseSchema = z.object({
-  token_type: z.string(),
-  expires_at: z.number(),
-  expires_in: z.number(),
   refresh_token: z.string(),
   access_token: z.string(),
-  athlete: z
-    .object({
-      id: z.number(),
-      username: z.string().optional(),
-      firstname: z.string().optional(),
-      lastname: z.string().optional(),
-    })
-    .optional(),
 });
 
-export type StravaTokenResponse = z.infer<typeof StravaTokenResponseSchema>;
-
-// Strava Activity Schema
-export const StravaActivitySchema = z.object({
+const StravaActivitySchema = z.object({
   id: z.number(),
-  sport_type: z.enum(sportTypeValues),
+  sport_type: SportTypeSchema,
   start_date_local: z.string(),
   distance: z.number(),
   moving_time: z.number(),
@@ -88,7 +76,6 @@ export const StravaActivitySchema = z.object({
   total_elevation_gain: z.number(),
   map: z
     .object({
-      id: z.string(),
       summary_polyline: z.string().nullable(),
     })
     .optional()
@@ -98,11 +85,9 @@ export const StravaActivitySchema = z.object({
   average_heartrate: z.number().optional(),
   max_heartrate: z.number().optional(),
   average_speed: z.number().optional(),
-  max_speed: z.number().optional(),
   average_cadence: z.number().optional(),
   pr_count: z.number().optional(),
   suffer_score: z.number().optional(),
-  achievement_count: z.number().optional(),
   kilojoules: z.number().optional(),
   average_watts: z.number().optional(),
   max_watts: z.number().optional(),
@@ -117,15 +102,15 @@ const StravaBestEffortSchema = z.object({
   elapsed_time: z.number(),
 });
 
-// Detailed activity (from GET /activities/{id}) — adds calories and run best efforts
-export const StravaActivityDetailSchema = StravaActivitySchema.extend({
+/** GET /activities/{id} returns the summary fields plus calories and run best efforts. */
+const StravaActivityDetailSchema = StravaActivitySchema.extend({
   calories: z.number().optional(),
   best_efforts: z.array(StravaBestEffortSchema).optional(),
 });
 
 export type StravaActivityDetail = z.infer<typeof StravaActivityDetailSchema>;
 
-async function refreshAccessToken(): Promise<StravaTokenResponse> {
+async function refreshAccessToken() {
   const clientId = process.env.STRAVA_CLIENT_ID;
   const clientSecret = process.env.STRAVA_CLIENT_SECRET;
   const refreshToken = process.env.STRAVA_REFRESH_TOKEN;
@@ -160,12 +145,6 @@ async function refreshAccessToken(): Promise<StravaTokenResponse> {
   const data = await response.json();
   const tokenData = StravaTokenResponseSchema.parse(data);
 
-  console.log("Token refresh successful:", {
-    expires_at: tokenData.expires_at,
-    expires_in: tokenData.expires_in,
-    athlete: tokenData.athlete?.firstname,
-  });
-
   if (tokenData.refresh_token !== process.env.STRAVA_REFRESH_TOKEN) {
     console.warn("⚠️  Strava refresh token has changed. Update STRAVA_REFRESH_TOKEN in your environment.");
   }
@@ -173,7 +152,7 @@ async function refreshAccessToken(): Promise<StravaTokenResponse> {
   return tokenData;
 }
 
-export async function fetchActivitiesRaw(page: number, perPage: number = 10): Promise<StravaActivity[]> {
+export async function fetchActivities(page: number, perPage: number) {
   const tokenData = await refreshAccessToken();
 
   const url = new URL("https://www.strava.com/api/v3/athlete/activities");
@@ -202,15 +181,13 @@ export async function fetchActivitiesRaw(page: number, perPage: number = 10): Pr
     .parse(data)
     .filter((activity) => !activity.private);
 
-  console.log(`Fetched ${activities.length} activities from Strava (page ${page})`);
-
   return activities;
 }
 
-export async function fetchAllPublicActivities(perPage: number = 200): Promise<StravaActivity[]> {
+export async function fetchAllPublicActivities(perPage = 200) {
   const all: StravaActivity[] = [];
   for (let page = 1; page <= 50; page++) {
-    const batch = await fetchActivitiesRaw(page, perPage);
+    const batch = await fetchActivities(page, perPage);
     all.push(...batch);
     if (batch.length < perPage) break;
   }
@@ -226,13 +203,7 @@ export function activitySlug(startDateLocal: string): string {
   return h.toString(36);
 }
 
-export const fetchActivities = defineCachedFunction(fetchActivitiesRaw, {
-  name: "strava-activities",
-  maxAge: 5 * 60, // short so ISR re-renders (hourly) get fresh data; still shields Strava from client navigations
-  getKey: (page: number, perPage: number = 10) => `p${page}-pp${perPage}`,
-});
-
-export async function fetchActivityDetailRaw(id: number): Promise<StravaActivityDetail> {
+export async function fetchActivityDetail(id: number) {
   const tokenData = await refreshAccessToken();
 
   const response = await fetch(`https://www.strava.com/api/v3/activities/${id}`, {
@@ -249,16 +220,10 @@ export async function fetchActivityDetailRaw(id: number): Promise<StravaActivity
   return StravaActivityDetailSchema.parse(data);
 }
 
-export const fetchActivityDetail = defineCachedFunction(fetchActivityDetailRaw, {
-  name: "strava-activity-detail",
-  maxAge: 60 * 60,
-  getKey: (id: number) => `id${id}`,
-});
-
-// ─── Sanitized activity (safe for the client) ─────────────────────────────────
-// Strips: id, start_date_local, map.summary_polyline (GPS coords), private.
-// All time/location-derived values are computed server-side before sending.
-
+/**
+ * The client-safe shape of an activity. Strips id, start_date_local, map.summary_polyline
+ * (GPS coords) and private; all time- and location-derived values are computed server-side.
+ */
 export type SanitizedActivity = {
   slug: string;
   startDate: string; // YYYY-MM-DD in athlete's local timezone
@@ -290,8 +255,10 @@ export type SanitizedActivity = {
 
 export type SanitizedActivityDetail = SanitizedActivity & { calories?: number | null };
 
+// start_date_local is the athlete's wall-clock time with a misleading "Z" suffix, so it is read
+// in UTC to get that wall-clock time back regardless of the server's timezone
 function computeTimeOfDay(startDateLocal: string): SanitizedActivity["timeOfDay"] {
-  const h = new Date(startDateLocal).getHours();
+  const h = new Date(startDateLocal).getUTCHours();
   if (h < 12) return "morning";
   if (h < 17) return "afternoon";
   return "evening";
@@ -299,7 +266,7 @@ function computeTimeOfDay(startDateLocal: string): SanitizedActivity["timeOfDay"
 
 function computeDateDisplay(startDateLocal: string, options: Intl.DateTimeFormatOptions = {}): string {
   return new Date(startDateLocal)
-    .toLocaleDateString("en-US", { month: "short", day: "numeric", ...options })
+    .toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC", ...options })
     .toLowerCase();
 }
 
@@ -339,7 +306,6 @@ export function groupActivitiesByWeek(
   return { current, last };
 }
 
-export type SportSet = "run" | "ride" | "lift";
 export function computeSportSet(sportType: SportType) {
   switch (sportType) {
     case "Run":
@@ -365,29 +331,27 @@ export function computeSportSet(sportType: SportType) {
   }
 }
 
-function computeTitle(sportType: SportType, distance: number, startDateLocal: string): string {
-  const tod = computeTimeOfDay(startDateLocal);
-  const sportSet = computeSportSet(sportType);
+function computeTitle(sportType: SportType, distance: number, startDateLocal: string) {
+  return `${computeTimeOfDay(startDateLocal)} ${computeSportLabel(sportType, distance)}`;
+}
 
-  let sportLabel = sportSet;
-  if (sportSet === "run") {
-    let prefix = "";
-    if (sportType === "TrailRun") prefix = "trail ";
-    if (sportType === "VirtualRun") prefix = "virtual ";
-
-    if (distance >= 42_195) sportLabel = `${prefix}marathon`;
-    else if (distance >= 21_097.5) sportLabel = `${prefix}half marathon`;
-    else if (distance > 15_000) sportLabel = `${prefix}long run`;
-    else sportLabel = `${prefix}run`;
-  } else {
-    sportLabel = sportType
+function computeSportLabel(sportType: SportType, distance: number) {
+  if (computeSportSet(sportType) !== "run") {
+    return sportType
       .replace(/([A-Z]+)([A-Z][a-z])/g, "$1-$2")
       .replace(/([a-z\d])([A-Z])/g, "$1 $2")
       .trim()
       .toLowerCase();
   }
 
-  return `${tod} ${sportLabel}`;
+  let prefix = "";
+  if (sportType === "TrailRun") prefix = "trail ";
+  if (sportType === "VirtualRun") prefix = "virtual ";
+
+  if (distance >= 42_195) return `${prefix}marathon`;
+  if (distance >= 21_097.5) return `${prefix}half marathon`;
+  if (distance > 15_000) return `${prefix}long run`;
+  return `${prefix}run`;
 }
 
 function computeRouteSvgPaths(summaryPolyline: string | null | undefined): SanitizedActivity["routeSvgPaths"] {

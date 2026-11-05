@@ -1,13 +1,13 @@
 import { createFileRoute, useLoaderData } from "@tanstack/react-router";
+
 import { PageLayout } from "~/components/PageLayout";
+import { getRecentlyPlayed } from "~/lib/server-statsfm";
 import { cn } from "~/lib/utils";
 
-import { getRecentlyPlayed } from "~/lib/server-statsfm";
-
 import { HeroParagraph, pickSentences } from "./-home/sentences";
+import { SocialLinksGroup } from "./-home/social-links";
 import { WorkCard } from "./-home/work";
 import { RecentWorkoutCard } from "./-home/workout";
-import { SocialLinksGroup } from "./-home/social-links";
 
 export const Route = createFileRoute("/_strava/")({
   loader: async () => {

@@ -1,0 +1,11 @@
+---
+description: How to contribute — commits, PRs, and repo hygiene
+alwaysApply: true
+---
+
+# Contributing
+
+- Commits + PR titles: [Conventional Commits](https://www.conventionalcommits.org/). Same format both. Scope when area clear (`workout`, `deps`, `ui`).
+- PR: focused diff. CI green before review. Squash use PR title as commit — title matter.
+- No secrets, `.env`, credentials in git.
+- Code style: `.cursor/rules/coding-standards.mdc`.

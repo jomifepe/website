@@ -1,5 +1,7 @@
-import { type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
+import type { ReactNode } from "react";
+
+import { type HoverColor, hoverColorClass } from "~/components/SocialLink";
 import { cn } from "~/lib/utils";
 
 const codingPhrases = [
@@ -116,28 +118,15 @@ export type Sentences = ReturnType<typeof pickSentences>;
 type TextLinkProps = {
   children: ReactNode;
   to: string;
-  hoverColor?: "green" | "orange" | "purple";
+  hoverColor: HoverColor;
 };
 
 function TextLink(props: TextLinkProps) {
-  const { children, to, hoverColor = "white" } = props;
-
-  let hoverColorClass = "";
-  switch (hoverColor) {
-    case "green":
-      hoverColorClass = "hover:text-green-400 focus-visible:text-green-400";
-      break;
-    case "orange":
-      hoverColorClass = "hover:text-orange-400 focus-visible:text-orange-400";
-      break;
-    case "purple":
-      hoverColorClass = "hover:text-purple-400 focus-visible:text-purple-400";
-      break;
-  }
+  const { children, to, hoverColor } = props;
 
   const className = cn(
     "text-foreground hover:text-foreground/80 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded group self-start",
-    hoverColorClass,
+    hoverColorClass[hoverColor],
   );
 
   if (to.startsWith("http")) {

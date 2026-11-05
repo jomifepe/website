@@ -1,5 +1,7 @@
 import type { ComponentPropsWithoutRef, ElementType, ReactNode } from "react";
+
 import { cn } from "~/lib/utils";
+
 import { useSlideHighlightRegion } from "./SlideHighlightRegion";
 
 type CardItemOwnProps = {
@@ -43,7 +45,7 @@ export function useCardItemWrapperProps(className?: string) {
       "relative flex cursor-pointer items-start gap-4 rounded-lg",
       "-mx-2 px-2 py-2 md:-mx-3 md:px-3 md:py-3",
       "transition-colors focus-visible:outline-none",
-      slideHighlight != null ? "z-10" : "hover:bg-foreground/7 focus-visible:bg-foreground/7",
+      slideHighlight !== null ? "z-10" : "hover:bg-foreground/7 focus-visible:bg-foreground/7",
       className,
     ),
     onMouseEnter: slideHighlight?.onInteract,

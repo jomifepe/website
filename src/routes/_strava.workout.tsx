@@ -1,16 +1,19 @@
+import { createFileRoute, Link, Outlet, useLoaderData } from "@tanstack/react-router";
 import { FaMedal } from "react-icons/fa";
 import { TbActivity, TbBrandStrava, TbChevronLeft, TbClock, TbRoute } from "react-icons/tb";
-import { createFileRoute, Link, Outlet, useLoaderData } from "@tanstack/react-router";
+
+import { PageLayout } from "~/components/PageLayout";
 import { SlideHighlightRegion } from "~/components/SlideHighlightRegion";
 import { SocialLink } from "~/components/SocialLink";
-import { Badge } from "../components/ui/badge";
-import { PageLayout } from "../components/PageLayout";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../components/ui/tooltip";
-import { Card, CardAction, CardContent, CardHeader, CardTitle } from "../components/ui/card";
-import { WorkoutCard, formatMovingTime } from "../components/WorkoutCard";
-import { BEST_EFFORT_TARGETS, formatDurationNoSeconds, type AllTimeBestEfforts } from "../lib/best-efforts";
-import { cn } from "../lib/utils";
-import { computeSportSet, groupActivitiesByWeek, type SanitizedActivity } from "../lib/strava";
+import { Badge } from "~/components/ui/badge";
+import { Card, CardAction, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { Tooltip, TooltipContent, TooltipTrigger } from "~/components/ui/tooltip";
+import { WorkoutCard } from "~/components/WorkoutCard";
+import { BEST_EFFORT_TARGETS, formatDurationNoSeconds, type BestEfforts } from "~/lib/best-efforts";
+import { formatMovingTime } from "~/lib/format";
+import { groupActivitiesByWeek, type SanitizedActivity } from "~/lib/strava";
+import { cn } from "~/lib/utils";
+import { categorizeCurrentWeek, categorizeWeek } from "~/lib/workout-week";
 
 export const Route = createFileRoute("/_strava/workout")({
   component: WorkoutPage,
@@ -21,8 +24,8 @@ function WorkoutPage() {
   const { current, last } = groupActivitiesByWeek(activities);
 
   const weeks = [
-    { label: "current week", activities: current },
-    ...(last.length > 0 ? [{ label: "last week", activities: last }] : []),
+    { label: "current week", activities: current, category: categorizeCurrentWeek(current) },
+    ...(last.length > 0 ? [{ label: "last week", activities: last, category: categorizeWeek(last) }] : []),
   ];
 
   return (
@@ -48,46 +51,39 @@ function WorkoutPage() {
         >
           {bestEfforts && <BestEffortsCard bestEfforts={bestEfforts} />}
           <div className={cn("flex min-w-0 flex-col gap-8", bestEfforts && "flex-1")}>
-            {weeks.map(({ label, activities: weekActivities }) => {
-              const category =
-                label === "current week"
-                  ? categorizeCurrentWeek(weekActivities.length)
-                  : categorizeWeek(weekActivities);
-
-              return (
-                // the negative margin at 2xl widens the row past the max-w-5xl column so the
-                // summary lands in the viewport gutter while staying in flow (-mr = card + gap)
-                <div key={label} className="flex flex-col items-stretch gap-4 lg:flex-row lg:items-start 2xl:-mr-48">
-                  <Card className="flex min-w-0 flex-1 flex-col gap-4 overflow-hidden border-border bg-foreground/4 p-4 text-foreground shadow-none lg:p-6">
-                    <CardHeader className="p-0">
-                      <div className="flex flex-row flex-wrap items-center gap-3">
-                        <CardTitle className="font-medium tracking-wider text-sm text-foreground">{label}</CardTitle>
-                        <Tooltip delayDuration={0}>
-                          <TooltipTrigger asChild>
-                            <Badge className="cursor-help" variant={category.color}>
-                              {category.label}
-                            </Badge>
-                          </TooltipTrigger>
-                          <TooltipContent>{category.description}</TooltipContent>
-                        </Tooltip>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="flex min-h-0 flex-1 flex-col gap-2 p-0">
-                      {weekActivities.length === 0 ? (
-                        <p className="italic text-foreground/40 text-sm">no activities yet, get moving</p>
-                      ) : (
-                        <SlideHighlightRegion className="relative flex flex-col items-stretch gap-2" variant="panel">
-                          {weekActivities.map((activity) => (
-                            <WorkoutCard key={activity.slug} activity={activity} />
-                          ))}
-                        </SlideHighlightRegion>
-                      )}
-                    </CardContent>
-                  </Card>
-                  <WeekSummaryCard activities={weekActivities} />
-                </div>
-              );
-            })}
+            {weeks.map(({ label, activities: weekActivities, category }) => (
+              // the negative margin at 2xl widens the row past the max-w-5xl column so the
+              // summary lands in the viewport gutter while staying in flow (-mr = card + gap)
+              <div key={label} className="flex flex-col items-stretch gap-4 lg:flex-row lg:items-start 2xl:-mr-48">
+                <Card className="min-w-0 flex-1 gap-4 overflow-hidden p-4 lg:p-6">
+                  <CardHeader className="p-0">
+                    <div className="flex flex-row flex-wrap items-center gap-3">
+                      <CardTitle>{label}</CardTitle>
+                      <Tooltip delayDuration={0}>
+                        <TooltipTrigger asChild>
+                          <Badge className="cursor-help" variant={category.color}>
+                            {category.label}
+                          </Badge>
+                        </TooltipTrigger>
+                        <TooltipContent>{category.description}</TooltipContent>
+                      </Tooltip>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="flex min-h-0 flex-1 flex-col gap-2 p-0">
+                    {weekActivities.length === 0 ? (
+                      <p className="italic text-foreground/40 text-sm">no activities yet, get moving</p>
+                    ) : (
+                      <SlideHighlightRegion className="relative flex flex-col items-stretch gap-2" variant="panel">
+                        {weekActivities.map((activity) => (
+                          <WorkoutCard key={activity.slug} activity={activity} />
+                        ))}
+                      </SlideHighlightRegion>
+                    )}
+                  </CardContent>
+                </Card>
+                <WeekSummaryCard activities={weekActivities} />
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -97,16 +93,16 @@ function WorkoutPage() {
 }
 
 type BestEffortsCardProps = {
-  bestEfforts: AllTimeBestEfforts;
+  bestEfforts: BestEfforts;
 };
 
 function BestEffortsCard(props: BestEffortsCardProps) {
   const { bestEfforts } = props;
 
   return (
-    <Card className="-order-1 shrink-0 gap-3 border-border bg-foreground/4 p-4 text-foreground shadow-none lg:order-0 lg:sticky lg:top-4 lg:w-44 lg:self-start">
+    <Card className="-order-1 shrink-0 gap-3 p-4 lg:order-0 lg:sticky lg:top-4 lg:w-44 lg:self-start">
       <CardHeader className="p-0">
-        <CardTitle className="font-medium tracking-wider text-sm text-foreground">Best efforts</CardTitle>
+        <CardTitle>Best efforts</CardTitle>
         <CardAction className="row-span-1 self-center">
           <FaMedal aria-hidden className="text-amber-500" size={12} />
         </CardAction>
@@ -147,7 +143,7 @@ function WeekSummaryCard(props: WeekSummaryCardProps) {
   ];
 
   return (
-    <Card className="-order-1 shrink-0 gap-0 border-border bg-foreground/4 p-4 text-foreground shadow-none lg:order-0 lg:sticky lg:top-4 lg:w-44">
+    <Card className="-order-1 shrink-0 gap-0 p-4 lg:order-0 lg:sticky lg:top-4 lg:w-44">
       <dl className="flex flex-row flex-wrap gap-x-6 gap-y-3 lg:flex-col">
         {stats.map((stat) => (
           <div key={stat.label} className="flex flex-col gap-0.5">
@@ -178,68 +174,4 @@ function BackButton() {
       back
     </Link>
   );
-}
-
-type WeekCategory = {
-  label: string;
-  color: "gold" | "purple" | "green" | "red" | "secondary";
-  description: string;
-};
-
-function categorizeCurrentWeek(activityCount: number): WeekCategory {
-  return {
-    label: "in progress",
-    color: "secondary",
-    description: `trained ${activityCount} day${activityCount === 1 ? "" : "s"} so far`,
-  };
-}
-
-function categorizeWeek(activities: SanitizedActivity[]): WeekCategory {
-  const activityCount = activities.length;
-  const description = `trained ${activityCount} days`;
-
-  const weeklyGoal = checkWeeklyGoal(activities);
-  if (weeklyGoal.wasMet) {
-    return {
-      label: "outstanding 🥇",
-      color: "gold",
-      description: `${description}. reached goal of ${weeklyGoalDescription}`,
-    };
-  }
-
-  if (activityCount >= 5) {
-    return { label: "strong", color: "purple", description };
-  }
-  if (activityCount >= 3) {
-    return { label: "good", color: "green", description };
-  }
-  if (activityCount === 2) {
-    return { label: "okay", color: "green", description };
-  }
-  return {
-    label: "slacking 😴",
-    color: "red",
-    description: `trained ${activityCount} day${activityCount === 1 ? "" : "s"}`,
-  };
-}
-
-/** current weekly goal, adapt as needed */
-const weeklyGoal = { run: 3, lift: 3 };
-const weeklyGoalDescription = Object.entries(weeklyGoal)
-  .map(([key, value]) => `${value}+ ${key}${value === 1 ? "" : "s"}`)
-  .join(", ")
-  .replace(/, ([^,]*)$/, " and $1");
-
-function checkWeeklyGoal(activities: SanitizedActivity[]) {
-  const counts = { run: 0, lift: 0 };
-  for (const activity of activities) {
-    const sportSet = computeSportSet(activity.sport_type);
-    if (sportSet === "run") counts.run++;
-    if (sportSet === "lift") counts.lift++;
-  }
-
-  return {
-    wasMet: Object.entries(counts).every(([key, count]) => count >= weeklyGoal[key as keyof typeof weeklyGoal]),
-    description: weeklyGoalDescription,
-  };
 }
