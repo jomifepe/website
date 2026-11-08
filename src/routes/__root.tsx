@@ -2,9 +2,10 @@ import { TanStackDevtools } from "@tanstack/react-devtools";
 import { createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import type { ReactNode } from "react";
+
 import { TooltipProvider } from "~/components/ui/tooltip";
 
-import appCss from "../styles.css?url";
+import appCss from "~/styles.css?url";
 
 export const Route = createRootRoute({
   head: () => ({
@@ -42,10 +43,10 @@ type RootDocumentProps = {
 function RootDocument(props: RootDocumentProps) {
   const { children } = props;
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
-        {/* Prevent flash of wrong theme before React hydrates */}
+        {/* Prevent flash of wrong theme before React hydrates; it sets the class that suppressHydrationWarning allows on <html> */}
         <script
           dangerouslySetInnerHTML={{
             __html: `(function(){try{var t=localStorage.getItem('theme');var d=window.matchMedia('(prefers-color-scheme: dark)').matches;if(t==='dark'||(t!=='light'&&d)){document.documentElement.classList.add('dark');}}catch(e){}})();`,
@@ -60,7 +61,7 @@ function RootDocument(props: RootDocumentProps) {
           Skip to main content
         </a>
         <TooltipProvider delayDuration={800}>{children}</TooltipProvider>
-        {process.env.NODE_ENV !== "production" && (
+        {import.meta.env.DEV && (
           <TanStackDevtools
             config={{
               position: "bottom-right",

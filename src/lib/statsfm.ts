@@ -3,7 +3,6 @@ import { z } from "zod";
 
 const StatsFmTrackSchema = z.object({
   name: z.string(),
-  durationMs: z.number(),
   externalIds: z.object({
     spotify: z.array(z.string()).optional(),
   }),
@@ -23,7 +22,6 @@ const StatsFmTrackSchema = z.object({
 const StatsFmRecentResponseSchema = z.object({
   items: z.array(
     z.object({
-      endTime: z.string(),
       track: StatsFmTrackSchema,
     }),
   ),
@@ -35,7 +33,6 @@ export type RecentTrack = {
   albumName: string;
   albumImageUrl: string | null;
   trackUrl: string | null;
-  playedAt: string;
 };
 
 async function fetchRecentlyPlayedRaw(username: string): Promise<RecentTrack | null> {
@@ -58,7 +55,6 @@ async function fetchRecentlyPlayedRaw(username: string): Promise<RecentTrack | n
     albumName: track.albums[0]?.name ?? "",
     albumImageUrl: track.albums[0]?.image ?? null,
     trackUrl: spotifyId ? `https://open.spotify.com/track/${spotifyId}` : null,
-    playedAt: item.endTime,
   };
 }
 

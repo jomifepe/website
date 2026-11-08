@@ -11,5 +11,6 @@
   "arrowParens": "always",
   "bracketSameLine": false,
   "bracketSpacing": true,
+  "sortImports": true,
   "ignorePatterns": ["**/src/routeTree.gen.ts", "**/src/styles.css"]
 }

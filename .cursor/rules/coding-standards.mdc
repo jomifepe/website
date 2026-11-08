@@ -60,6 +60,7 @@ alwaysApply: true
     // ...
   }
   ```
+- Don't extract a props/args type that only aliases another type (e.g., `type DivProps = ComponentProps<"div">`); inline it (`props: ComponentProps<"div">`). Extract only when it's worth it: multiple own props, a composed/complex type, or a very long one.
 - Conditional rendering with syntax, prefer:
   ```
   return <div>{condition && <div>True</div>}</div>;

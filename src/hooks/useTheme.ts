@@ -2,16 +2,13 @@ import { useCallback, useEffect, useState } from "react";
 
 export type Theme = "dark" | "light" | "system";
 
-function getEffectiveTheme(theme: Theme): "dark" | "light" {
-  if (theme === "system") {
-    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-  }
-  return theme;
+function systemPrefersDark() {
+  return window.matchMedia("(prefers-color-scheme: dark)").matches;
 }
 
 function applyTheme(theme: Theme) {
-  const effective = getEffectiveTheme(theme);
-  document.documentElement.classList.toggle("dark", effective === "dark");
+  const isDark = theme === "dark" || (theme === "system" && systemPrefersDark());
+  document.documentElement.classList.toggle("dark", isDark);
 }
 
 function readStoredTheme(): Theme {
@@ -22,13 +19,23 @@ function readStoredTheme(): Theme {
   return "system";
 }
 
+/**
+ * Cycle order depends on the system preference so every click visibly changes the theme:
+ *   system-light: system → dark → light → system
+ *   system-dark:  system → light → dark → system
+ */
+export function getNextTheme(current: Theme, systemIsDark: boolean): Theme {
+  if (current === "system") return systemIsDark ? "light" : "dark";
+  if (current === "dark") return systemIsDark ? "system" : "light";
+  return systemIsDark ? "dark" : "system";
+}
+
 export function useTheme() {
   const [theme, setTheme] = useState<Theme>(() => {
     if (typeof window === "undefined") return "system";
     return readStoredTheme();
   });
 
-  // Re-apply when system preference changes and theme is "system"
   useEffect(() => {
     const media = window.matchMedia("(prefers-color-scheme: dark)");
     const handleChange = () => {
@@ -39,26 +46,13 @@ export function useTheme() {
   }, []);
 
   const toggle = useCallback(() => {
-    setTheme((current) => {
-      const systemIsDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-      // Cycle order depends on system preference:
-      //   system-light: system → dark → light → system
-      //   system-dark:  system → light → dark → system
-      let next: Theme;
-      if (current === "system") {
-        next = systemIsDark ? "light" : "dark";
-      } else if (current === "dark") {
-        next = systemIsDark ? "system" : "light";
-      } else {
-        next = systemIsDark ? "dark" : "system";
-      }
-      try {
-        localStorage.setItem("theme", next);
-      } catch {}
-      applyTheme(next);
-      return next;
-    });
-  }, []);
+    const next = getNextTheme(theme, systemPrefersDark());
+    try {
+      localStorage.setItem("theme", next);
+    } catch {}
+    applyTheme(next);
+    setTheme(next);
+  }, [theme]);
 
   return { theme, toggle };
 }

@@ -10,6 +10,7 @@ import {
   useRef,
   useState,
 } from "react";
+
 import { cn } from "~/lib/utils";
 
 type SlideBackdropRect = {
@@ -21,7 +22,6 @@ type SlideBackdropRect = {
 
 type SlideHighlightRegionProps = {
   className?: string;
-  backdropClassName?: string;
   groupAriaLabel?: string;
   children: ReactNode;
 } & ({ variant: "navigation"; "aria-label": string } | { variant?: "panel" });
@@ -33,9 +33,8 @@ type SlideHighlightContextValue = {
 const SlideHighlightContext = createContext<SlideHighlightContextValue | null>(null);
 
 export function SlideHighlightRegion(props: SlideHighlightRegionProps) {
-  const { className, backdropClassName, children, groupAriaLabel } = props;
-  const navigationAriaLabel =
-    props.variant === "navigation" ? (props as { "aria-label": string })["aria-label"] : undefined;
+  const { className, children, groupAriaLabel } = props;
+  const navigationAriaLabel = props.variant === "navigation" ? props["aria-label"] : undefined;
 
   const rootRef = useRef<HTMLElement | null>(null);
   const activeTargetRef = useRef<HTMLElement | null>(null);
@@ -87,15 +86,13 @@ export function SlideHighlightRegion(props: SlideHighlightRegionProps) {
     window.addEventListener("resize", measureActive);
     window.addEventListener("scroll", measureActive, true);
 
-    const resizeObserver = rootRef.current && new ResizeObserver(measureActive);
-    if (rootRef.current && resizeObserver) {
-      resizeObserver.observe(rootRef.current);
-    }
+    const resizeObserver = new ResizeObserver(measureActive);
+    if (rootRef.current) resizeObserver.observe(rootRef.current);
 
     return () => {
       window.removeEventListener("resize", measureActive);
       window.removeEventListener("scroll", measureActive, true);
-      resizeObserver?.disconnect();
+      resizeObserver.disconnect();
     };
   }, [backdropVisible, measureActive]);
 
@@ -119,7 +116,6 @@ export function SlideHighlightRegion(props: SlideHighlightRegionProps) {
         "pointer-events-none absolute z-0 rounded-lg bg-foreground/7 shadow-none",
         "transition-[left,top,width,height,opacity] duration-300 ease-out",
         "motion-reduce:transition-none motion-reduce:duration-150",
-        backdropClassName,
         backdropVisible ? "opacity-100" : "opacity-0",
       )}
       style={
@@ -156,7 +152,7 @@ export function SlideHighlightRegion(props: SlideHighlightRegionProps) {
         </nav>
       ) : (
         <fieldset
-          aria-label={groupAriaLabel ?? undefined}
+          aria-label={groupAriaLabel}
           className={cn(
             className,
             // Reset native fieldset chrome; we only need the grouping landmark.

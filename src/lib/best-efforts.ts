@@ -1,3 +1,5 @@
+import { computeSportSet, type SportType } from "./strava";
+
 export const BEST_EFFORT_TARGETS = [
   { key: "halfMarathon", meters: 21_097.5, label: "Half" },
   { key: "km15", meters: 15_000, label: "15km" },
@@ -8,9 +10,8 @@ export const BEST_EFFORT_TARGETS = [
 
 export type BestEffortKey = (typeof BEST_EFFORT_TARGETS)[number]["key"];
 
-export type RunBestEfforts = Partial<Record<BestEffortKey, number>>;
-
-export type AllTimeBestEfforts = Partial<Record<BestEffortKey, number>>;
+/** Elapsed seconds per distance, for one run or the best across all runs. */
+export type BestEfforts = Partial<Record<BestEffortKey, number>>;
 
 const DISTANCE_MATCH_TOLERANCE_METERS = 50;
 
@@ -19,10 +20,10 @@ type BestEffortSegment = {
   elapsed_time: number;
 };
 
-export function extractRunBestEfforts(segments: BestEffortSegment[] | undefined): RunBestEfforts {
+export function extractRunBestEfforts(segments: BestEffortSegment[] | undefined): BestEfforts {
   if (!segments?.length) return {};
 
-  const result: RunBestEfforts = {};
+  const result: BestEfforts = {};
   for (const target of BEST_EFFORT_TARGETS) {
     const match = segments.find(
       (segment) => Math.abs(segment.distance - target.meters) <= DISTANCE_MATCH_TOLERANCE_METERS,
@@ -33,17 +34,15 @@ export function extractRunBestEfforts(segments: BestEffortSegment[] | undefined)
 }
 
 type ActivityWithRunEfforts = {
-  sport_type: string;
-  runBestEfforts?: RunBestEfforts;
+  sport_type: SportType;
+  runBestEfforts?: BestEfforts;
 };
 
-const RUN_SPORT_TYPES = new Set(["Run", "TrailRun", "VirtualRun"]);
-
-export function reduceAllTimeBestEfforts(activities: ActivityWithRunEfforts[]): AllTimeBestEfforts {
-  const result: AllTimeBestEfforts = {};
+export function reduceAllTimeBestEfforts(activities: ActivityWithRunEfforts[]): BestEfforts {
+  const result: BestEfforts = {};
 
   for (const activity of activities) {
-    if (!RUN_SPORT_TYPES.has(activity.sport_type)) continue;
+    if (computeSportSet(activity.sport_type) !== "run") continue;
     if (!activity.runBestEfforts) continue;
     for (const target of BEST_EFFORT_TARGETS) {
       const elapsed = activity.runBestEfforts[target.key];

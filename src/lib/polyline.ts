@@ -1,4 +1,4 @@
-// Decode Google Encoded Polyline Algorithm
+/** https://developers.google.com/maps/documentation/utilities/polylinealgorithm */
 export function decodePolyline(encoded: string): [number, number][] {
   const coords: [number, number][] = [];
   let lat = 0;
@@ -45,7 +45,6 @@ type PolylineToSvgPathProps = {
   padding: number;
 };
 
-// Project coordinates to SVG path string
 export function polylineToSvgPath(props: PolylineToSvgPathProps): string {
   const { coords, w, h, padding } = props;
   if (coords.length === 0) return "";

@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+
 import { syncWorkoutsStore } from "~/lib/workouts-store";
 
 export const Route = createFileRoute("/api/strava-sync")({

@@ -1,13 +1,14 @@
 import { Link } from "@tanstack/react-router";
+
 import { CardItem } from "~/components/CardItem";
 import { SlideHighlightRegion } from "~/components/SlideHighlightRegion";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 
 export function WorkCard() {
   return (
-    <Card className="border-border bg-foreground/4 text-foreground shadow-none h-full flex flex-col gap-4 p-5 md:p-6">
+    <Card className="h-full gap-4 p-5 md:p-6">
       <CardHeader className="p-0">
-        <CardTitle className="text-foreground text-sm font-medium tracking-wider">work</CardTitle>
+        <CardTitle>work</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-1 flex-col gap-4 p-0 min-h-0">
         <SlideHighlightRegion
