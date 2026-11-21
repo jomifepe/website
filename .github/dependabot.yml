@@ -1,0 +1,31 @@
+version: 2
+updates:
+  - package-ecosystem: bun
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: chore
+      include: scope
+    groups:
+      # first match wins: these move together and always need a human (Start pins the exact
+      # react-router it depends on; nitro is a prerelease whose "patch" bumps can break ISR config)
+      framework:
+        patterns:
+          - "@tanstack/react-start"
+          - "@tanstack/react-router"
+          - "@tanstack/router-plugin"
+          - "nitro"
+      minor-and-patch:
+        patterns:
+          - "*"
+        update-types:
+          - minor
+          - patch
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: ci
