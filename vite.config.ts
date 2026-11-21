@@ -17,10 +17,11 @@ const config = defineConfig({
     devtools(),
     nitro({
       preset: "vercel",
-      // Vercel ISR: served from cache; after `isr` seconds the next hit triggers a background re-render
+      // Vercel ISR: served from cache; after `expiration` seconds the next hit triggers a background re-render.
+      // allowQuery: [] so ?utm_… and bot query strings share one cache entry instead of each writing their own
       routeRules: {
-        "/": { isr: 60 * 60 },
-        "/workout": { isr: 60 * 60 },
+        "/": { isr: { expiration: 60 * 60, allowQuery: [] } },
+        "/workout": { isr: { expiration: 60 * 60, allowQuery: [] } },
       },
     }),
     tailwindcss(),

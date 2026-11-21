@@ -16,6 +16,11 @@ import {
 } from "./strava";
 
 const WORKOUTS_BLOB_PATH = "workouts.json";
+// pages read this small blob; the full history is only read by the nightly sync
+const SITE_BLOB_PATH = "workouts-site.json";
+// current week + last week + slack for the doc being up to a day old
+const SITE_WINDOW_DAYS = 15;
+const SITE_MIN_ACTIVITIES = 2;
 const DETAIL_BUDGET_PER_RUN = 40;
 const RECENT_ACTIVITIES_PAGE_SIZE = 28;
 
@@ -66,8 +71,16 @@ const WorkoutsDocumentSchema = z.object({
   activities: z.array(StoredActivitySchema),
 });
 
+const SiteDocumentSchema = z.object({
+  version: z.literal(1),
+  updatedAt: z.string(),
+  activities: z.array(StoredActivitySchema),
+  bestEfforts: z.record(z.string(), z.number()).nullable(),
+});
+
 export type StoredActivity = z.infer<typeof StoredActivitySchema>;
 type WorkoutsDocument = z.infer<typeof WorkoutsDocumentSchema>;
+type SiteDocument = z.infer<typeof SiteDocumentSchema>;
 
 export type WorkoutsLoaderData = {
   activities: SanitizedActivity[];
@@ -97,16 +110,52 @@ export async function readWorkoutsDocument(): Promise<WorkoutsDocument | null> {
   return WorkoutsDocumentSchema.parse(JSON.parse(text));
 }
 
+async function readSiteDocument(): Promise<SiteDocument | null> {
+  if (!blobConfigured()) return null;
+
+  const result = await get(SITE_BLOB_PATH, { access: "private" });
+  if (!result || result.statusCode !== 200 || !result.stream) return null;
+
+  const text = await new Response(result.stream).text();
+  return SiteDocumentSchema.parse(JSON.parse(text));
+}
+
+/** Expects activities sorted newest first. */
+export function selectSiteActivities<T extends { startDate: string }>(activities: T[], now: Date = new Date()): T[] {
+  const cutoff = new Date(now.getTime() - SITE_WINDOW_DAYS * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  return activities.filter((activity, index) => index < SITE_MIN_ACTIVITIES || activity.startDate >= cutoff);
+}
+
+function buildSiteDocument(doc: WorkoutsDocument): SiteDocument {
+  return {
+    version: 1,
+    updatedAt: doc.updatedAt,
+    activities: selectSiteActivities(doc.activities),
+    bestEfforts: doc.backfillComplete ? reduceAllTimeBestEfforts(doc.activities) : null,
+  };
+}
+
+async function putPrivateJson(path: string, value: unknown) {
+  await put(path, JSON.stringify(value), {
+    access: "private",
+    addRandomSuffix: false,
+    allowOverwrite: true,
+  });
+}
+
+async function writeSiteDocument(doc: WorkoutsDocument) {
+  const site = buildSiteDocument(doc);
+  await putPrivateJson(SITE_BLOB_PATH, site);
+  return site;
+}
+
 async function writeWorkoutsDocument(doc: WorkoutsDocument) {
   if (!blobConfigured()) {
     throw new Error("BLOB_READ_WRITE_TOKEN is not configured");
   }
 
-  await put(WORKOUTS_BLOB_PATH, JSON.stringify(doc), {
-    access: "private",
-    addRandomSuffix: false,
-    allowOverwrite: true,
-  });
+  await putPrivateJson(WORKOUTS_BLOB_PATH, doc);
+  return writeSiteDocument(doc);
 }
 
 function listFingerprint(summary: StravaActivity) {
@@ -206,8 +255,7 @@ export async function seedWorkoutsStoreFromOnePage() {
     activities,
   };
 
-  await writeWorkoutsDocument(doc);
-  return doc;
+  return writeWorkoutsDocument(doc);
 }
 
 function toClientActivity(stored: StoredActivity): SanitizedActivity {
@@ -215,10 +263,16 @@ function toClientActivity(stored: StoredActivity): SanitizedActivity {
   return activity;
 }
 
-export function documentToLoaderData(doc: WorkoutsDocument): WorkoutsLoaderData {
-  const activities = doc.activities.map(toClientActivity);
-  const bestEfforts = doc.backfillComplete ? reduceAllTimeBestEfforts(doc.activities) : null;
-  return { activities, bestEfforts };
+/** Site blob missing (first deploy, before the nightly sync): derive it once from the full blob, or seed. */
+async function ensureSiteDocument(): Promise<SiteDocument> {
+  const site = await readSiteDocument();
+  if (site) return site;
+
+  const doc = await readWorkoutsDocument();
+  if (!doc || doc.activities.length === 0) {
+    return seedWorkoutsStoreFromOnePage();
+  }
+  return writeSiteDocument(doc);
 }
 
 export async function loadWorkoutsForSite(): Promise<WorkoutsLoaderData> {
@@ -226,12 +280,8 @@ export async function loadWorkoutsForSite(): Promise<WorkoutsLoaderData> {
     return loadWorkoutsLiveFallback();
   }
 
-  let doc = await readWorkoutsDocument();
-  if (!doc || doc.activities.length === 0) {
-    doc = await seedWorkoutsStoreFromOnePage();
-  }
-
-  return documentToLoaderData(doc);
+  const site = await ensureSiteDocument();
+  return { activities: site.activities.map(toClientActivity), bestEfforts: site.bestEfforts };
 }
 
 async function loadWorkoutsLiveFallback(): Promise<WorkoutsLoaderData> {
@@ -240,11 +290,6 @@ async function loadWorkoutsLiveFallback(): Promise<WorkoutsLoaderData> {
     activities: raw.map(sanitizeActivity),
     bestEfforts: null,
   };
-}
-
-export async function findStoredActivityBySlug(slug: string): Promise<StoredActivity | undefined> {
-  const doc = await readWorkoutsDocument();
-  return doc?.activities.find((activity) => activity.slug === slug);
 }
 
 export function storedToActivityDetail(stored: StoredActivity): SanitizedActivityDetail {
@@ -257,14 +302,15 @@ export function storedToActivityDetail(stored: StoredActivity): SanitizedActivit
 
 export async function loadActivityDetailBySlug(slug: string): Promise<SanitizedActivityDetail> {
   if (blobConfigured()) {
-    const stored = await findStoredActivityBySlug(slug);
-    if (stored) {
-      if (stored.calories !== undefined) {
-        return storedToActivityDetail(stored);
-      }
-      const detail = await fetchActivityDetail(stored.stravaId);
-      return sanitizeActivityDetail(detail);
+    const site = await ensureSiteDocument();
+    // older activities are not in the site blob; the route redirects to /workout
+    const stored = site.activities.find((activity) => activity.slug === slug);
+    if (!stored) throw new Error(`Activity not found: ${slug}`);
+    if (stored.calories !== undefined) {
+      return storedToActivityDetail(stored);
     }
+    const detail = await fetchActivityDetail(stored.stravaId);
+    return sanitizeActivityDetail(detail);
   }
 
   const raw = await fetchActivities(1, RECENT_ACTIVITIES_PAGE_SIZE);
